@@ -1,0 +1,82 @@
+syntax = "proto3";
+
+option csharp_namespace = "AccountsMicroservice";
+
+package AccountsMicroservice;
+
+// The greeting service definition.
+service Accounts {
+  // Sends a greeting
+  rpc Get (GetAccountsRequest) returns (GetAccountsResponse);
+  rpc GetBalance (GetBalanceRequest) returns (GetBalanceResponse);
+  rpc GetTransactions (GetTransactionsRequest) returns (GetTransactionsResponse);
+  rpc Transfer (TransferRequest) returns (TransferResponse);
+  rpc ChangeBalance (ChangeBalanceRequest) returns (Empty);
+}
+
+message Transaction {
+  string id = 1;
+  string title = 2;
+  float amount = 3;
+  int64 timestamp = 4;
+  string recipient = 5;
+  string sender = 6;
+  string paymentId = 7;
+  string cardId = 8;
+}
+
+message Account {
+  string id = 1;
+  float balance = 2;
+  string number = 3;
+  string userId = 4;
+}
+
+message Balance {
+  string id = 1;
+  float balance = 2;
+}
+
+message GetAccountsRequest {
+  repeated string ids = 1;
+}
+
+message GetAccountsResponse {
+  repeated Account accounts = 1;
+}
+
+message GetBalanceRequest {
+  repeated string ids = 1;
+}
+
+message GetBalanceResponse {
+  repeated Balance balances = 1;
+}
+
+message GetTransactionsRequest {
+  repeated string ids = 1;
+}
+
+message GetTransactionsResponse {
+  repeated Transaction transactions = 1;
+}
+
+message TransferRequest {
+  string accountId = 1;
+  string recipient = 5;
+  string title = 2;
+  float amount = 3;
+}
+
+message TransferResponse {
+  Transaction transaction = 1;
+}
+
+message ChangeBalanceRequest {
+  string id = 1;
+  float amount = 2;
+}
+
+message Empty {
+  
+}
