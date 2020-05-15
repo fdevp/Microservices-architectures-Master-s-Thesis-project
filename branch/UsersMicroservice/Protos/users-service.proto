@@ -1,0 +1,31 @@
+syntax = "proto3";
+package UsersMicroservice;
+
+option csharp_namespace = "UsersMicroservice";
+
+service Users {
+  rpc Token (SignInRequest) returns (TokenReply);
+  rpc Logout (LogoutRequest) returns (Empty);
+  rpc AddMessage (AddMessageRequest) returns (Empty);
+}
+
+message SignInRequest {
+  string login = 1;
+  string password = 2;
+}
+
+message TokenReply {
+  string Token = 1;
+}
+
+message LogoutRequest {
+  string Token = 1;
+}
+
+message AddMessageRequest {
+  int32 userId = 1;
+  string message = 2;
+}
+
+message Empty {
+}
