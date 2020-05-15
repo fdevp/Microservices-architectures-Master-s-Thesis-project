@@ -18,7 +18,7 @@ namespace UsersMicroservice
         public override Task<TokenReply> Token(SignInRequest request, ServerCallContext context)
         {
             return Task.FromResult(new TokenReply{
-                Token = new Guid().ToString()
+                Token = Guid.NewGuid().ToString()
             });
         }
 
