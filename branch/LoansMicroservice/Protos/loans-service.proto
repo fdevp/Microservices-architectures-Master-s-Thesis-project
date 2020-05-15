@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+option csharp_namespace = "LoansMicroservice";
+
+package LoansMicroservice;
+
+// The greeting service definition.
+service Loans {
+  // Sends a greeting
+  rpc RepayInstalment (RepayInstalmentRequest) returns (Empty);
+  rpc Get (GetLoansRequest) returns (GetLoansResponse);
+}
+
+message Loan {
+  string id = 1;
+  float paidAmount = 2;
+  float totalAmount = 3;
+  int32 instalments = 4;
+  string paymentId = 5;
+}
+
+// The request message containing the user's name.
+message RepayInstalmentRequest {
+  string id = 1;
+}
+
+// The response message containing the greetings.
+message GetLoansRequest {
+  repeated string ids = 1;
+}
+
+message GetLoansResponse {
+  repeated Loan loans = 1;
+}
+
+message Empty {
+
+}
