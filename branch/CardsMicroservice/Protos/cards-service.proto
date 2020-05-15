@@ -1,0 +1,69 @@
+syntax = "proto3";
+
+option csharp_namespace = "CardsMicroservice";
+
+package CardsMicroservice;
+
+service Cards {
+  rpc Get (GetCardsRequest) returns (GetCardsResponse);
+  rpc GetBlocks (GetBlocksRequest) returns (GetBlocksResponse);
+  rpc GetTransactions (GetTransactionsRequest) returns (GetTransactionsResponse);
+  rpc Transfer (TransferRequest) returns (TransferResponse);
+}
+
+message Card {
+  string id = 1;
+  string number = 2;
+  string accountId = 3;
+}
+
+message Block {
+  string cardId = 1;
+  string transactionId = 2;
+  int64 blockTimestamp = 3;
+}
+
+message Transaction {
+  string id = 1;
+  string title = 2;
+  float amount = 3;
+  int64 timestamp = 4;
+  string recipient = 5;
+  string sender = 6;
+  string paymentId = 7;
+  string cardId = 8;
+}
+
+message GetCardsRequest {
+  repeated string ids = 1;
+}
+
+message GetCardsResponse {
+  repeated Card cards = 1;
+}
+
+message GetBlocksRequest {
+  string cardId = 1;
+}
+
+message GetBlocksResponse {
+  repeated Block blocks = 1;
+}
+
+message GetTransactionsRequest {
+  repeated string ids = 1;
+}
+
+message GetTransactionsResponse {
+  repeated Transaction transactions = 1;
+}
+
+message TransferRequest {
+  string cardId = 1;
+  string recipient = 5;
+  float amount = 3;
+}
+
+message TransferResponse {
+  Transaction transaction = 1;
+}
