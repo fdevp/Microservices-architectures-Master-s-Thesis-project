@@ -1,4 +1,6 @@
 syntax = "proto3";
+import "empty.proto";
+
 package UsersMicroservice;
 
 option csharp_namespace = "UsersMicroservice";
@@ -25,7 +27,4 @@ message LogoutRequest {
 message AddMessageRequest {
   int32 userId = 1;
   string message = 2;
-}
-
-message Empty {
 }

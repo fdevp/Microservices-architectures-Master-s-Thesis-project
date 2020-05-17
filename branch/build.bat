@@ -1,0 +1,9 @@
+dotnet build PanelsBranchMicroservice/PanelsBranchMicroservice.csproj
+dotnet build BatchesBranchMicroservice/BatchesBranchMicroservice.csproj
+dotnet build ReportsBranchMicroservice/ReportsBranchMicroservice.csproj
+dotnet build CardsMicroservice/CardsMicroservice.csproj
+dotnet build LoansMicroservice/LoansMicroservice.csproj
+dotnet build PaymentsMicroservice/PaymentsMicroservice.csproj
+dotnet build AccountsMicroservice/AccountsMicroservice.csproj
+dotnet build TransactionsMicroservice/TransactionsMicroservice.csproj
+dotnet build UsersMicroservice/UsersMicroservice.csproj

@@ -1,4 +1,5 @@
 syntax = "proto3";
+import "empty.proto";
 
 option csharp_namespace = "LoansMicroservice";
 
@@ -31,8 +32,4 @@ message GetLoansRequest {
 
 message GetLoansResponse {
   repeated Loan loans = 1;
-}
-
-message Empty {
-
 }

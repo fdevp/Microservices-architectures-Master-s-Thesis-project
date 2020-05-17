@@ -1,26 +1,14 @@
 syntax = "proto3";
+import "transaction.proto";
 
 option csharp_namespace = "TransactionsMicroservice";
-
 package TransactionsMicroservice;
 
-// The greeting service definition.
 service Transactions {
   // Sends a greeting
   rpc Get (GetTransactionsRequest) returns (GetTransactionsResult);
   rpc Create (CreateTransactionRequest) returns (CreateTransactionResult);
   rpc BatchCreate (BatchCreateTransactionRequest) returns (BatchCreateTransactionResult);
-}
-
-message Transaction {
-  string id = 1;
-  string title = 2;
-  float amount = 3;
-  int64 timestamp = 4;
-  string recipient = 5;
-  string sender = 6;
-  string paymentId = 7;
-  string cardId = 8;
 }
 
 message GetTransactionsRequest {

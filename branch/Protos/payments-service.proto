@@ -1,4 +1,6 @@
 syntax = "proto3";
+import "transaction.proto";
+import "empty.proto";
 
 option csharp_namespace = "PaymentsMicroservice";
 
@@ -11,17 +13,6 @@ service Payments {
   rpc GetTransactions (GetTransactionsRequest) returns (GetTransactionsResult);
   rpc Create (CreatePaymentRequest) returns (CreatePaymentResult);
   rpc Cancel (CancelPaymentRequest) returns (Empty);
-}
-
-message Transaction {
-  string id = 1;
-  string title = 2;
-  float amount = 3;
-  int64 timestamp = 4;
-  string recipient = 5;
-  string sender = 6;
-  string paymentId = 7;
-  string cardId = 8;
 }
 
 message Payment {
@@ -69,8 +60,4 @@ message CreatePaymentResult {
 
 message CancelPaymentRequest {
   string id = 1;
-}
-
-message Empty {
-
 }
