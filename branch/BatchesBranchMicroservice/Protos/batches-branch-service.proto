@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+option csharp_namespace = "BatchesBranchMicroservice";
+
+package BatchesBranchMicroservice;
+
+// The greeting service definition.
+service BatchesBranch {
+  // Sends a greeting
+  rpc Get (GetDataToProcessRequest) returns (GetDataToProcessResponse);
+  rpc Process(ProcessBatchRequest) returns (ProcessBatchResponse);
+}
+
+message GetDataToProcessRequest {
+
+}
+
+message GetDataToProcessResponse {
+
+}
+
+message ProcessBatchRequest {
+
+}
+
+message ProcessBatchResponse {
+
+}

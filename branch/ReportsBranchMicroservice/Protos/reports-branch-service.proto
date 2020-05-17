@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+option csharp_namespace = "ReportsBranchMicroservice";
+
+package ReportsBranchMicroservice;
+
+// The greeting service definition.
+service ReportsBranch {
+  // Sends a greeting
+  rpc Generate (GenerateReportRequest) returns (GenerateReportResponse);
+}
+
+// The request message containing the user's name.
+message GenerateReportRequest {
+}
+
+// The response message containing the greetings.
+message GenerateReportResponse {
+}
