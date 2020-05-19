@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+message Payment {
+  string id = 1;
+  float amount = 2;
+  int64 startTimestamp = 3;
+  
+  int64 interval = 5;
+  string accountId = 6;
+  string recipient = 7;
+}

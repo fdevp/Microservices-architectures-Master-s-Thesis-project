@@ -1,6 +1,7 @@
 syntax = "proto3";
 import "transaction.proto";
-import "empty.proto";
+import "common/empty.proto";
+import "payments/payment.proto";
 
 option csharp_namespace = "PaymentsMicroservice";
 
@@ -15,23 +16,8 @@ service Payments {
   rpc Cancel (CancelPaymentRequest) returns (Empty);
 }
 
-message Payment {
-  string id = 1;
-  float amount = 2;
-  int64 startTimestamp = 3;
-  PaymentStatus status = 4;
-  int64 interval = 5;
-  string accountId = 6;
-  string recipient = 7;
-}
-
-enum PaymentStatus {
-  ACTIVE = 0;
-  CANCELLED = 1;
-}
-
 message GetPaymentsRequest {
-  repeated int32 ids = 1;
+  repeated string ids = 1;
 }
 
 message GetPaymentsResult {
@@ -39,7 +25,7 @@ message GetPaymentsResult {
 }
 
 message GetTransactionsRequest {
-  repeated int32 ids = 1;
+  repeated string ids = 1;
 }
 
 message GetTransactionsResult {

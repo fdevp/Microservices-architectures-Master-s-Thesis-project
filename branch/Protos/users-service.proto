@@ -1,5 +1,7 @@
 syntax = "proto3";
-import "empty.proto";
+import "common/empty.proto";
+import "users/user.proto";
+import "users/message.proto";
 
 package UsersMicroservice;
 
@@ -8,7 +10,9 @@ option csharp_namespace = "UsersMicroservice";
 service Users {
   rpc Token (SignInRequest) returns (TokenReply);
   rpc Logout (LogoutRequest) returns (Empty);
-  rpc AddMessage (AddMessageRequest) returns (Empty);
+  rpc BatchAddMessages (BatchAddMessagesRequest) returns (Empty);
+  rpc Setup(SetupRequest) returns (Empty);
+  rpc TearDown(Empty) returns (Empty);
 }
 
 message SignInRequest {
@@ -24,7 +28,11 @@ message LogoutRequest {
   string Token = 1;
 }
 
-message AddMessageRequest {
-  int32 userId = 1;
-  string message = 2;
+message BatchAddMessagesRequest {
+  repeated Message messages = 1;
+}
+
+message SetupRequest {
+  repeated User users = 1;
+  repeated Message messages = 2;
 }

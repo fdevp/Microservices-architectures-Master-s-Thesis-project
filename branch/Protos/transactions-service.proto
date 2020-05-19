@@ -12,7 +12,7 @@ service Transactions {
 }
 
 message GetTransactionsRequest {
-  repeated int32 ids = 1;
+  repeated string ids = 1;
 }
 
 message GetTransactionsResult {

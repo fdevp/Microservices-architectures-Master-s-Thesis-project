@@ -1,6 +1,9 @@
 syntax = "proto3";
+
 import "transaction.proto";
-import "empty.proto";
+import "common/empty.proto";
+import "accounts/account.proto";
+import "accounts/balance.proto";
 
 option csharp_namespace = "AccountsMicroservice";
 
@@ -14,18 +17,6 @@ service Accounts {
   rpc GetTransactions (GetTransactionsRequest) returns (GetTransactionsResponse);
   rpc Transfer (TransferRequest) returns (TransferResponse);
   rpc ChangeBalance (ChangeBalanceRequest) returns (Empty);
-}
-
-message Account {
-  string id = 1;
-  float balance = 2;
-  string number = 3;
-  string userId = 4;
-}
-
-message Balance {
-  string id = 1;
-  float balance = 2;
 }
 
 message GetAccountsRequest {
