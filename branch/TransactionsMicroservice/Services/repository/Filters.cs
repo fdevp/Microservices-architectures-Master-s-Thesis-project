@@ -9,7 +9,7 @@ namespace TransactionsMicroservice.Repository
         public ISet<string> Senders { get; set; }
         public ISet<string> Payments { get; set; }
         public ISet<string> Cards { get; set; }
-        public DateTime TimestampFrom { get; set; }
-        public DateTime TimestampTo { get; set; }
+        public long TimestampFrom { get; set; }
+        public long TimestampTo { get; set; }
     }
 }

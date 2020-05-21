@@ -1,5 +1,7 @@
 syntax = "proto3";
 import "transaction.proto";
+import "cards/block.proto";
+import "cards/card.proto";
 
 option csharp_namespace = "CardsMicroservice";
 
@@ -10,18 +12,6 @@ service Cards {
   rpc GetBlocks (GetBlocksRequest) returns (GetBlocksResponse);
   rpc GetTransactions (GetTransactionsRequest) returns (GetTransactionsResponse);
   rpc Transfer (TransferRequest) returns (TransferResponse);
-}
-
-message Card {
-  string id = 1;
-  string number = 2;
-  string accountId = 3;
-}
-
-message Block {
-  string cardId = 1;
-  string transactionId = 2;
-  int64 blockTimestamp = 3;
 }
 
 message GetCardsRequest {

@@ -8,6 +8,11 @@ namespace TransactionsMicroservice.Repository
     {
         private Dictionary<string, Transaction> transactions = new Dictionary<string, Transaction>();
 
+        public TransactionsRepository()
+        {
+            transactions.Add("1", new Transaction("123", "Initial transaciton", 100, DateTime.UtcNow.Ticks, "5423", "1", null, null));
+        }
+
         public Transaction Create(string title, float amount, string recipient, string sender, string paymentId, string cardId)
         {
             var id = Guid.NewGuid().ToString();
@@ -45,13 +50,13 @@ namespace TransactionsMicroservice.Repository
                 return false;
             if (filters.Cards.Any() && transaction.CardId != null && !filters.Cards.Contains(transaction.CardId))
                 return false;
-            if (filters.Recipients.Any() && transaction.Recipient != null && !filters.Payments.Contains(transaction.Recipient))
+            if (filters.Recipients.Any() && transaction.Recipient != null && !filters.Recipients.Contains(transaction.Recipient))
                 return false;
-            if (filters.Senders.Any() && transaction.Sender != null && !filters.Payments.Contains(transaction.Sender))
+            if (filters.Senders.Any() && transaction.Sender != null && !filters.Senders.Contains(transaction.Sender))
                 return false;
-            if (filters.TimestampFrom != null && transaction.Timestamp < filters.TimestampFrom.Ticks)
+            if (filters.TimestampFrom > 0 && transaction.Timestamp < filters.TimestampFrom)
                 return false;
-            if (filters.TimestampTo != null && transaction.Timestamp > filters.TimestampTo.Ticks)
+            if (filters.TimestampTo > 0 && transaction.Timestamp > filters.TimestampTo)
                 return false;
 
             return true;

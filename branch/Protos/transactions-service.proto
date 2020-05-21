@@ -7,12 +7,22 @@ package TransactionsMicroservice;
 service Transactions {
   // Sends a greeting
   rpc Get (GetTransactionsRequest) returns (GetTransactionsResult);
+  rpc Filter(FilterTransactionsRequest) returns (GetTransactionsResult);
   rpc Create (CreateTransactionRequest) returns (CreateTransactionResult);
   rpc BatchCreate (BatchCreateTransactionRequest) returns (BatchCreateTransactionResult);
 }
 
 message GetTransactionsRequest {
   repeated string ids = 1;
+}
+
+message FilterTransactionsRequest {
+  repeated string recipients = 1;
+  repeated string senders = 2;
+  repeated string payments = 3;
+  repeated string cards = 4;
+  int64 timestampFrom = 5;
+  int64 timestampTo = 6;
 }
 
 message GetTransactionsResult {

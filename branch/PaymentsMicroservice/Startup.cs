@@ -1,13 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 using AutoMapper;
+using Grpc.Net.Client;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using static TransactionsMicroservice.Transactions;
 
 namespace PaymentsMicroservice
 {
@@ -19,6 +22,7 @@ namespace PaymentsMicroservice
         {
             services.AddGrpc();
             services.AddSingleton(CreateMapper());
+            services.AddSingleton(CreateTransactionsClient());
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -50,6 +54,16 @@ namespace PaymentsMicroservice
                 cfg.CreateMap<Payment, Repository.Payment>();
             });
             return new Mapper(config);
+        }
+
+        private TransactionsClient CreateTransactionsClient()
+        {
+            var httpClientHandler = new HttpClientHandler();
+            httpClientHandler.ServerCertificateCustomValidationCallback =
+                HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
+            var httpClient = new HttpClient(httpClientHandler);
+            var channel = GrpcChannel.ForAddress("https://localhost:5001", new GrpcChannelOptions { HttpClient = httpClient });
+            return new TransactionsClient(channel);
         }
     }
 }
