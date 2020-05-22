@@ -13,39 +13,39 @@ namespace AccountsMicroservice
 {
     public class AccountsService : Accounts.AccountsBase
     {
-        private readonly ILogger<AccountsService> _logger;
+        private readonly ILogger<AccountsService> logger;
         private readonly Mapper mapper;
         private readonly TransactionsClient transactionsClient;
-        private readonly AccountsRepository _repository;
+        private readonly AccountsRepository repository;
 
         public AccountsService(ILogger<AccountsService> logger, Mapper mapper, TransactionsClient transactionsClient)
         {
-            _logger = logger;
+            this.logger = logger;
             this.mapper = mapper;
             this.transactionsClient = transactionsClient;
-            _repository = new AccountsRepository();
+            repository = new AccountsRepository();
         }
 
-        public override async Task<Empty> ChangeBalance(ChangeBalanceRequest request, ServerCallContext context)
+        public override Task<Empty> ChangeBalance(ChangeBalanceRequest request, ServerCallContext context)
         {
-            _repository.ChangeBalance(request.Id, request.Amount);
-            return new Empty();
+            repository.ChangeBalance(request.Id, request.Amount);
+            return Task.FromResult(new Empty());
         }
 
-        public override async Task<GetAccountsResponse> Get(GetAccountsRequest request, ServerCallContext context)
+        public override Task<GetAccountsResponse> Get(GetAccountsRequest request, ServerCallContext context)
         {
-            var accounts = request.Ids.Select(id => _repository.Get(id))
+            var accounts = request.Ids.Select(id => repository.Get(id))
                 .Where(account => account != null)
                 .Select(account => mapper.Map<Account>(account));
-            return new GetAccountsResponse { Accounts = { accounts } };
+            return Task.FromResult(new GetAccountsResponse { Accounts = { accounts } });
         }
 
-        public override async Task<GetBalanceResponse> GetBalance(GetBalanceRequest request, ServerCallContext context)
+        public override Task<GetBalanceResponse> GetBalance(GetBalanceRequest request, ServerCallContext context)
         {
-            var balances = request.Ids.Select(id => _repository.Get(id))
+            var balances = request.Ids.Select(id => repository.Get(id))
                 .Where(account => account != null)
                 .Select(account => new Balance { Id = account.Id, Balance_ = account.Balance });
-            return new GetBalanceResponse { Balances = { balances } };
+            return Task.FromResult(new GetBalanceResponse { Balances = { balances } });
         }
 
         public override async Task<GetTransactionsResponse> GetTransactions(GetTransactionsRequest request, ServerCallContext context)
@@ -57,11 +57,11 @@ namespace AccountsMicroservice
 
         public override async Task<TransferResponse> Transfer(TransferRequest request, ServerCallContext context)
         {
-            var account = _repository.Get(request.AccountId);
+            var account = repository.Get(request.AccountId);
             if (account == null)
                 throw new ArgumentException("Account not found.");
 
-            var recipient = _repository.Get(request.Recipient);
+            var recipient = repository.Get(request.Recipient);
             if (recipient == null)
                 throw new ArgumentException("Recipient not found.");
 
@@ -78,10 +78,23 @@ namespace AccountsMicroservice
 
             var result = await transactionsClient.CreateAsync(transfer);
 
-            _repository.ChangeBalance(request.Recipient, request.Amount);
-            _repository.ChangeBalance(request.AccountId, request.Amount * (-1));
+            repository.ChangeBalance(request.Recipient, request.Amount);
+            repository.ChangeBalance(request.AccountId, request.Amount * (-1));
 
             return new TransferResponse { Transaction = result.Transaction };
+        }
+
+        public override Task<Empty> Setup(SetupRequest request, ServerCallContext context)
+        {
+            var accounts = request.Accounts.Select(a => mapper.Map<Repository.Account>(a));
+            repository.Setup(accounts);
+            return Task.FromResult(new Empty());
+        }
+
+        public override Task<Empty> TearDown(Empty request, ServerCallContext context)
+        {
+            repository.TearDown();
+            return Task.FromResult(new Empty());
         }
     }
 }

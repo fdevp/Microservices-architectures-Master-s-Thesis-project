@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Collections.Generic;
 
 namespace PaymentsMicroservice.Repository
@@ -25,6 +26,16 @@ namespace PaymentsMicroservice.Repository
         {
             if (payments.ContainsKey(id))
                 payments[id].Cancel();
+        }
+
+        public void Setup(IEnumerable<Repository.Payment> payments)
+        {
+            this.payments = payments.ToDictionary(p => p.Id, p => p);
+        }
+
+        public void TearDown()
+        {
+            this.payments = new Dictionary<string, Payment>();
         }
     }
 }

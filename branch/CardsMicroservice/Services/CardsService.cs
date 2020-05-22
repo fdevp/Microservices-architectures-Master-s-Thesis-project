@@ -12,20 +12,20 @@ namespace CardsMicroservice
 {
     public class CardsService : Cards.CardsBase
     {
-        private readonly ILogger<CardsService> _logger;
+        private readonly ILogger<CardsService> logger;
         private readonly Mapper mapper;
         private readonly AccountsClient accountsClient;
-        private CardsRepository _repository;
+        private CardsRepository repository = new CardsRepository();
         public CardsService(ILogger<CardsService> logger, Mapper mapper, AccountsClient accountsClient)
         {
-            _logger = logger;
+            this.logger = logger;
             this.mapper = mapper;
             this.accountsClient = accountsClient;
         }
 
         public override Task<GetCardsResponse> Get(GetCardsRequest request, ServerCallContext context)
         {
-            var cards = request.Ids.Select(id => _repository.GetCard(id))
+            var cards = request.Ids.Select(id => repository.GetCard(id))
                             .Where(card => card != null)
                             .Select(transaction => mapper.Map<Card>(transaction))
                             .ToArray();
@@ -34,13 +34,13 @@ namespace CardsMicroservice
 
         public override Task<GetBlocksResponse> GetBlocks(GetBlocksRequest request, ServerCallContext context)
         {
-            var blocks = _repository.GetBlocks(request.CardId).Select(b => mapper.Map<Block>(b));
+            var blocks = repository.GetBlocks(request.CardId).Select(b => mapper.Map<Block>(b));
             return Task.FromResult(new GetBlocksResponse { Blocks = { blocks } });
         }
 
         public override async Task<GetTransactionsResponse> GetTransactions(GetTransactionsRequest request, ServerCallContext context)
         {
-            var cardAccountsIds = request.Ids.Select(id => _repository.GetCard(id))
+            var cardAccountsIds = request.Ids.Select(id => repository.GetCard(id))
                 .Where(card => card != null)
                 .Select(card => card.AccountId)
                 .ToHashSet();
@@ -53,7 +53,7 @@ namespace CardsMicroservice
 
         public override async Task<TransferResponse> Transfer(TransferRequest request, ServerCallContext context)
         {
-            var card = _repository.GetCard(request.CardId);
+            var card = repository.GetCard(request.CardId);
             if (card == null)
                 throw new ArgumentException("Card not found.");
 
@@ -69,9 +69,23 @@ namespace CardsMicroservice
             };
 
             var transferResponse = await accountsClient.TransferAsync(transferRequest);
-            _repository.CreateBlock(card.Id, transferResponse.Transaction.Id, blockRequestTime);
+            repository.CreateBlock(card.Id, transferResponse.Transaction.Id, blockRequestTime);
 
             return new TransferResponse { Transaction = transferResponse.Transaction };
+        }
+
+        public override Task<Empty> Setup(SetupRequest request, ServerCallContext context)
+        {
+            var cards = request.Cards.Select(c => mapper.Map<Repository.Card>(c));
+            var blocks = request.Blocks.Select(b => mapper.Map<Repository.Block>(b));
+            repository.Setup(cards, blocks);
+            return Task.FromResult(new Empty());
+        }
+
+        public override Task<Empty> TearDown(Empty request, ServerCallContext context)
+        {
+            repository.TearDown();
+            return Task.FromResult(new Empty());
         }
     }
 }

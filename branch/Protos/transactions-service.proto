@@ -1,15 +1,17 @@
 syntax = "proto3";
 import "transaction.proto";
+import "common/empty.proto";
 
 option csharp_namespace = "TransactionsMicroservice";
 package TransactionsMicroservice;
 
 service Transactions {
-  // Sends a greeting
   rpc Get (GetTransactionsRequest) returns (GetTransactionsResult);
   rpc Filter(FilterTransactionsRequest) returns (GetTransactionsResult);
   rpc Create (CreateTransactionRequest) returns (CreateTransactionResult);
   rpc BatchCreate (BatchCreateTransactionRequest) returns (BatchCreateTransactionResult);
+  rpc Setup(SetupRequest) returns (Empty);
+  rpc TearDown(Empty) returns (Empty);
 }
 
 message GetTransactionsRequest {
@@ -47,5 +49,9 @@ message BatchCreateTransactionRequest {
 }
 
 message BatchCreateTransactionResult {
+  repeated Transaction transactions = 1;
+}
+
+message SetupRequest {
   repeated Transaction transactions = 1;
 }

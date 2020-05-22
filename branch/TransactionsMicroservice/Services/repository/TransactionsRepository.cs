@@ -34,7 +34,7 @@ namespace TransactionsMicroservice.Repository
             return transactions.Values.Where(t => SelectTransaction(t, filters)).ToArray();
         }
 
-        public void Setup(IEnumerable<Transaction> transactions)
+        public void Setup(IEnumerable<Repository.Transaction> transactions)
         {
             this.transactions = transactions.ToDictionary(t => t.Id, t => t);
         }

@@ -13,14 +13,14 @@ namespace PaymentsMicroservice
 {
     public class PaymentsService : Payments.PaymentsBase
     {
-        private readonly ILogger<PaymentsService> _logger;
+        private readonly ILogger<PaymentsService> logger;
         private readonly Mapper mapper;
         private readonly TransactionsClient transactionsClient;
         private readonly PaymentsRepository repository = new PaymentsRepository();
 
         public PaymentsService(ILogger<PaymentsService> logger, Mapper mapper, TransactionsClient transactionsClient)
         {
-            _logger = logger;
+            this.logger = logger;
             this.mapper = mapper;
             this.transactionsClient = transactionsClient;
         }
@@ -52,6 +52,19 @@ namespace PaymentsMicroservice
             var transactionsRequest = new FilterTransactionsRequest { Payments = { request.Ids } };
             var transactionsResponse = await transactionsClient.FilterAsync(transactionsRequest);
             return new GetTransactionsResult { Transactions = { transactionsResponse.Transactions } };
+        }
+
+        public override Task<Empty> Setup(SetupRequest request, Grpc.Core.ServerCallContext context)
+        {
+            var payments = request.Payments.Select(p => mapper.Map<Repository.Payment>(p));
+            repository.Setup(payments);
+            return Task.FromResult(new Empty());
+        }
+
+        public override Task<Empty> TearDown(Empty request, Grpc.Core.ServerCallContext context)
+        {
+            repository.TearDown();
+            return Task.FromResult(new Empty());
         }
     }
 }

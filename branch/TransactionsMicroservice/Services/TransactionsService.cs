@@ -11,19 +11,19 @@ namespace TransactionsMicroservice
 {
     public class TransactionsService : Transactions.TransactionsBase
     {
-        private readonly ILogger<TransactionsService> _logger;
+        private readonly ILogger<TransactionsService> logger;
         private readonly Mapper mapper;
-        private TransactionsRepository _repository = new TransactionsRepository();
+        private TransactionsRepository repository = new TransactionsRepository();
 
         public TransactionsService(ILogger<TransactionsService> logger, Mapper mapper)
         {
-            _logger = logger;
+            this.logger = logger;
             this.mapper = mapper;
         }
 
         public override Task<GetTransactionsResult> Get(GetTransactionsRequest request, ServerCallContext context)
         {
-            var transactions = request.Ids.Select(id => _repository.Get(id))
+            var transactions = request.Ids.Select(id => repository.Get(id))
                 .Where(transaction => transaction != null)
                 .Select(transaction => mapper.Map<Transaction>(transaction))
                 .ToArray();
@@ -32,14 +32,14 @@ namespace TransactionsMicroservice
 
         public override Task<CreateTransactionResult> Create(CreateTransactionRequest request, ServerCallContext context)
         {
-            var transaction = _repository.Create(request.Title, request.Amount, request.Recipient, request.Sender, request.PaymentId, request.CardId);
+            var transaction = repository.Create(request.Title, request.Amount, request.Recipient, request.Sender, request.PaymentId, request.CardId);
             return Task.FromResult(new CreateTransactionResult { Transaction = mapper.Map<Transaction>(transaction) });
         }
 
         public override Task<BatchCreateTransactionResult> BatchCreate(BatchCreateTransactionRequest request, ServerCallContext context)
         {
             var transactions = request.Requests
-                .Select(r => _repository.Create(r.Title, r.Amount, r.Recipient, r.Sender, r.PaymentId, r.CardId))
+                .Select(r => repository.Create(r.Title, r.Amount, r.Recipient, r.Sender, r.PaymentId, r.CardId))
                 .Select(transaction => mapper.Map<Transaction>(transaction))
                 .ToArray();
             return Task.FromResult(new BatchCreateTransactionResult { Transactions = { transactions } });
@@ -57,8 +57,20 @@ namespace TransactionsMicroservice
                 TimestampTo = request.TimestampTo,
             };
 
-            var transactions = _repository.GetMany(filters).Select(t => mapper.Map<Transaction>(t));
+            var transactions = repository.GetMany(filters).Select(t => mapper.Map<Transaction>(t));
             return Task.FromResult(new GetTransactionsResult { Transactions = { transactions } });
+        }
+
+        public override Task<Empty> Setup(SetupRequest request, ServerCallContext context)
+        {
+            var transactions = request.Transactions.Select(t => mapper.Map<Repository.Transaction>(t));
+            repository.Setup(transactions);
+            return Task.FromResult(new Empty());
+        }
+
+        public override Task<Empty> TearDown(Empty request, ServerCallContext context)
+        {
+            return Task.FromResult(new Empty());
         }
     }
 }

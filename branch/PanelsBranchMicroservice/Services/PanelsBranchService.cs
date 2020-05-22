@@ -9,10 +9,10 @@ namespace PanelsBranchMicroservice
 {
     public class PanelsBranchService : PanelsBranch.PanelsBranchBase
     {
-        private readonly ILogger<PanelsBranchService> _logger;
+        private readonly ILogger<PanelsBranchService> logger;
         public PanelsBranchService(ILogger<PanelsBranchService> logger)
         {
-            _logger = logger;
+            this.logger = logger;
         }
     }
 }

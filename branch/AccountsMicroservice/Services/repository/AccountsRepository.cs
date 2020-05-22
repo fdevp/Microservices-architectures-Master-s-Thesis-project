@@ -24,7 +24,7 @@ namespace AccountsMicroservice.Repository
             account.SetBalance(newBalance);
         }
 
-        public void Setup(Repository.Account[] accounts)
+        public void Setup(IEnumerable<Repository.Account> accounts)
         {
             this.accounts = accounts.ToDictionary(a => a.Id, a => a);
         }

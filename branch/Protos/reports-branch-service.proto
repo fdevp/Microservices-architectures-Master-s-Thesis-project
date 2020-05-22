@@ -4,9 +4,7 @@ option csharp_namespace = "ReportsBranchMicroservice";
 
 package ReportsBranchMicroservice;
 
-// The greeting service definition.
 service ReportsBranch {
-  // Sends a greeting
   rpc Generate (GenerateReportRequest) returns (GenerateReportResponse);
 }
 

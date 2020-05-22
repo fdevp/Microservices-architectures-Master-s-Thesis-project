@@ -9,10 +9,10 @@ namespace BatchesBranchMicroservice
 {
     public class BatchesBranchService : BatchesBranch.BatchesBranchBase
     {
-        private readonly ILogger<BatchesBranchService> _logger;
+        private readonly ILogger<BatchesBranchService> logger;
         public BatchesBranchService(ILogger<BatchesBranchService> logger)
         {
-            _logger = logger;
+            this.logger = logger;
         }
     }
 }

@@ -9,10 +9,10 @@ namespace ReportsBranchMicroservice
 {
     public class ReportsBranchService : ReportsBranch.ReportsBranchBase
     {
-        private readonly ILogger<ReportsBranchService> _logger;
+        private readonly ILogger<ReportsBranchService> logger;
         public ReportsBranchService(ILogger<ReportsBranchService> logger)
         {
-            _logger = logger;
+            this.logger = logger;
         }
     }
 }

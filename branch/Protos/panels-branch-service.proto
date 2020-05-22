@@ -4,9 +4,7 @@ option csharp_namespace = "PanelsBranchMicroservice";
 
 package PanelsBranchMicroservice;
 
-// The greeting service definition.
 service PanelsBranch {
-  // Sends a greeting
   rpc Get (GetPanelRequest) returns (GetPanelResponse);
 }
 

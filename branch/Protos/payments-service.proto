@@ -7,13 +7,13 @@ option csharp_namespace = "PaymentsMicroservice";
 
 package PaymentsMicroservice;
 
-// The greeting service definition.
 service Payments {
-  // Sends a greeting
   rpc Get (GetPaymentsRequest) returns (GetPaymentsResult);
   rpc GetTransactions (GetTransactionsRequest) returns (GetTransactionsResult);
   rpc Create (CreatePaymentRequest) returns (CreatePaymentResult);
   rpc Cancel (CancelPaymentRequest) returns (Empty);
+  rpc Setup(SetupRequest) returns (Empty);
+  rpc TearDown(Empty) returns (Empty);    
 }
 
 message GetPaymentsRequest {
@@ -46,4 +46,8 @@ message CreatePaymentResult {
 
 message CancelPaymentRequest {
   string id = 1;
+}
+
+message SetupRequest {
+  repeated Payment payments = 1;
 }

@@ -9,14 +9,14 @@ option csharp_namespace = "AccountsMicroservice";
 
 package AccountsMicroservice;
 
-// The greeting service definition.
 service Accounts {
-  // Sends a greeting
   rpc Get (GetAccountsRequest) returns (GetAccountsResponse);
   rpc GetBalance (GetBalanceRequest) returns (GetBalanceResponse);
   rpc GetTransactions (GetTransactionsRequest) returns (GetTransactionsResponse);
   rpc Transfer (TransferRequest) returns (TransferResponse);
   rpc ChangeBalance (ChangeBalanceRequest) returns (Empty);
+  rpc Setup(SetupRequest) returns (Empty);
+  rpc TearDown(Empty) returns (Empty);
 }
 
 message GetAccountsRequest {
@@ -57,4 +57,8 @@ message TransferResponse {
 message ChangeBalanceRequest {
   string id = 1;
   float amount = 2;
+}
+
+message SetupRequest {
+  repeated Account accounts = 1;
 }
