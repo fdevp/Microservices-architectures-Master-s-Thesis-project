@@ -1,7 +1,0 @@
-syntax = "proto3";
-
-message User {
-  string id = 1;
-  string login = 2;
-  string password = 3;
-}

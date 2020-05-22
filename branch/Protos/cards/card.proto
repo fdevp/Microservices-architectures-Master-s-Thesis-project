@@ -1,7 +1,0 @@
-syntax = "proto3";
-
-message Card {
-  string id = 1;
-  string number = 2;
-  string accountId = 3;
-}

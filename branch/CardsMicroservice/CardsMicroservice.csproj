@@ -5,12 +5,8 @@
   <ItemGroup>
     <Protobuf Include="..\Protos\cards-service.proto" GrpcServices="Server"/>
     <Protobuf Include="..\Protos\accounts-service.proto" GrpcServices="Client"/>
-    <Protobuf Include="..\Protos\transaction.proto"/>
-    <Protobuf Include="..\Protos\cards\card.proto"/>
-    <Protobuf Include="..\Protos\cards\block.proto"/>
-    <Protobuf Include="..\Protos\accounts\account.proto"/>
-    <Protobuf Include="..\Protos\accounts\balance.proto"/>
     <Protobuf Include="..\Protos\common\empty.proto"/>
+    <Protobuf Include="..\Protos\common\transaction.proto"/>
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Grpc.AspNetCore" Version="2.27.0"/>

@@ -1,6 +1,0 @@
-syntax = "proto3";
-
-enum PaymentStatus {
-  ACTIVE = 0;
-  CANCELLED = 1;
-}

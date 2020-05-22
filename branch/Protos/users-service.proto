@@ -1,7 +1,5 @@
 syntax = "proto3";
 import "common/empty.proto";
-import "users/user.proto";
-import "users/message.proto";
 
 package UsersMicroservice;
 
@@ -13,6 +11,17 @@ service Users {
   rpc BatchAddMessages (BatchAddMessagesRequest) returns (Empty);
   rpc Setup(SetupRequest) returns (Empty);
   rpc TearDown(Empty) returns (Empty);
+}
+
+message Message {
+  string userId = 1;
+  string content = 2;
+}
+
+message User {
+  string id = 1;
+  string login = 2;
+  string password = 3;
 }
 
 message SignInRequest {

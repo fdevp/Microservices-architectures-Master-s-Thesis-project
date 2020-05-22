@@ -74,9 +74,9 @@ namespace APIGateway
             services.AddSingleton(new CardsClient(CreateChannel(httpClient, "localhost", "5014")));
             services.AddSingleton(new LoansClient(CreateChannel(httpClient, "localhost", "5015")));
 
-            services.AddSingleton(new ReportsBranchClient(CreateChannel(httpClient, "localhost", "5011")));
-            services.AddSingleton(new PanelsBranchClient(CreateChannel(httpClient, "localhost", "5012")));
-            services.AddSingleton(new BatchesBranchClient(CreateChannel(httpClient, "localhost", "5013")));
+            services.AddSingleton(new ReportsBranchClient(CreateChannel(httpClient, "localhost", "5021")));
+            services.AddSingleton(new PanelsBranchClient(CreateChannel(httpClient, "localhost", "5022")));
+            services.AddSingleton(new BatchesBranchClient(CreateChannel(httpClient, "localhost", "5023")));
         }
 
         private GrpcChannel CreateChannel(HttpClient httpClient, string host, string port)

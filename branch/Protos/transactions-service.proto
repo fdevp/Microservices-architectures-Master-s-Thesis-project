@@ -1,5 +1,5 @@
 syntax = "proto3";
-import "transaction.proto";
+import "common/transaction.proto";
 import "common/empty.proto";
 
 option csharp_namespace = "TransactionsMicroservice";
