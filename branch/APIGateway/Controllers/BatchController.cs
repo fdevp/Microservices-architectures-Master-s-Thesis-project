@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using static BatchesBranchMicroservice.BatchesBranch;
 
 namespace APIGateway.Controllers
 {
@@ -9,7 +10,7 @@ namespace APIGateway.Controllers
     {
         private readonly ILogger<BatchController> logger;
 
-        public BatchController(ILogger<BatchController> logger)
+        public BatchController(ILogger<BatchController> logger, BatchesBranchClient batchesBranchClient)
         {
             this.logger = logger;
         }

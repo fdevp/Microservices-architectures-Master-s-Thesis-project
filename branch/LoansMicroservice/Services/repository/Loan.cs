@@ -3,11 +3,11 @@ namespace LoansMicroservice.Repository
     public class Loan
     {
         public string Id { get; }
-        public float PaidAmount { get; }
-        float TotalAmount { get; }
-        int Instalments { get; }
+        public float PaidAmount { get; private set; }
+        public float TotalAmount { get; }
+        public int Instalments { get; }
 
-        string PaymentId { get; }
+        public string PaymentId { get; }
 
         public Loan(string id, float paidAmount, float totalAmount, int instalments, string paymentId)
         {
@@ -16,6 +16,11 @@ namespace LoansMicroservice.Repository
             TotalAmount = totalAmount;
             Instalments = instalments;
             PaymentId = paymentId;
+        }
+
+        public void Repay(float amount)
+        {
+            this.PaidAmount += amount;
         }
     }
 }

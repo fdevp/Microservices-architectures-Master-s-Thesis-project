@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using static ReportsBranchMicroservice.ReportsBranch;
 
 namespace APIGateway.Controllers
 {
@@ -9,7 +10,7 @@ namespace APIGateway.Controllers
     {
         private readonly ILogger<ReportController> logger;
 
-        public ReportController(ILogger<ReportController> logger)
+        public ReportController(ILogger<ReportController> logger, ReportsBranchClient reportsBranchClient)
         {
             this.logger = logger;
         }

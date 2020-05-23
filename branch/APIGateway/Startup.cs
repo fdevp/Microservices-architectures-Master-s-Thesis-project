@@ -1,17 +1,18 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
-using System.Threading.Tasks;
+using AccountsMicroservice;
+using APIGateway.Models;
+using APIGateway.Models.Setup;
+using AutoMapper;
+using CardsMicroservice;
 using Grpc.Net.Client;
+using LoansMicroservice;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
+using PaymentsMicroservice;
+using UsersMicroservice;
 using static AccountsMicroservice.Accounts;
 using static BatchesBranchMicroservice.BatchesBranch;
 using static CardsMicroservice.Cards;
@@ -37,6 +38,7 @@ namespace APIGateway
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
+            services.AddSingleton(CreateMapper());
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -57,6 +59,33 @@ namespace APIGateway
             {
                 endpoints.MapControllers();
             });
+        }
+
+        private Mapper CreateMapper()
+        {
+            var config = new MapperConfiguration(cfg =>
+            {
+                cfg.CreateMap<Transaction, TransactionDTO>();
+                cfg.CreateMap<Account, AccountDTO>();
+                cfg.CreateMap<Card, CardDTO>();
+                cfg.CreateMap<Payment, PaymentDTO>();
+                cfg.CreateMap<User, UserDTO>();
+                cfg.CreateMap<Loan, LoanDTO>();
+
+                cfg.CreateMap<TransactionsMicroservice.SetupRequest, TransactionsSetup>();
+                cfg.CreateMap<AccountsMicroservice.SetupRequest, AccountsSetup>();
+                cfg.CreateMap<CardsMicroservice.SetupRequest, CardsSetup>();
+                cfg.CreateMap<PaymentsMicroservice.SetupRequest, PaymentsSetup>();
+                cfg.CreateMap<UsersMicroservice.SetupRequest, UsersSetup>();
+                cfg.CreateMap<LoansMicroservice.SetupRequest, LoansSetup>();
+
+                cfg.CreateMap<AccountsMicroservice.TransferRequest, AccountTransfer>();
+                cfg.CreateMap<CardsMicroservice.TransferRequest, CardTransfer>();
+                cfg.CreateMap<UsersMicroservice.SignInRequest, TokenRequest>();
+
+
+            });
+            return new Mapper(config);
         }
 
         private void ConfigureGrpcConnections(IServiceCollection services)
