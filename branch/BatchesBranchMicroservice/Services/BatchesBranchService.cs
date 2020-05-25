@@ -14,5 +14,15 @@ namespace BatchesBranchMicroservice
         {
             this.logger = logger;
         }
+
+        // public override Get(GetDataToProcessRequest request, ServerCallContext context)
+        // {
+
+        // }
+
+        // public override Process(ProcessBatchRequest request, ServerCallContext context)
+        // {
+            
+        // }
     }
 }

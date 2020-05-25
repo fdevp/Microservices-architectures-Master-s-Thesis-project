@@ -22,12 +22,12 @@ namespace SharedClasses
         {
             var method = context.Method;
             var flowId = GetFlowId(request);
+
             this.logger.LogInformation($"Service='{serviceName}' FlowId='{flowId}' Method='{method}' Type='Start'");
             var stopwatch = Stopwatch.StartNew();
             try
             {
-                var response = await base.UnaryServerHandler(request, context, continuation);
-                return response;
+                return await base.UnaryServerHandler(request, context, continuation);
             }
             finally
             {
