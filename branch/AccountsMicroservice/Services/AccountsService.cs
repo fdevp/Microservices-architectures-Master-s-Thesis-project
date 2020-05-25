@@ -50,7 +50,7 @@ namespace AccountsMicroservice
 
         public override async Task<GetTransactionsResponse> GetTransactions(GetTransactionsRequest request, ServerCallContext context)
         {
-            var filters = new FilterTransactionsRequest { Senders = { request.Ids } };
+            var filters = new FilterTransactionsRequest { FlowId = request.FlowId, Senders = { request.Ids } };
             var response = await transactionsClient.FilterAsync(filters);
             return new GetTransactionsResponse { Transactions = { response.Transactions } };
         }
@@ -70,6 +70,7 @@ namespace AccountsMicroservice
 
             var transfer = new CreateTransactionRequest
             {
+                FlowId = request.FlowId,
                 Sender = request.AccountId,
                 Recipient = request.Recipient,
                 Title = request.Title,

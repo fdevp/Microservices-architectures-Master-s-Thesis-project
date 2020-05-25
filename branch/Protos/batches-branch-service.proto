@@ -10,7 +10,7 @@ service BatchesBranch {
 }
 
 message GetDataToProcessRequest {
-
+  int64 flowId = 1;
 }
 
 message GetDataToProcessResponse {
@@ -18,7 +18,7 @@ message GetDataToProcessResponse {
 }
 
 message ProcessBatchRequest {
-
+  int64 flowId = 1;
 }
 
 message ProcessBatchResponse {

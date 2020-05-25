@@ -29,6 +29,7 @@ namespace APIGateway.Controllers
         public async Task<string> Token(TokenRequest data)
         {
             var request = mapper.Map<SignInRequest>(data);
+            request.FlowId = (long)HttpContext.Items["flowId"];
             var response = await usersClient.TokenAsync(request);
             return response.Token;
         }
@@ -38,6 +39,7 @@ namespace APIGateway.Controllers
         public async Task Logout(string token)
         {
             var request = new LogoutRequest { Token = token };
+            request.FlowId = (long)HttpContext.Items["flowId"];
             await usersClient.LogoutAsync(request);
         }
 

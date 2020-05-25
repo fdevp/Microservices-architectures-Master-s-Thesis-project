@@ -33,10 +33,11 @@ namespace APIGateway.Controllers
         }
 
         [HttpGet]
-        [Route("balance")]
+        [Route("balance/{accountId}")]
         public async Task<float> Balance(string accountId)
         {
             var request = new GetBalanceRequest { Ids = { accountId } };
+            request.FlowId = (long)HttpContext.Items["flowId"];
             var repsonse = await accountClient.GetBalanceAsync(request);
             var balance = repsonse.Balances.Single();
             return balance.Balance_;
@@ -47,6 +48,7 @@ namespace APIGateway.Controllers
         public async Task<TransactionDTO> Transfer(AccountTransfer data)
         {
             var request = mapper.Map<TransferRequest>(data);
+            request.FlowId = (long)HttpContext.Items["flowId"];
             var response = await accountClient.TransferAsync(request);
             var transcation = mapper.Map<TransactionDTO>(response.Transaction);
             return transcation;

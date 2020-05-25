@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using static TransactionsMicroservice.Transactions;
+using SharedClasses;
 
 namespace PaymentsMicroservice
 {
@@ -20,7 +21,10 @@ namespace PaymentsMicroservice
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddGrpc();
+            services.AddGrpc(options =>
+            {
+                options.Interceptors.Add<LoggingInterceptor>("Accounts");
+            });
             services.AddSingleton(CreateMapper());
             services.AddSingleton(CreateTransactionsClient());
         }

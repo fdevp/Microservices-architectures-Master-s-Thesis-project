@@ -45,7 +45,7 @@ namespace CardsMicroservice
                 .Select(card => card.AccountId)
                 .ToHashSet();
 
-            var transactionsRequest = new AccountsMicroservice.GetTransactionsRequest { Ids = { cardAccountsIds } };
+            var transactionsRequest = new AccountsMicroservice.GetTransactionsRequest { FlowId = request.FlowId, Ids = { cardAccountsIds } };
             var accountTransactions = await accountsClient.GetTransactionsAsync(transactionsRequest);
             var transactions = accountTransactions.Transactions.Where(t => cardAccountsIds.Contains(t.CardId));
             return new GetTransactionsResponse { Transactions = { transactions } };
@@ -62,6 +62,7 @@ namespace CardsMicroservice
 
             var transferRequest = new AccountsMicroservice.TransferRequest
             {
+                FlowId = request.FlowId,
                 AccountId = card.AccountId,
                 Recipient = request.Recipient,
                 Amount = request.Amount,

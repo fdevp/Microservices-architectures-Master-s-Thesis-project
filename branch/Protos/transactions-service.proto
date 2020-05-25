@@ -15,16 +15,18 @@ service Transactions {
 }
 
 message GetTransactionsRequest {
-  repeated string ids = 1;
+  int64 flowId = 1;
+  repeated string ids = 2;
 }
 
 message FilterTransactionsRequest {
-  repeated string recipients = 1;
-  repeated string senders = 2;
-  repeated string payments = 3;
-  repeated string cards = 4;
-  int64 timestampFrom = 5;
-  int64 timestampTo = 6;
+  int64 flowId = 1;
+  repeated string recipients = 2;
+  repeated string senders = 3;
+  repeated string payments = 4;
+  repeated string cards = 5;
+  int64 timestampFrom = 6;
+  int64 timestampTo = 7;
 }
 
 message GetTransactionsResult {
@@ -32,12 +34,13 @@ message GetTransactionsResult {
 }
 
 message CreateTransactionRequest {
+  int64 flowId = 1;
   string title = 2;
   float amount = 3;
-  string recipient = 5;
-  string sender = 6;
-  string paymentId = 7;
-  string cardId = 8;
+  string recipient = 4;
+  string sender = 5;
+  string paymentId = 6;
+  string cardId = 7;
 }
 
 message CreateTransactionResult {
@@ -45,7 +48,8 @@ message CreateTransactionResult {
 }
 
 message BatchCreateTransactionRequest {
-  repeated CreateTransactionRequest requests = 1;
+  int64 flowId = 1;
+  repeated CreateTransactionRequest requests = 2;
 }
 
 message BatchCreateTransactionResult {

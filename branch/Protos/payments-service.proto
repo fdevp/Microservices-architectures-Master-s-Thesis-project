@@ -31,7 +31,8 @@ enum PaymentStatus {
 }
 
 message GetPaymentsRequest {
-  repeated string ids = 1;
+  int64 flowId = 1;
+  repeated string ids = 2;
 }
 
 message GetPaymentsResult {
@@ -39,7 +40,8 @@ message GetPaymentsResult {
 }
 
 message GetTransactionsRequest {
-  repeated string ids = 1;
+  int64 flowId = 1;
+  repeated string ids = 2;
 }
 
 message GetTransactionsResult {
@@ -47,11 +49,12 @@ message GetTransactionsResult {
 }
 
 message CreatePaymentRequest {
+  int64 flowId = 1;
   float amount = 2;
   int64 startTimestamp = 3;
-  int64 interval = 5;
-  string accountId = 6;
-  string recipient = 7;
+  int64 interval = 4;
+  string accountId = 5;
+  string recipient = 6;
 }
 
 message CreatePaymentResult {
@@ -59,7 +62,8 @@ message CreatePaymentResult {
 }
 
 message CancelPaymentRequest {
-  string id = 1;
+  int64 flowId = 1;
+  string id = 2;
 }
 
 message SetupRequest {

@@ -29,7 +29,8 @@ message Card {
 }
 
 message GetCardsRequest {
-  repeated string ids = 1;
+  int64 flowId = 1;
+  repeated string ids = 2;
 }
 
 message GetCardsResponse {
@@ -37,7 +38,8 @@ message GetCardsResponse {
 }
 
 message GetBlocksRequest {
-  string cardId = 1;
+  int64 flowId = 1;
+  string cardId = 2;
 }
 
 message GetBlocksResponse {
@@ -45,7 +47,8 @@ message GetBlocksResponse {
 }
 
 message GetTransactionsRequest {
-  repeated string ids = 1;
+  int64 flowId = 1;
+  repeated string ids = 2;
 }
 
 message GetTransactionsResponse {
@@ -53,9 +56,10 @@ message GetTransactionsResponse {
 }
 
 message TransferRequest {
-  string cardId = 1;
-  string recipient = 5;
-  float amount = 3;
+  int64 flowId = 1;
+  string cardId = 2;
+  string recipient = 3;
+  float amount = 4;
 }
 
 message TransferResponse {

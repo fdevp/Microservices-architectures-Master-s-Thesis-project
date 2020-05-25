@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
-using System.Threading.Tasks;
+﻿using System.Net.Http;
 using AutoMapper;
 using Grpc.Net.Client;
 using Microsoft.AspNetCore.Builder;
@@ -11,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using static AccountsMicroservice.Accounts;
+using SharedClasses;
 
 namespace CardsMicroservice
 {
@@ -20,7 +17,10 @@ namespace CardsMicroservice
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddGrpc();
+            services.AddGrpc(options =>
+            {
+                options.Interceptors.Add<LoggingInterceptor>("Accounts");
+            });
             services.AddSingleton(CreateMapper());
             services.AddSingleton(CreateAccountsClient());
         }

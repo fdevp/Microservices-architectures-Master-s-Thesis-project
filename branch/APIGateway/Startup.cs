@@ -1,5 +1,6 @@
 using System.Net.Http;
 using AccountsMicroservice;
+using APIGateway.Middlewares;
 using APIGateway.Models;
 using APIGateway.Models.Setup;
 using AutoMapper;
@@ -39,6 +40,7 @@ namespace APIGateway
         {
             services.AddControllers();
             services.AddSingleton(CreateMapper());
+            ConfigureGrpcConnections(services);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -54,6 +56,8 @@ namespace APIGateway
             app.UseRouting();
 
             app.UseAuthorization();
+
+            app.UseMiddleware<LoggingMiddleware>();
 
             app.UseEndpoints(endpoints =>
             {

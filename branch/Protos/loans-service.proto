@@ -25,7 +25,8 @@ message RepayInstalmentRequest {
 }
 
 message GetLoansRequest {
-  repeated string ids = 1;
+  int64 flowId = 1;
+  repeated string ids = 2;
 }
 
 message GetLoansResponse {
