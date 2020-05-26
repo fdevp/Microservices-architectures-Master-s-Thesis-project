@@ -15,10 +15,32 @@ namespace AccountsMicroservice.Repository
             return null;
         }
 
-        public void ChangeBalance(string id, float amount)
+        public bool CanTransfer(string sender, string recipient, float amount)
         {
-            if (!accounts.ContainsKey(id))
+            if (!accounts.ContainsKey(sender))
+                return false;
+            if (!accounts.ContainsKey(recipient))
+                return false;
+            if (accounts[sender].Balance < amount)
+                return false;
+            return true;
+        }
+
+        public void Transfer(string sender, string recipient, float amount)
+        {
+            if (!accounts.ContainsKey(sender))
                 throw new ArgumentException("Account not found.");
+            if (!accounts.ContainsKey(recipient))
+                throw new ArgumentException("Recipient not found.");
+            if (accounts[sender].Balance < amount)
+                throw new ArgumentException("Not enough founds on the account.");
+
+            ChangeBalance(recipient, amount);
+            ChangeBalance(sender, amount * (-1));
+        }
+
+        private void ChangeBalance(string id, float amount)
+        {
             var account = accounts[id];
             var newBalance = account.Balance + amount;
             account.SetBalance(newBalance);

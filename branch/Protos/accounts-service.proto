@@ -11,7 +11,7 @@ service Accounts {
   rpc GetBalance (GetBalanceRequest) returns (GetBalanceResponse);
   rpc GetTransactions (GetTransactionsRequest) returns (GetTransactionsResponse);
   rpc Transfer (TransferRequest) returns (TransferResponse);
-  rpc ChangeBalance (ChangeBalanceRequest) returns (Empty);
+  rpc BatchTransfer (BatchTransferRequest) returns (BatchTransferResponse);
   rpc Setup(SetupRequest) returns (Empty);
   rpc TearDown(Empty) returns (Empty);
 }
@@ -67,10 +67,13 @@ message TransferResponse {
   Transaction transaction = 1;
 }
 
-message ChangeBalanceRequest {
+message BatchTransferRequest {
   int64 flowId = 1;
-  string id = 2;
-  float amount = 3;
+  repeated TransferRequest transfers = 2;
+}
+
+message BatchTransferResponse {
+  repeated Transaction transactions = 1;
 }
 
 message SetupRequest {

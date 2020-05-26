@@ -26,12 +26,6 @@ namespace AccountsMicroservice
             repository = new AccountsRepository();
         }
 
-        public override Task<Empty> ChangeBalance(ChangeBalanceRequest request, ServerCallContext context)
-        {
-            repository.ChangeBalance(request.Id, request.Amount);
-            return Task.FromResult(new Empty());
-        }
-
         public override Task<GetAccountsResponse> Get(GetAccountsRequest request, ServerCallContext context)
         {
             var accounts = request.Ids.Select(id => repository.Get(id))
@@ -57,32 +51,32 @@ namespace AccountsMicroservice
 
         public override async Task<TransferResponse> Transfer(TransferRequest request, ServerCallContext context)
         {
-            var account = repository.Get(request.AccountId);
-            if (account == null)
-                throw new ArgumentException("Account not found.");
+            if (!repository.CanTransfer(request.AccountId, request.Recipient, request.Amount))
+                throw new ArgumentException("Cannot transfer founds.");
 
-            var recipient = repository.Get(request.Recipient);
-            if (recipient == null)
-                throw new ArgumentException("Recipient not found.");
+            var transfer = CreateRequest(request);
+            var result = await transactionsClient.CreateAsync(transfer);
+            
+            repository.Transfer(request.AccountId, request.Recipient, request.Amount);
+            return new TransferResponse { Transaction = result.Transaction };
+        }
 
-            if (account.Balance < request.Amount)
-                throw new ArgumentException("Not enough founds on the account.");
-
-            var transfer = new CreateTransactionRequest
+        public override async Task<BatchTransferResponse> BatchTransfer(BatchTransferRequest request, Grpc.Core.ServerCallContext context)
+        {
+            if (request.Transfers.Any(r => !repository.CanTransfer(r.AccountId, r.Recipient, r.Amount)))
+                throw new ArgumentException("Cannot transfer founds.");
+            
+            var transferRequests = request.Transfers.Select(r => CreateRequest(r));
+            var batchAddTransactionsRequest = new BatchCreateTransactionRequest
             {
                 FlowId = request.FlowId,
-                Sender = request.AccountId,
-                Recipient = request.Recipient,
-                Title = request.Title,
-                Amount = request.Amount
+                Requests = { transferRequests }
             };
+            var result = await transactionsClient.BatchCreateAsync(batchAddTransactionsRequest);
 
-            var result = await transactionsClient.CreateAsync(transfer);
-
-            repository.ChangeBalance(request.Recipient, request.Amount);
-            repository.ChangeBalance(request.AccountId, request.Amount * (-1));
-
-            return new TransferResponse { Transaction = result.Transaction };
+            foreach (var t in request.Transfers)
+                repository.Transfer(t.AccountId, t.Recipient, t.Amount);
+            return new BatchTransferResponse { Transactions = { { result.Transactions } } };
         }
 
         public override Task<Empty> Setup(SetupRequest request, ServerCallContext context)
@@ -96,6 +90,23 @@ namespace AccountsMicroservice
         {
             repository.TearDown();
             return Task.FromResult(new Empty());
+        }
+
+        private CreateTransactionRequest CreateRequest(TransferRequest request)
+        {
+            var account = repository.Get(request.AccountId);
+            var recipient = repository.Get(request.Recipient);
+
+            var transfer = new CreateTransactionRequest
+            {
+                FlowId = request.FlowId,
+                Sender = request.AccountId,
+                Recipient = request.Recipient,
+                Title = request.Title,
+                Amount = request.Amount
+            };
+
+            return transfer;
         }
     }
 }
