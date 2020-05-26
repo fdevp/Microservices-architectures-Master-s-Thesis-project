@@ -1,4 +1,6 @@
-﻿using AutoMapper;
+﻿using System.Net.Http;
+using AutoMapper;
+using Grpc.Net.Client;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -6,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using SharedClasses;
+using static PaymentsMicroservice.Payments;
 
 namespace LoansMicroservice
 {
@@ -20,6 +23,7 @@ namespace LoansMicroservice
                 options.Interceptors.Add<LoggingInterceptor>("Accounts");
             });
             services.AddSingleton(CreateMapper());
+            services.AddSingleton(CreatePaymentsClient());
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -49,6 +53,16 @@ namespace LoansMicroservice
         {
             var config = new MapperConfiguration(cfg => cfg.CreateMap<Loan, Repository.Loan>());
             return new Mapper(config);
+        }
+
+        private PaymentsClient CreatePaymentsClient()
+        {
+            var httpClientHandler = new HttpClientHandler();
+            httpClientHandler.ServerCertificateCustomValidationCallback =
+                HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
+            var httpClient = new HttpClient(httpClientHandler);
+            var channel = GrpcChannel.ForAddress("https://localhost:5013", new GrpcChannelOptions { HttpClient = httpClient });
+            return new PaymentsClient(channel);
         }
     }
 }

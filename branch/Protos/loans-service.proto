@@ -1,32 +1,32 @@
 syntax = "proto3";
 import "common/empty.proto";
+import "common/loan.proto";
 
 option csharp_namespace = "LoansMicroservice";
 
 package LoansMicroservice;
 
 service Loans {
-  rpc RepayInstalment (RepayInstalmentRequest) returns (Empty);
+  rpc BatchRepayInstalments (BatchRepayInstalmentsRequest) returns (Empty);
   rpc Get (GetLoansRequest) returns (GetLoansResponse);
+  rpc GetPaymentsLoans (GetPaymentsLoansRequest) returns (GetLoansResponse);
   rpc Setup(SetupRequest) returns (Empty);
   rpc TearDown(Empty) returns (Empty);
 }
 
-message Loan {
-  string id = 1;
-  float paidAmount = 2;
-  float totalAmount = 3;
-  int32 instalments = 4;
-  string paymentId = 5;
-}
-
-message RepayInstalmentRequest {
-  string id = 1;
+message BatchRepayInstalmentsRequest {
+  int64 flowId = 1;
+  repeated string ids = 2;
 }
 
 message GetLoansRequest {
   int64 flowId = 1;
   repeated string ids = 2;
+}
+
+message GetPaymentsLoansRequest {
+  int64 flowId = 1;
+  repeated string paymentsIds = 2;
 }
 
 message GetLoansResponse {

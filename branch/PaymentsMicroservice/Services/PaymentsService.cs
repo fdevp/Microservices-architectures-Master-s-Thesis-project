@@ -4,9 +4,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using Grpc.Core;
+using LoansMicroservice;
 using Microsoft.Extensions.Logging;
 using PaymentsMicroservice.Repository;
 using TransactionsMicroservice;
+using static LoansMicroservice.Loans;
 using static TransactionsMicroservice.Transactions;
 
 namespace PaymentsMicroservice
@@ -16,13 +18,15 @@ namespace PaymentsMicroservice
         private readonly ILogger<PaymentsService> logger;
         private readonly Mapper mapper;
         private readonly TransactionsClient transactionsClient;
+        private readonly LoansClient loansClient;
         private readonly PaymentsRepository repository = new PaymentsRepository();
 
-        public PaymentsService(ILogger<PaymentsService> logger, Mapper mapper, TransactionsClient transactionsClient)
+        public PaymentsService(ILogger<PaymentsService> logger, Mapper mapper, TransactionsClient transactionsClient, LoansClient loansClient)
         {
             this.logger = logger;
             this.mapper = mapper;
             this.transactionsClient = transactionsClient;
+            this.loansClient = loansClient;
         }
 
         public override Task<GetPaymentsResult> Get(GetPaymentsRequest request, ServerCallContext context)
@@ -35,15 +39,30 @@ namespace PaymentsMicroservice
             return Task.FromResult(new GetPaymentsResult { Payments = { payments } });
         }
 
+        public override async Task<GetPaymentsWithLoansResult> GetWithLoans(GetPaymentsRequest request, ServerCallContext context)
+        {
+            var payments = request.Ids.Select(id => repository.Get(id))
+                .Where(payment => payment != null)
+                .Select(p => mapper.Map<Payment>(p))
+                .ToArray();
+
+            var paymentsIds = payments.Select(p => p.Id);
+            var loansRequest = new GetPaymentsLoansRequest { FlowId = request.FlowId, PaymentsIds = { paymentsIds } };
+            var loansResult = await loansClient.GetPaymentsLoansAsync(loansRequest);
+
+            return new GetPaymentsWithLoansResult { Payments = { payments }, Loans = { loansResult.Loans } };
+        }
+
         public override Task<CreatePaymentResult> Create(CreatePaymentRequest request, ServerCallContext context)
         {
             var payment = repository.Create(request.Amount, request.StartTimestamp, request.Interval, request.AccountId, request.Recipient);
             return Task.FromResult(new CreatePaymentResult { Payment = mapper.Map<Payment>(payment) });
         }
 
-        public override Task<Empty> Cancel(CancelPaymentRequest request, ServerCallContext context)
+        public override Task<Empty> Cancel(CancelPaymentsRequest request, ServerCallContext context)
         {
-            repository.Cancel(request.Id);
+            foreach (var id in request.Ids)
+                repository.Cancel(id);
             return Task.FromResult(new Empty());
         }
 

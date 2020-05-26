@@ -14,20 +14,23 @@ namespace LoansMicroservice.Repository
             return null;
         }
 
-        public float InstalmentAmount(string id)
+        public bool RepayInstalment(string id)
         {
             var loan = loans[id];
+            var amount = InstalmentAmount(loan);
+            loan.Repay(amount);
+            if (loan.PaidAmount >= loan.TotalAmount)
+                return true;
+            return false;
+        }
+
+        private float InstalmentAmount(Loan loan)
+        {
             var regularAmount = loan.TotalAmount / loan.Instalments;
             var toRepay = loan.PaidAmount - loan.TotalAmount;
             if (regularAmount > toRepay)
                 return toRepay;
             return regularAmount;
-        }
-
-        public void RepayInstalment(string id, float amount)
-        {
-            var loan = loans[id];
-            loan.Repay(amount);
         }
 
         public void Setup(IEnumerable<Repository.Loan> loans)

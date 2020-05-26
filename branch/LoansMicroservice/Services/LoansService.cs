@@ -6,6 +6,8 @@ using AutoMapper;
 using Grpc.Core;
 using LoansMicroservice.Repository;
 using Microsoft.Extensions.Logging;
+using PaymentsMicroservice;
+using static PaymentsMicroservice.Payments;
 
 namespace LoansMicroservice
 {
@@ -13,12 +15,14 @@ namespace LoansMicroservice
     {
         private readonly ILogger<LoansService> logger;
         private readonly Mapper mapper;
+        private readonly PaymentsClient paymentsClient;
         private LoansRepository repository = new LoansRepository();
 
-        public LoansService(ILogger<LoansService> logger, Mapper mapper)
+        public LoansService(ILogger<LoansService> logger, Mapper mapper, PaymentsClient paymentsClient)
         {
             this.logger = logger;
             this.mapper = mapper;
+            this.paymentsClient = paymentsClient;
         }
 
         public override Task<GetLoansResponse> Get(GetLoansRequest request, ServerCallContext context)
@@ -29,13 +33,24 @@ namespace LoansMicroservice
             return Task.FromResult(new GetLoansResponse { Loans = { loans } });
         }
 
-        // public override RepayInstalment(RepayInstalmentRequest request, ServerCallContext context)
-        // {
-        //     if (repository.Get(request.Id) == null)
-        //         throw new ArgumentException("Loan not found.");
-        //     var amount = repository.InstalmentAmount(request.Id);
+        public override async Task<Empty> BatchRepayInstalments(BatchRepayInstalmentsRequest request, ServerCallContext context)
+        {
+            var paymentsToFinish = new List<string>();
+            foreach (var id in request.Ids)
+            {
+                var totalAmountPaid = repository.RepayInstalment(id);
+                if (totalAmountPaid)
+                    paymentsToFinish.Add(repository.Get(id).PaymentId);
+            }
 
-        // }
+            var cancelPaymentsRequest = new CancelPaymentsRequest
+            {
+                FlowId = request.FlowId,
+                Ids = { paymentsToFinish }
+            };
+            await paymentsClient.CancelAsync(cancelPaymentsRequest);
+            return new Empty();
+        }
 
         public override Task<Empty> Setup(SetupRequest request, ServerCallContext context)
         {

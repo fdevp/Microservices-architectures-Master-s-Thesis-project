@@ -13,6 +13,7 @@ using Microsoft.Extensions.Hosting;
 using static TransactionsMicroservice.Transactions;
 using SharedClasses;
 using Microsoft.Extensions.Logging;
+using static LoansMicroservice.Loans;
 
 namespace PaymentsMicroservice
 {
@@ -27,7 +28,7 @@ namespace PaymentsMicroservice
                 options.Interceptors.Add<LoggingInterceptor>("Accounts");
             });
             services.AddSingleton(CreateMapper());
-            services.AddSingleton(CreateTransactionsClient());
+            CreateClients(services)
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -63,14 +64,18 @@ namespace PaymentsMicroservice
             return new Mapper(config);
         }
 
-        private TransactionsClient CreateTransactionsClient()
+        private void CreateClients(IServiceCollection services)
         {
             var httpClientHandler = new HttpClientHandler();
             httpClientHandler.ServerCertificateCustomValidationCallback =
                 HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
             var httpClient = new HttpClient(httpClientHandler);
-            var channel = GrpcChannel.ForAddress("https://localhost:5001", new GrpcChannelOptions { HttpClient = httpClient });
-            return new TransactionsClient(channel);
+
+            var transactionsChannel = GrpcChannel.ForAddress("https://localhost:5001", new GrpcChannelOptions { HttpClient = httpClient });
+            services.AddSingleton(new TransactionsClient(transactionsChannel));
+
+            var loansChannel = GrpcChannel.ForAddress("https://localhost:5015", new GrpcChannelOptions { HttpClient = httpClient });
+            services.AddSingleton(new LoansClient(transactionsChannel));
         }
     }
 }
