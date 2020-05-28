@@ -17,7 +17,7 @@ namespace TransactionsMicroservice
         {
             services.AddGrpc(options =>
             {
-                options.Interceptors.Add<LoggingInterceptor>("Accounts");
+                options.Interceptors.Add<LoggingInterceptor>("Transactions");
             });
             services.AddSingleton(CreateMapper());
         }

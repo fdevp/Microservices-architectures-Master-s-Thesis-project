@@ -20,7 +20,7 @@ namespace CardsMicroservice
         {
             services.AddGrpc(options =>
             {
-                options.Interceptors.Add<LoggingInterceptor>("Accounts");
+                options.Interceptors.Add<LoggingInterceptor>("Cards");
             });
             services.AddSingleton(CreateMapper());
             services.AddSingleton(CreateAccountsClient());

@@ -1,10 +1,16 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using System.Net.Http;
+using Grpc.Net.Client;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using SharedClasses;
+using static AccountsMicroservice.Accounts;
+using static LoansMicroservice.Loans;
+using static PaymentsMicroservice.Payments;
+using static UsersMicroservice.Users;
 
 namespace BatchesBranchMicroservice
 {
@@ -16,8 +22,9 @@ namespace BatchesBranchMicroservice
         {
             services.AddGrpc(options =>
             {
-                options.Interceptors.Add<LoggingInterceptor>("Accounts");
+                options.Interceptors.Add<LoggingInterceptor>("Batches_branch");
             });
+            CreateClients(services);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -41,6 +48,26 @@ namespace BatchesBranchMicroservice
             });
 
             loggerFactory.AddFile("log.txt");
+        }
+
+        private void CreateClients(IServiceCollection services)
+        {
+            var httpClientHandler = new HttpClientHandler();
+            httpClientHandler.ServerCertificateCustomValidationCallback =
+                HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
+            var httpClient = new HttpClient(httpClientHandler);
+
+            var accountsChannel = GrpcChannel.ForAddress("https://localhost:5011", new GrpcChannelOptions { HttpClient = httpClient });
+            services.AddSingleton(new AccountsClient(accountsChannel));
+
+            var usersChannel = GrpcChannel.ForAddress("https://localhost:5012", new GrpcChannelOptions { HttpClient = httpClient });
+            services.AddSingleton(new UsersClient(usersChannel));
+
+            var paymentsChannel = GrpcChannel.ForAddress("https://localhost:5013", new GrpcChannelOptions { HttpClient = httpClient });
+            services.AddSingleton(new PaymentsClient(paymentsChannel));
+
+            var loansChannel = GrpcChannel.ForAddress("https://localhost:5015", new GrpcChannelOptions { HttpClient = httpClient });
+            services.AddSingleton(new LoansClient(loansChannel));
         }
     }
 }

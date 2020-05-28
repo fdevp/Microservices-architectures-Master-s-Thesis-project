@@ -51,13 +51,13 @@ namespace AccountsMicroservice
 
         public override async Task<TransferResponse> Transfer(TransferRequest request, ServerCallContext context)
         {
-            if (!repository.CanTransfer(request.AccountId, request.Recipient, request.Amount))
+            if (!repository.CanTransfer(request.Transfer.AccountId, request.Transfer.Recipient, request.Transfer.Amount))
                 throw new ArgumentException("Cannot transfer founds.");
 
-            var transfer = CreateRequest(request);
+            var transfer = CreateRequest(request.FlowId, request.Transfer);
             var result = await transactionsClient.CreateAsync(transfer);
-            
-            repository.Transfer(request.AccountId, request.Recipient, request.Amount);
+
+            repository.Transfer(request.Transfer.AccountId, request.Transfer.Recipient, request.Transfer.Amount);
             return new TransferResponse { Transaction = result.Transaction };
         }
 
@@ -65,8 +65,8 @@ namespace AccountsMicroservice
         {
             if (request.Transfers.Any(r => !repository.CanTransfer(r.AccountId, r.Recipient, r.Amount)))
                 throw new ArgumentException("Cannot transfer founds.");
-            
-            var transferRequests = request.Transfers.Select(r => CreateRequest(r));
+
+            var transferRequests = request.Transfers.Select(r => CreateRequest(request.FlowId, r));
             var batchAddTransactionsRequest = new BatchCreateTransactionRequest
             {
                 FlowId = request.FlowId,
@@ -92,21 +92,21 @@ namespace AccountsMicroservice
             return Task.FromResult(new Empty());
         }
 
-        private CreateTransactionRequest CreateRequest(TransferRequest request)
+        private CreateTransactionRequest CreateRequest(long flowId, Transfer request)
         {
             var account = repository.Get(request.AccountId);
             var recipient = repository.Get(request.Recipient);
 
-            var transfer = new CreateTransactionRequest
+            var transcation = new CreateTransactionRequest
             {
-                FlowId = request.FlowId,
+                FlowId = flowId,
                 Sender = request.AccountId,
                 Recipient = request.Recipient,
                 Title = request.Title,
                 Amount = request.Amount
             };
 
-            return transfer;
+            return transcation;
         }
     }
 }

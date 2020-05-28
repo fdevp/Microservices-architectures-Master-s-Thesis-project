@@ -1,5 +1,6 @@
 syntax = "proto3";
 import "common/empty.proto";
+import "common/message.proto";
 
 package UsersMicroservice;
 
@@ -11,11 +12,6 @@ service Users {
   rpc BatchAddMessages (BatchAddMessagesRequest) returns (Empty);
   rpc Setup(SetupRequest) returns (Empty);
   rpc TearDown(Empty) returns (Empty);
-}
-
-message Message {
-  string userId = 1;
-  string content = 2;
 }
 
 message User {

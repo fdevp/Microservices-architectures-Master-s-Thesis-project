@@ -15,6 +15,11 @@ namespace PaymentsMicroservice.Repository
             return null;
         }
 
+        public Payment[] Get(int mod)
+        {
+            return payments.Values.Where((element, index) => index % mod == 0).ToArray();
+        }
+
         public Payment Create(float amount, long startTimestamp, long interval, string accountId, string recipient)
         {
             var payment = new Repository.Payment(Guid.NewGuid().ToString(), amount, startTimestamp, interval, PaymentStatus.ACTIVE, accountId, recipient);

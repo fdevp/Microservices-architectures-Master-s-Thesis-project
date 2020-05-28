@@ -39,9 +39,9 @@ namespace PaymentsMicroservice
             return Task.FromResult(new GetPaymentsResult { Payments = { payments } });
         }
 
-        public override async Task<GetPaymentsWithLoansResult> GetWithLoans(GetPaymentsRequest request, ServerCallContext context)
+        public override async Task<GetPaymentsWithLoansResult> GetWithLoans(GetPaymentsWithLoansRequest request, ServerCallContext context)
         {
-            var payments = request.Ids.Select(id => repository.Get(id))
+            var payments = repository.Get(request.Mod)
                 .Where(payment => payment != null)
                 .Select(p => mapper.Map<Payment>(p))
                 .ToArray();

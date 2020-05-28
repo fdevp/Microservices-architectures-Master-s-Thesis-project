@@ -20,7 +20,7 @@ namespace LoansMicroservice
         {
             services.AddGrpc(options =>
             {
-                options.Interceptors.Add<LoggingInterceptor>("Accounts");
+                options.Interceptors.Add<LoggingInterceptor>("Loans");
             });
             services.AddSingleton(CreateMapper());
             services.AddSingleton(CreatePaymentsClient());

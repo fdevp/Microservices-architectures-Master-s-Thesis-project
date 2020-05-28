@@ -1,4 +1,10 @@
 syntax = "proto3";
+import "common/empty.proto";
+import "common/loan.proto";
+import "common/payment.proto";
+import "common/balance.proto";
+import "common/transfer.proto";
+import "common/message.proto";
 
 option csharp_namespace = "BatchesBranchMicroservice";
 
@@ -6,21 +12,23 @@ package BatchesBranchMicroservice;
 
 service BatchesBranch {
   rpc Get (GetDataToProcessRequest) returns (GetDataToProcessResponse);
-  rpc Process(ProcessBatchRequest) returns (ProcessBatchResponse);
+  rpc Process(ProcessBatchRequest) returns (Empty);
 }
 
 message GetDataToProcessRequest {
   int64 flowId = 1;
+  int32 mod = 2;
 }
 
 message GetDataToProcessResponse {
-
+  repeated Loan loans = 1;
+  repeated Payment payments = 2;
+  repeated Balance balances = 3;
 }
 
 message ProcessBatchRequest {
   int64 flowId = 1;
-}
-
-message ProcessBatchResponse {
-
+  repeated Message messages = 2;
+  repeated Transfer transfers = 3;
+  repeated string repaidInstalmentsIds = 4;
 }

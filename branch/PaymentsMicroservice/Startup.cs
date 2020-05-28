@@ -25,10 +25,10 @@ namespace PaymentsMicroservice
         {
             services.AddGrpc(options =>
             {
-                options.Interceptors.Add<LoggingInterceptor>("Accounts");
+                options.Interceptors.Add<LoggingInterceptor>("Payments");
             });
             services.AddSingleton(CreateMapper());
-            CreateClients(services)
+            CreateClients(services);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

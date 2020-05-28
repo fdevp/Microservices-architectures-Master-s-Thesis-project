@@ -60,13 +60,17 @@ namespace CardsMicroservice
             var blockRequestTime = DateTime.UtcNow;
             var title = $"{DateTime.UtcNow} card usage for a transfer worth {request.Amount} EUR";
 
-            var transferRequest = new AccountsMicroservice.TransferRequest
+            var transfer = new Transfer
             {
-                FlowId = request.FlowId,
                 AccountId = card.AccountId,
                 Recipient = request.Recipient,
                 Amount = request.Amount,
                 Title = title
+            };
+            var transferRequest = new AccountsMicroservice.TransferRequest
+            {
+                FlowId = request.FlowId,
+                Transfer = transfer,
             };
 
             var transferResponse = await accountsClient.TransferAsync(transferRequest);

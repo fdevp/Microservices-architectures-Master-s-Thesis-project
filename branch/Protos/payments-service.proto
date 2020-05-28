@@ -1,6 +1,7 @@
 syntax = "proto3";
 import "common/transaction.proto";
 import "common/loan.proto";
+import "common/payment.proto";
 import "common/empty.proto";
 
 option csharp_namespace = "PaymentsMicroservice";
@@ -9,27 +10,12 @@ package PaymentsMicroservice;
 
 service Payments {
   rpc Get (GetPaymentsRequest) returns (GetPaymentsResult);
-  rpc GetWithLoans (GetPaymentsRequest) returns (GetPaymentsWithLoansResult);
+  rpc GetWithLoans (GetPaymentsWithLoansRequest) returns (GetPaymentsWithLoansResult);
   rpc GetTransactions (GetTransactionsRequest) returns (GetTransactionsResult);
   rpc Create (CreatePaymentRequest) returns (CreatePaymentResult);
   rpc Cancel (CancelPaymentsRequest) returns (Empty);
   rpc Setup(SetupRequest) returns (Empty);
   rpc TearDown(Empty) returns (Empty);    
-}
-
-message Payment {
-  string id = 1;
-  float amount = 2;
-  int64 startTimestamp = 3;
-  PaymentStatus status = 4;
-  int64 interval = 5;
-  string accountId = 6;
-  string recipient = 7;
-}
-
-enum PaymentStatus {
-  ACTIVE = 0;
-  CANCELLED = 1;
 }
 
 message GetPaymentsRequest {
@@ -39,6 +25,11 @@ message GetPaymentsRequest {
 
 message GetPaymentsResult {
   repeated Payment payments = 1;
+}
+
+message GetPaymentsWithLoansRequest {
+  int64 flowId = 1;
+  int32 mod = 2;
 }
 
 message GetPaymentsWithLoansResult 
