@@ -16,6 +16,12 @@ namespace CardsMicroservice.Repository
             return null;
         }
 
+        public Card[] GetByAccounts(IEnumerable<string> accountIds)
+        {
+            var accountsSet = accountIds.ToHashSet();
+            return cards.Values.Where(c => accountsSet.Contains(c.AccountId)).ToArray();
+        }
+
         public Block[] GetBlocks(string cardId)
         {
             return blocks.Values.Where(b => b.CardId == cardId).ToArray();

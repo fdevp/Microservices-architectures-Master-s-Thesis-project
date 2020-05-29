@@ -33,6 +33,14 @@ namespace CardsMicroservice
             return Task.FromResult(new GetCardsResponse { Cards = { cards } });
         }
 
+        public override Task<GetCardsResponse> GetByAccounts(GetCardsByAccountsRequest request, ServerCallContext context)
+        {
+            var cards = cardsRepository.GetByAccounts(request.AccountIds)
+                                        .Select(transaction => mapper.Map<Card>(transaction))
+                                        .ToArray();
+            return Task.FromResult(new GetCardsResponse { Cards = { cards } });
+        }
+
         public override Task<GetBlocksResponse> GetBlocks(GetBlocksRequest request, ServerCallContext context)
         {
             var blocks = cardsRepository.GetBlocks(request.CardId).Select(b => mapper.Map<Block>(b));

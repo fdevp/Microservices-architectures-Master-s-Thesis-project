@@ -42,8 +42,8 @@ namespace PaymentsMicroservice
 
         public override async Task<GetPaymentsWithLoansResult> GetWithLoans(GetPaymentsWithLoansRequest request, ServerCallContext context)
         {
-            var payments = paymentsRepository.Get(request.Mod)
-                .Where(payment => payment != null)
+            var payments = request.AccountIds.Any() ? paymentsRepository.GetByAccounts(request.AccountIds) : paymentsRepository.Get(request.Mod);
+            var mapped = payments.Where(payment => payment != null)
                 .Select(p => mapper.Map<Payment>(p))
                 .ToArray();
 
@@ -51,7 +51,7 @@ namespace PaymentsMicroservice
             var loansRequest = new GetPaymentsLoansRequest { FlowId = request.FlowId, PaymentsIds = { paymentsIds } };
             var loansResult = await loansClient.GetPaymentsLoansAsync(loansRequest);
 
-            return new GetPaymentsWithLoansResult { Payments = { payments }, Loans = { loansResult.Loans } };
+            return new GetPaymentsWithLoansResult { Payments = { mapped }, Loans = { loansResult.Loans } };
         }
 
         public override Task<CreatePaymentResult> Create(CreatePaymentRequest request, ServerCallContext context)

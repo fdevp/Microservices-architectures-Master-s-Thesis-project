@@ -16,7 +16,7 @@ namespace ReportsBranchMicroservice
         {
             services.AddGrpc(options =>
             {
-                options.Interceptors.Add<LoggingInterceptor>("Accounts");
+                options.Interceptors.Add<LoggingInterceptor>("Reports_branch");
             });
         }
 

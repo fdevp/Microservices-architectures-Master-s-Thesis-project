@@ -24,6 +24,13 @@ namespace APIGateway.Controllers
             this.mapper = mapper;
         }
 
+        [HttpGet]
+        [Route("{userId}/panel")]
+        public async Task<string> Panel(string userId)
+        {
+            return "asd";
+        }
+
         [HttpPost]
         [Route("token")]
         public async Task<string> Token(TokenRequest data)

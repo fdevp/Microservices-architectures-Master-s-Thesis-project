@@ -1,4 +1,9 @@
 syntax = "proto3";
+import "common/transaction.proto";
+import "common/account.proto";
+import "common/card.proto";
+import "common/payment.proto";
+import "common/loan.proto";
 
 option csharp_namespace = "PanelsBranchMicroservice";
 
@@ -9,9 +14,14 @@ service PanelsBranch {
 }
 
 message GetPanelRequest {
-  string userId = 1;
+  int64 flowId = 1;
+  string userId = 2;
 }
 
 message GetPanelResponse {
-
+  repeated Account accounts = 1;
+  repeated Transaction transactions = 2;
+  repeated Card cards = 3;
+  repeated Payment payments = 4;
+  repeated Loan loans = 5;
 }

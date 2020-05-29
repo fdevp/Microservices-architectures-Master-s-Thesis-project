@@ -18,7 +18,9 @@
     <Protobuf Include="..\Protos\common\message.proto"/>
     <Protobuf Include="..\Protos\common\transfer.proto"/>
     <Protobuf Include="..\Protos\common\balance.proto"/>
-	<Protobuf Include="..\Protos\common\loan.proto"/>
+	  <Protobuf Include="..\Protos\common\loan.proto"/>
+    <Protobuf Include="..\Protos\common\account.proto"/>
+    <Protobuf Include="..\Protos\common\card.proto"/>
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Grpc.AspNetCore" Version="2.27.0"/>

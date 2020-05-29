@@ -1,0 +1,8 @@
+syntax = "proto3";
+
+message Account {
+  string id = 1;
+  float balance = 2;
+  string number = 3;
+  string userId = 4;
+}

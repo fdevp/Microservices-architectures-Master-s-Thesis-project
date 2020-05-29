@@ -30,6 +30,7 @@ message GetPaymentsResult {
 message GetPaymentsWithLoansRequest {
   int64 flowId = 1;
   int32 mod = 2;
+  repeated string accountIds = 3;
 }
 
 message GetPaymentsWithLoansResult 

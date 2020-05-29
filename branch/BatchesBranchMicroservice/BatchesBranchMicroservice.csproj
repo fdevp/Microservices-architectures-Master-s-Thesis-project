@@ -17,6 +17,7 @@
     <Protobuf Include="..\Protos\common\payment.proto"/>
     <Protobuf Include="..\Protos\common\balance.proto"/>
     <Protobuf Include="..\Protos\common\transfer.proto"/>
+    <Protobuf Include="..\Protos\common\account.proto"/>
   </ItemGroup>
 
   <ItemGroup>
