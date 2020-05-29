@@ -5,6 +5,7 @@ using APIGateway.Models;
 using APIGateway.Models.Setup;
 using AutoMapper;
 using CardsMicroservice;
+using Google.Protobuf.Collections;
 using Grpc.Net.Client;
 using LoansMicroservice;
 using Microsoft.AspNetCore.Builder;
@@ -72,23 +73,27 @@ namespace APIGateway
         {
             var config = new MapperConfiguration(cfg =>
             {
-                cfg.CreateMap<Transaction, TransactionDTO>();
-                cfg.CreateMap<Account, AccountDTO>();
-                cfg.CreateMap<Card, CardDTO>();
-                cfg.CreateMap<Payment, PaymentDTO>();
-                cfg.CreateMap<User, UserDTO>();
-                cfg.CreateMap<Loan, LoanDTO>();
+                cfg.ForAllPropertyMaps(
+                    map => map.DestinationType.IsGenericType && map.DestinationType.GetGenericTypeDefinition() == typeof(RepeatedField<>),
+                    (map, options) => options.UseDestinationValue());
 
-                cfg.CreateMap<TransactionsMicroservice.SetupRequest, TransactionsSetup>();
-                cfg.CreateMap<AccountsMicroservice.SetupRequest, AccountsSetup>();
-                cfg.CreateMap<CardsMicroservice.SetupRequest, CardsSetup>();
-                cfg.CreateMap<PaymentsMicroservice.SetupRequest, PaymentsSetup>();
-                cfg.CreateMap<UsersMicroservice.SetupRequest, UsersSetup>();
-                cfg.CreateMap<LoansMicroservice.SetupRequest, LoansSetup>();
+                cfg.CreateMap<Transaction, TransactionDTO>().ReverseMap();
+                cfg.CreateMap<Account, AccountDTO>().ReverseMap();
+                cfg.CreateMap<Card, CardDTO>().ReverseMap();
+                cfg.CreateMap<Payment, PaymentDTO>().ReverseMap();
+                cfg.CreateMap<User, UserDTO>().ReverseMap();
+                cfg.CreateMap<Loan, LoanDTO>().ReverseMap();
 
-                cfg.CreateMap<AccountsMicroservice.TransferRequest, AccountTransfer>();
-                cfg.CreateMap<CardsMicroservice.TransferRequest, CardTransfer>();
-                cfg.CreateMap<UsersMicroservice.SignInRequest, TokenRequest>();
+                cfg.CreateMap<TransactionsMicroservice.SetupRequest, TransactionsSetup>().ReverseMap();
+                cfg.CreateMap<AccountsMicroservice.SetupRequest, AccountsSetup>().ReverseMap();
+                cfg.CreateMap<CardsMicroservice.SetupRequest, CardsSetup>().ReverseMap();
+                cfg.CreateMap<PaymentsMicroservice.SetupRequest, PaymentsSetup>().ReverseMap();
+                cfg.CreateMap<UsersMicroservice.SetupRequest, UsersSetup>().ReverseMap();
+                cfg.CreateMap<LoansMicroservice.SetupRequest, LoansSetup>().ReverseMap();
+
+                cfg.CreateMap<AccountsMicroservice.TransferRequest, AccountTransfer>().ReverseMap();
+                cfg.CreateMap<CardsMicroservice.TransferRequest, CardTransfer>().ReverseMap();
+                cfg.CreateMap<UsersMicroservice.SignInRequest, TokenRequest>().ReverseMap();
 
 
             });
@@ -101,7 +106,6 @@ namespace APIGateway
             httpClientHandler.ServerCertificateCustomValidationCallback =
                 HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
             var httpClient = new HttpClient(httpClientHandler);
-
 
             services.AddSingleton(new TransactionsClient(CreateChannel(httpClient, "localhost", "5001")));
             services.AddSingleton(new AccountsClient(CreateChannel(httpClient, "localhost", "5011")));

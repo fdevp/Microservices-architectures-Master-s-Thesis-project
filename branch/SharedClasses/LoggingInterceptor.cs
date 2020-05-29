@@ -39,7 +39,7 @@ namespace SharedClasses
         {
             Type t = request.GetType();
             PropertyInfo prop = t.GetProperty("FlowId");
-            return prop.GetValue(request) as long?;
+            return prop?.GetValue(request) as long?;
         }
     }
 }

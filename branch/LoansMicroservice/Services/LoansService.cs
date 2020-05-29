@@ -16,10 +16,11 @@ namespace LoansMicroservice
         private readonly ILogger<LoansService> logger;
         private readonly Mapper mapper;
         private readonly PaymentsClient paymentsClient;
-        private LoansRepository repository = new LoansRepository();
+        private LoansRepository loansRepository;
 
-        public LoansService(ILogger<LoansService> logger, Mapper mapper, PaymentsClient paymentsClient)
+        public LoansService(LoansRepository loansRepository,ILogger<LoansService> logger, Mapper mapper, PaymentsClient paymentsClient)
         {
+            this.loansRepository = loansRepository;
             this.logger = logger;
             this.mapper = mapper;
             this.paymentsClient = paymentsClient;
@@ -27,7 +28,7 @@ namespace LoansMicroservice
 
         public override Task<GetLoansResponse> Get(GetLoansRequest request, ServerCallContext context)
         {
-            var loans = request.Ids.Select(id => repository.Get(id))
+            var loans = request.Ids.Select(id => loansRepository.Get(id))
                 .Where(loan => loan != null)
                 .Select(loan => mapper.Map<Loan>(loan));
             return Task.FromResult(new GetLoansResponse { Loans = { loans } });
@@ -38,9 +39,9 @@ namespace LoansMicroservice
             var paymentsToFinish = new List<string>();
             foreach (var id in request.Ids)
             {
-                var totalAmountPaid = repository.RepayInstalment(id);
+                var totalAmountPaid = loansRepository.RepayInstalment(id);
                 if (totalAmountPaid)
-                    paymentsToFinish.Add(repository.Get(id).PaymentId);
+                    paymentsToFinish.Add(loansRepository.Get(id).PaymentId);
             }
 
             var cancelPaymentsRequest = new CancelPaymentsRequest
@@ -55,13 +56,13 @@ namespace LoansMicroservice
         public override Task<Empty> Setup(SetupRequest request, ServerCallContext context)
         {
             var loans = request.Loans.Select(l => mapper.Map<Repository.Loan>(l));
-            repository.Setup(loans);
+            loansRepository.Setup(loans);
             return Task.FromResult(new Empty());
         }
 
         public override Task<Empty> TearDown(Empty request, ServerCallContext context)
         {
-            repository.TearDown();
+            loansRepository.TearDown();
             return Task.FromResult(new Empty());
         }
     }

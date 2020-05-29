@@ -27,9 +27,14 @@ namespace APIGateway.Controllers
         }
 
         [HttpGet]
-        public IEnumerable<AccountDTO> Get()
+        [Route("{userId}")]
+        public async Task<IEnumerable<AccountDTO>> Get(string userId)
         {
-            return new AccountDTO[0];
+            var request = new GetUserAccountsRequest { UserId = userId };
+            request.FlowId = (long)HttpContext.Items["flowId"];
+            var response = await accountClient.GetUserAccountsAsync(request);
+            var accounts = response.Accounts.Select(a => mapper.Map<AccountDTO>(a));
+            return accounts;
         }
 
         [HttpGet]

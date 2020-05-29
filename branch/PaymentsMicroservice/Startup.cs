@@ -14,6 +14,7 @@ using static TransactionsMicroservice.Transactions;
 using SharedClasses;
 using Microsoft.Extensions.Logging;
 using static LoansMicroservice.Loans;
+using PaymentsMicroservice.Repository;
 
 namespace PaymentsMicroservice
 {
@@ -28,6 +29,7 @@ namespace PaymentsMicroservice
                 options.Interceptors.Add<LoggingInterceptor>("Payments");
             });
             services.AddSingleton(CreateMapper());
+            services.AddSingleton(new PaymentsRepository());
             CreateClients(services);
         }
 
@@ -58,8 +60,8 @@ namespace PaymentsMicroservice
         {
             var config = new MapperConfiguration(cfg =>
             {
-                cfg.CreateMap<PaymentStatus, Repository.PaymentStatus>();
-                cfg.CreateMap<Payment, Repository.Payment>();
+                cfg.CreateMap<PaymentStatus, Repository.PaymentStatus>().ReverseMap();
+                cfg.CreateMap<Payment, Repository.Payment>().ReverseMap();
             });
             return new Mapper(config);
         }

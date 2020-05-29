@@ -10,6 +10,7 @@ package AccountsMicroservice;
 
 service Accounts {
   rpc Get (GetAccountsRequest) returns (GetAccountsResponse);
+  rpc GetUserAccounts (GetUserAccountsRequest) returns (GetAccountsResponse);
   rpc GetBalance (GetBalanceRequest) returns (GetBalanceResponse);
   rpc GetTransactions (GetTransactionsRequest) returns (GetTransactionsResponse);
   rpc Transfer (TransferRequest) returns (TransferResponse);
@@ -28,6 +29,11 @@ message Account {
 message GetAccountsRequest {
   int64 flowId = 1;
   repeated string ids = 2;
+}
+
+message GetUserAccountsRequest {
+  int64 flowId = 1;
+  string userId = 2;
 }
 
 message GetAccountsResponse {

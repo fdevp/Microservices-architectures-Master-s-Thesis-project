@@ -16,27 +16,33 @@ namespace AccountsMicroservice
         private readonly ILogger<AccountsService> logger;
         private readonly Mapper mapper;
         private readonly TransactionsClient transactionsClient;
-        private readonly AccountsRepository repository;
+        private readonly AccountsRepository accountsRepository;
 
-        public AccountsService(ILogger<AccountsService> logger, Mapper mapper, TransactionsClient transactionsClient)
+        public AccountsService(AccountsRepository accountsRepository,ILogger<AccountsService> logger, Mapper mapper, TransactionsClient transactionsClient)
         {
+            this.accountsRepository = accountsRepository;
             this.logger = logger;
             this.mapper = mapper;
             this.transactionsClient = transactionsClient;
-            repository = new AccountsRepository();
         }
 
         public override Task<GetAccountsResponse> Get(GetAccountsRequest request, ServerCallContext context)
         {
-            var accounts = request.Ids.Select(id => repository.Get(id))
+            var accounts = request.Ids.Select(id => accountsRepository.Get(id))
                 .Where(account => account != null)
                 .Select(account => mapper.Map<Account>(account));
             return Task.FromResult(new GetAccountsResponse { Accounts = { accounts } });
         }
 
+        public override Task<GetAccountsResponse> GetUserAccounts(GetUserAccountsRequest request, ServerCallContext context)
+        {
+            var accounts = accountsRepository.GetByUser(request.UserId).Select(account => mapper.Map<Account>(account));
+            return Task.FromResult(new GetAccountsResponse { Accounts = { accounts } });
+        }
+
         public override Task<GetBalanceResponse> GetBalance(GetBalanceRequest request, ServerCallContext context)
         {
-            var balances = request.Ids.Select(id => repository.Get(id))
+            var balances = request.Ids.Select(id => accountsRepository.Get(id))
                 .Where(account => account != null)
                 .Select(account => new Balance { Id = account.Id, Balance_ = account.Balance });
             return Task.FromResult(new GetBalanceResponse { Balances = { balances } });
@@ -51,19 +57,19 @@ namespace AccountsMicroservice
 
         public override async Task<TransferResponse> Transfer(TransferRequest request, ServerCallContext context)
         {
-            if (!repository.CanTransfer(request.Transfer.AccountId, request.Transfer.Recipient, request.Transfer.Amount))
+            if (!accountsRepository.CanTransfer(request.Transfer.AccountId, request.Transfer.Recipient, request.Transfer.Amount))
                 throw new ArgumentException("Cannot transfer founds.");
 
             var transfer = CreateRequest(request.FlowId, request.Transfer);
             var result = await transactionsClient.CreateAsync(transfer);
 
-            repository.Transfer(request.Transfer.AccountId, request.Transfer.Recipient, request.Transfer.Amount);
+            accountsRepository.Transfer(request.Transfer.AccountId, request.Transfer.Recipient, request.Transfer.Amount);
             return new TransferResponse { Transaction = result.Transaction };
         }
 
         public override async Task<BatchTransferResponse> BatchTransfer(BatchTransferRequest request, Grpc.Core.ServerCallContext context)
         {
-            if (request.Transfers.Any(r => !repository.CanTransfer(r.AccountId, r.Recipient, r.Amount)))
+            if (request.Transfers.Any(r => !accountsRepository.CanTransfer(r.AccountId, r.Recipient, r.Amount)))
                 throw new ArgumentException("Cannot transfer founds.");
 
             var transferRequests = request.Transfers.Select(r => CreateRequest(request.FlowId, r));
@@ -75,27 +81,27 @@ namespace AccountsMicroservice
             var result = await transactionsClient.BatchCreateAsync(batchAddTransactionsRequest);
 
             foreach (var t in request.Transfers)
-                repository.Transfer(t.AccountId, t.Recipient, t.Amount);
+                accountsRepository.Transfer(t.AccountId, t.Recipient, t.Amount);
             return new BatchTransferResponse { Transactions = { { result.Transactions } } };
         }
 
         public override Task<Empty> Setup(SetupRequest request, ServerCallContext context)
         {
             var accounts = request.Accounts.Select(a => mapper.Map<Repository.Account>(a));
-            repository.Setup(accounts);
+            accountsRepository.Setup(accounts);
             return Task.FromResult(new Empty());
         }
 
         public override Task<Empty> TearDown(Empty request, ServerCallContext context)
         {
-            repository.TearDown();
+            accountsRepository.TearDown();
             return Task.FromResult(new Empty());
         }
 
         private CreateTransactionRequest CreateRequest(long flowId, Transfer request)
         {
-            var account = repository.Get(request.AccountId);
-            var recipient = repository.Get(request.Recipient);
+            var account = accountsRepository.Get(request.AccountId);
+            var recipient = accountsRepository.Get(request.Recipient);
 
             var transcation = new CreateTransactionRequest
             {

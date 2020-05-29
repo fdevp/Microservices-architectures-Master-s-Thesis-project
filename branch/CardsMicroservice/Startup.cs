@@ -9,6 +9,7 @@ using Microsoft.Extensions.Hosting;
 using static AccountsMicroservice.Accounts;
 using SharedClasses;
 using Microsoft.Extensions.Logging;
+using CardsMicroservice.Repository;
 
 namespace CardsMicroservice
 {
@@ -24,6 +25,7 @@ namespace CardsMicroservice
             });
             services.AddSingleton(CreateMapper());
             services.AddSingleton(CreateAccountsClient());
+            services.AddSingleton(new CardsRepository());
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -53,8 +55,8 @@ namespace CardsMicroservice
         {
             var config = new MapperConfiguration(cfg =>
             {
-                cfg.CreateMap<Card, Repository.Card>();
-                cfg.CreateMap<Block, Repository.Block>();
+                cfg.CreateMap<Card, Repository.Card>().ReverseMap();
+                cfg.CreateMap<Block, Repository.Block>().ReverseMap();
             });
             return new Mapper(config);
         }

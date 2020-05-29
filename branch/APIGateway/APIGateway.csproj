@@ -14,6 +14,10 @@
     <Protobuf Include="..\Protos\users-service.proto" GrpcServices="Client"/>
     <Protobuf Include="..\Protos\common\empty.proto"/>
     <Protobuf Include="..\Protos\common\transaction.proto"/>
+    <Protobuf Include="..\Protos\common\payment.proto"/>
+    <Protobuf Include="..\Protos\common\message.proto"/>
+    <Protobuf Include="..\Protos\common\transfer.proto"/>
+    <Protobuf Include="..\Protos\common\balance.proto"/>
 	<Protobuf Include="..\Protos\common\loan.proto"/>
   </ItemGroup>
   <ItemGroup>

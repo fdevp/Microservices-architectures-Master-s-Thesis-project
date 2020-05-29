@@ -1,6 +1,7 @@
 ﻿using System.Net.Http;
 using AutoMapper;
 using Grpc.Net.Client;
+using LoansMicroservice.Repository;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -24,6 +25,7 @@ namespace LoansMicroservice
             });
             services.AddSingleton(CreateMapper());
             services.AddSingleton(CreatePaymentsClient());
+            services.AddSingleton(new LoansRepository());
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -51,7 +53,7 @@ namespace LoansMicroservice
 
         private Mapper CreateMapper()
         {
-            var config = new MapperConfiguration(cfg => cfg.CreateMap<Loan, Repository.Loan>());
+            var config = new MapperConfiguration(cfg => cfg.CreateMap<Loan, Repository.Loan>().ReverseMap());
             return new Mapper(config);
         }
 

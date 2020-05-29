@@ -15,6 +15,11 @@ namespace AccountsMicroservice.Repository
             return null;
         }
 
+        public Account[] GetByUser(string userId)
+        {
+            return accounts.Values.Where(a=>a.UserId == userId).ToArray();
+        }
+
         public bool CanTransfer(string sender, string recipient, float amount)
         {
             if (!accounts.ContainsKey(sender))

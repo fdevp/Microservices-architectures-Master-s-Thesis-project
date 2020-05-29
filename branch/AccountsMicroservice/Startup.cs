@@ -1,4 +1,5 @@
 ﻿using System.Net.Http;
+using AccountsMicroservice.Repository;
 using AutoMapper;
 using Grpc.Net.Client;
 using Microsoft.AspNetCore.Builder;
@@ -24,6 +25,7 @@ namespace AccountsMicroservice
             });
             services.AddSingleton(CreateMapper());
             services.AddSingleton(CreateTransactionsClient());
+            services.AddSingleton(new AccountsRepository());
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -51,7 +53,7 @@ namespace AccountsMicroservice
 
         private Mapper CreateMapper()
         {
-            var config = new MapperConfiguration(cfg => cfg.CreateMap<Account, Repository.Account>());
+            var config = new MapperConfiguration(cfg => cfg.CreateMap<Account, Repository.Account>().ReverseMap());
             return new Mapper(config);
         }
 

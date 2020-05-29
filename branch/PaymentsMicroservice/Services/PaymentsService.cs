@@ -19,10 +19,11 @@ namespace PaymentsMicroservice
         private readonly Mapper mapper;
         private readonly TransactionsClient transactionsClient;
         private readonly LoansClient loansClient;
-        private readonly PaymentsRepository repository = new PaymentsRepository();
+        private readonly PaymentsRepository paymentsRepository;
 
-        public PaymentsService(ILogger<PaymentsService> logger, Mapper mapper, TransactionsClient transactionsClient, LoansClient loansClient)
+        public PaymentsService(PaymentsRepository paymentsRepository, ILogger<PaymentsService> logger, Mapper mapper, TransactionsClient transactionsClient, LoansClient loansClient)
         {
+            this.paymentsRepository = paymentsRepository;
             this.logger = logger;
             this.mapper = mapper;
             this.transactionsClient = transactionsClient;
@@ -31,7 +32,7 @@ namespace PaymentsMicroservice
 
         public override Task<GetPaymentsResult> Get(GetPaymentsRequest request, ServerCallContext context)
         {
-            var payments = request.Ids.Select(id => repository.Get(id))
+            var payments = request.Ids.Select(id => paymentsRepository.Get(id))
                 .Where(payment => payment != null)
                 .Select(p => mapper.Map<Payment>(p))
                 .ToArray();
@@ -41,7 +42,7 @@ namespace PaymentsMicroservice
 
         public override async Task<GetPaymentsWithLoansResult> GetWithLoans(GetPaymentsWithLoansRequest request, ServerCallContext context)
         {
-            var payments = repository.Get(request.Mod)
+            var payments = paymentsRepository.Get(request.Mod)
                 .Where(payment => payment != null)
                 .Select(p => mapper.Map<Payment>(p))
                 .ToArray();
@@ -55,14 +56,14 @@ namespace PaymentsMicroservice
 
         public override Task<CreatePaymentResult> Create(CreatePaymentRequest request, ServerCallContext context)
         {
-            var payment = repository.Create(request.Amount, request.StartTimestamp, request.Interval, request.AccountId, request.Recipient);
+            var payment = paymentsRepository.Create(request.Amount, request.StartTimestamp, request.Interval, request.AccountId, request.Recipient);
             return Task.FromResult(new CreatePaymentResult { Payment = mapper.Map<Payment>(payment) });
         }
 
         public override Task<Empty> Cancel(CancelPaymentsRequest request, ServerCallContext context)
         {
             foreach (var id in request.Ids)
-                repository.Cancel(id);
+                paymentsRepository.Cancel(id);
             return Task.FromResult(new Empty());
         }
 
@@ -76,13 +77,13 @@ namespace PaymentsMicroservice
         public override Task<Empty> Setup(SetupRequest request, Grpc.Core.ServerCallContext context)
         {
             var payments = request.Payments.Select(p => mapper.Map<Repository.Payment>(p));
-            repository.Setup(payments);
+            paymentsRepository.Setup(payments);
             return Task.FromResult(new Empty());
         }
 
         public override Task<Empty> TearDown(Empty request, Grpc.Core.ServerCallContext context)
         {
-            repository.TearDown();
+            paymentsRepository.TearDown();
             return Task.FromResult(new Empty());
         }
     }

@@ -47,7 +47,7 @@ namespace TransactionsMicroservice
 
         private Mapper CreateMapper()
         {
-            var config = new MapperConfiguration(cfg => cfg.CreateMap<Transaction, Repository.Transaction>());
+            var config = new MapperConfiguration(cfg => cfg.CreateMap<Transaction, Repository.Transaction>().ReverseMap());
             return new Mapper(config);
         }
     }
