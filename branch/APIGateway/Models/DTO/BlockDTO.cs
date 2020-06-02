@@ -1,3 +1,5 @@
+using System;
+
 namespace APIGateway.Models
 {
     public class BlockDTO
@@ -5,6 +7,6 @@ namespace APIGateway.Models
         public string Id { get; set; }
         public string CardId { get; set; }
         public string TransactionId { get; set; }
-        public long Timestamp { get; set; }
+        public DateTime Timestamp { get; set; }
     }
 }

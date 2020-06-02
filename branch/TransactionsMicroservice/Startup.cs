@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using SharedClasses;
+using TransactionsMicroservice.Repository;
 
 namespace TransactionsMicroservice
 {
@@ -20,6 +21,7 @@ namespace TransactionsMicroservice
                 options.Interceptors.Add<LoggingInterceptor>("Transactions");
             });
             services.AddSingleton(CreateMapper());
+            services.AddSingleton(new TransactionsRepository());
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

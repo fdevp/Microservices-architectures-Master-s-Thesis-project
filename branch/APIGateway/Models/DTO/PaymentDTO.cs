@@ -1,3 +1,5 @@
+using System;
+
 namespace APIGateway.Models
 {
     public class PaymentDTO
@@ -7,7 +9,7 @@ namespace APIGateway.Models
         public string AccountId { get; set; }
         public string Recipient { get; set; }
         public float Amount { get; set; }
-        public int StartTimestamp { get; set; }
-        public int Interval { get; set; }
+        public DateTime StartTimestamp { get; set; }
+        public TimeSpan Interval { get; set; }
     }
 }

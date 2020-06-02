@@ -43,9 +43,9 @@ namespace APIGateway.Controllers
 
         [HttpPost]
         [Route("logout")]
-        public async Task Logout(string token)
+        public async Task Logout(Models.LogoutRequest data)
         {
-            var request = new LogoutRequest { Token = token };
+            var request = new UsersMicroservice.LogoutRequest { Token = data.Token };
             request.FlowId = (long)HttpContext.Items["flowId"];
             await usersClient.LogoutAsync(request);
         }

@@ -1,0 +1,103 @@
+(((new Date).getTime() * 10000) + 621355968000000000)
+
+{
+	"AccountsSetup":{
+		"Accounts":[{
+		"id": "1001",
+		"number": "123-321-123-2",
+		"balance": 1000,
+		"userId": "1"
+	},
+	{
+		"id": "1002",
+		"number": "123-321-123-3",
+		"balance": 1500,
+		"userId": "1"
+	},
+	{
+		"id": "1003",
+		"number": "123-321-123-4",
+		"balance": 9474,
+		"userId": "2"
+	},
+	{
+		"id": "1004",
+		"number": "123-321-123-5",
+		"balance": 132,
+		"userId": "3"
+	},
+	{
+		"id": "1005",
+		"number": "123-321-123-6",
+		"balance": 873,
+		"userId": "4"
+	}]
+	},
+	"CardsSetup":{
+		"Cards":[{
+			"Id":"1",
+			"Number":"5133752494074730",
+			"AccountId":"1003",
+		}],
+		"Blocks":[]
+	},
+	"LoansSetup":{
+		"Loans":[{
+			"Id":"1",
+			"PaidAmount":0,
+			"TotalAmount":1500,
+			"Instalments":12,
+			"PaymentId":"0",
+		}]
+	},
+	"PaymentsSetup":{
+		"Payments":[{
+			"Id":"1",
+			"Status":0,
+			"AccountId":"123-321-123-6",
+			"Recipient":"123-321-123-2",
+			"Amount":167.84,
+			"StartTimestamp":"2019-01-06T17:16:40",
+			"Interval":"30:00:00:00",
+		},
+		{
+			"Id":"2",
+			"Status":0,
+			"AccountId":"123-321-123-3",
+			"Recipient":"123-321-123-4",
+			"Amount":25,
+			"StartTimestamp":"2020-06-02T15:00:00",
+			"Interval":"07:00:00:00",
+		}]
+	},
+	"TransactionsSetup":{
+		"Transactions":[{
+			"Title":"money transfer",
+			"Recipient":"1003",
+			"Sender":"1001",
+			"PaymentId":"",
+			"CardId":"",
+			"Timestamp":"2019-01-06T17:16:40",
+			"Amount":100
+		}]
+	},
+	"UsersSetup":{
+		"Users":[{
+		"id": "1",
+		"login": "user1",
+		"password": "password1"
+	},{
+		"id": "2",
+		"login": "user2",
+		"password": "password2"
+	},{
+		"id": "3",
+		"login": "user3",
+		"password": "password3"
+	},{
+		"id": "4",
+		"login": "user4",
+		"password": "password4"
+	}]
+	}
+}

@@ -1,3 +1,4 @@
+using System;
 using System.Net.Http;
 using AccountsMicroservice;
 using APIGateway.Middlewares;
@@ -40,7 +41,7 @@ namespace APIGateway
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers();
+            services.AddControllers().AddNewtonsoftJson();
             services.AddSingleton(CreateMapper());
             ConfigureGrpcConnections(services);
         }
@@ -76,7 +77,10 @@ namespace APIGateway
                 cfg.ForAllPropertyMaps(
                     map => map.DestinationType.IsGenericType && map.DestinationType.GetGenericTypeDefinition() == typeof(RepeatedField<>),
                     (map, options) => options.UseDestinationValue());
-
+                cfg.CreateMap<DateTime, long>().ConvertUsing(new DateTimeTypeConverter());
+                cfg.CreateMap<long, DateTime>().ConvertUsing(new DateTimeTypeConverterReverse());
+                cfg.CreateMap<TimeSpan, long>().ConvertUsing(new TimeSpanTypeConverter());
+                
                 cfg.CreateMap<Transaction, TransactionDTO>().ReverseMap();
                 cfg.CreateMap<Account, AccountDTO>().ReverseMap();
                 cfg.CreateMap<Card, CardDTO>().ReverseMap();
@@ -91,7 +95,7 @@ namespace APIGateway
                 cfg.CreateMap<UsersMicroservice.SetupRequest, UsersSetup>().ReverseMap();
                 cfg.CreateMap<LoansMicroservice.SetupRequest, LoansSetup>().ReverseMap();
 
-                cfg.CreateMap<AccountsMicroservice.TransferRequest, AccountTransfer>().ReverseMap();
+                cfg.CreateMap<Transfer, AccountTransfer>().ReverseMap();
                 cfg.CreateMap<CardsMicroservice.TransferRequest, CardTransfer>().ReverseMap();
                 cfg.CreateMap<UsersMicroservice.SignInRequest, TokenRequest>().ReverseMap();
 

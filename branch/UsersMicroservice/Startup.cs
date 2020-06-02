@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using SharedClasses;
+using UsersMicroservice.Repository;
 
 namespace UsersMicroservice
 {
@@ -18,6 +19,7 @@ namespace UsersMicroservice
             {
                 options.Interceptors.Add<LoggingInterceptor>("Users");
             });
+            services.AddSingleton(new UsersRepository());
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
