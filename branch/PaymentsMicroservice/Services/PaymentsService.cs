@@ -42,7 +42,7 @@ namespace PaymentsMicroservice
 
         public override async Task<GetPaymentsWithLoansResult> GetWithLoans(GetPaymentsWithLoansRequest request, ServerCallContext context)
         {
-            var payments = request.AccountIds.Any() ? paymentsRepository.GetByAccounts(request.AccountIds) : paymentsRepository.Get(request.Mod);
+            var payments = request.AccountIds.Any() ? paymentsRepository.GetByAccounts(request.AccountIds) : paymentsRepository.Get(request.Part, request.TotalParts);
             var mapped = payments.Where(payment => payment != null)
                 .Select(p => mapper.Map<Payment>(p))
                 .ToArray();

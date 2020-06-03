@@ -15,9 +15,9 @@ namespace PaymentsMicroservice.Repository
             return null;
         }
 
-        public Payment[] Get(int mod)
+        public Payment[] Get(int part, int totalParts)
         {
-            return payments.Values.Where((element, index) => index % mod == 0).ToArray();
+            return payments.Values.Where((element, index) => ((index % totalParts) + 1) == part).ToArray();
         }
 
         public Payment[] GetByAccounts(IEnumerable<string> accountIds)

@@ -44,32 +44,32 @@ namespace PanelsBranchMicroservice
 
         public override async Task<GetPanelResponse> Get(GetPanelRequest request, ServerCallContext context)
         {
-            RepeatedField<Loan> loans = null;
-            RepeatedField<Payment> payments = null;
-            RepeatedField<Account> accounts = null;
-            RepeatedField<Card> cards = null;
-            RepeatedField<Transaction> transactions = null;
+            RepeatedField<Loan> loans = new RepeatedField<Loan>();
+            RepeatedField<Payment> payments = new RepeatedField<Payment>();
+            RepeatedField<Account> accounts = new RepeatedField<Account>();
+            RepeatedField<Card> cards = new RepeatedField<Card>();
+            RepeatedField<Transaction> transactions = new RepeatedField<Transaction>();
 
             var accountsResponse = await accountsClient.GetUserAccountsAsync(new GetUserAccountsRequest { FlowId = request.FlowId, UserId = request.UserId });
-            var accountsIds = accounts.Select(a => a.Id).ToArray();
+            var accountsIds = accountsResponse.Accounts.Select(a => a.Id).ToArray();
             accounts = accountsResponse.Accounts;
 
 
             var parallelTasks = new List<Task>();
-            parallelTasks.Add(new Task(async () =>
+            parallelTasks.Add(Task.Run(async () =>
             {
                 var transactionsResponse = await transactionsClient.FilterAsync(new FilterTransactionsRequest { FlowId = request.FlowId, Senders = { accountsIds } });
                 transactions = transactionsResponse.Transactions;
             }));
 
-            parallelTasks.Add(new Task(async () =>
+            parallelTasks.Add(Task.Run(async () =>
             {
                 var paymentsAndLoans = await paymentsClient.GetWithLoansAsync(new GetPaymentsWithLoansRequest { FlowId = request.FlowId, AccountIds = { accountsIds } });
                 loans = paymentsAndLoans.Loans;
                 payments = paymentsAndLoans.Payments;
             }));
 
-            parallelTasks.Add(new Task(async () =>
+            parallelTasks.Add(Task.Run(async () =>
             {
                 var cardsResponse = await cardsClient.GetByAccountsAsync(new GetCardsByAccountsRequest { FlowId = request.FlowId, AccountIds = { accountsIds } });
                 cards = cardsResponse.Cards;
@@ -77,6 +77,7 @@ namespace PanelsBranchMicroservice
 
 
             await Task.WhenAll(parallelTasks);
+            
             return new GetPanelResponse
             {
                 Cards = { cards },

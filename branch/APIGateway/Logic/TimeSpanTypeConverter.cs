@@ -10,4 +10,12 @@ namespace APIGateway
             return source.Ticks;
         }
     }
+
+    public class TimeSpanTypeConverterReverse : ITypeConverter<long, TimeSpan>
+    {
+        public TimeSpan Convert(long source, TimeSpan destination, ResolutionContext context)
+        {
+            return TimeSpan.FromTicks(source);
+        }
+    }
 }

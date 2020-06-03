@@ -38,7 +38,7 @@ namespace BatchesBranchMicroservice
 
         public override async Task<GetDataToProcessResponse> Get(GetDataToProcessRequest request, ServerCallContext context)
         {
-            var paymentsAndLoansRequest = new GetPaymentsWithLoansRequest { FlowId = request.FlowId, Mod = request.Mod };
+            var paymentsAndLoansRequest = new GetPaymentsWithLoansRequest { FlowId = request.FlowId, Part = request.Part, TotalParts = request.TotalParts };
             var paymentsAndLoans = await paymentsClient.GetWithLoansAsync(paymentsAndLoansRequest);
 
             var paymentAccounts = paymentsAndLoans.Payments.Select(p => p.AccountId);

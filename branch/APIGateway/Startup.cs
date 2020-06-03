@@ -15,6 +15,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using PanelsBranchMicroservice;
 using PaymentsMicroservice;
 using UsersMicroservice;
 using static AccountsMicroservice.Accounts;
@@ -80,13 +81,15 @@ namespace APIGateway
                 cfg.CreateMap<DateTime, long>().ConvertUsing(new DateTimeTypeConverter());
                 cfg.CreateMap<long, DateTime>().ConvertUsing(new DateTimeTypeConverterReverse());
                 cfg.CreateMap<TimeSpan, long>().ConvertUsing(new TimeSpanTypeConverter());
-                
+                cfg.CreateMap<long, TimeSpan>().ConvertUsing(new TimeSpanTypeConverterReverse());
+
                 cfg.CreateMap<Transaction, TransactionDTO>().ReverseMap();
                 cfg.CreateMap<Account, AccountDTO>().ReverseMap();
                 cfg.CreateMap<Card, CardDTO>().ReverseMap();
                 cfg.CreateMap<Payment, PaymentDTO>().ReverseMap();
                 cfg.CreateMap<User, UserDTO>().ReverseMap();
                 cfg.CreateMap<Loan, LoanDTO>().ReverseMap();
+                cfg.CreateMap<Balance, BalanceDTO>().ForMember(balance => balance.Amount, m => m.MapFrom(dto => dto.Balance_));
 
                 cfg.CreateMap<TransactionsMicroservice.SetupRequest, TransactionsSetup>().ReverseMap();
                 cfg.CreateMap<AccountsMicroservice.SetupRequest, AccountsSetup>().ReverseMap();
@@ -99,7 +102,7 @@ namespace APIGateway
                 cfg.CreateMap<CardsMicroservice.TransferRequest, CardTransfer>().ReverseMap();
                 cfg.CreateMap<UsersMicroservice.SignInRequest, TokenRequest>().ReverseMap();
 
-
+                cfg.CreateMap<GetPanelResponse, Panel>();
             });
             return new Mapper(config);
         }

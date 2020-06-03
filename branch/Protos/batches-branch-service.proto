@@ -17,7 +17,8 @@ service BatchesBranch {
 
 message GetDataToProcessRequest {
   int64 flowId = 1;
-  int32 mod = 2;
+  int32 part = 2;
+  int32 totalParts = 3;
 }
 
 message GetDataToProcessResponse {

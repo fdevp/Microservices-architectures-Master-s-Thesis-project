@@ -18,7 +18,7 @@ namespace LoansMicroservice
         private readonly PaymentsClient paymentsClient;
         private LoansRepository loansRepository;
 
-        public LoansService(LoansRepository loansRepository,ILogger<LoansService> logger, Mapper mapper, PaymentsClient paymentsClient)
+        public LoansService(LoansRepository loansRepository, ILogger<LoansService> logger, Mapper mapper, PaymentsClient paymentsClient)
         {
             this.loansRepository = loansRepository;
             this.logger = logger;
@@ -30,6 +30,13 @@ namespace LoansMicroservice
         {
             var loans = request.Ids.Select(id => loansRepository.Get(id))
                 .Where(loan => loan != null)
+                .Select(loan => mapper.Map<Loan>(loan));
+            return Task.FromResult(new GetLoansResponse { Loans = { loans } });
+        }
+
+        public override Task<GetLoansResponse> GetPaymentsLoans(GetPaymentsLoansRequest request, ServerCallContext context)
+        {
+            var loans = loansRepository.GetByPayment(request.PaymentsIds)
                 .Select(loan => mapper.Map<Loan>(loan));
             return Task.FromResult(new GetLoansResponse { Loans = { loans } });
         }

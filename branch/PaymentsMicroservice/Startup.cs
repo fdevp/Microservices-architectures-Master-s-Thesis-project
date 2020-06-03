@@ -77,7 +77,7 @@ namespace PaymentsMicroservice
             services.AddSingleton(new TransactionsClient(transactionsChannel));
 
             var loansChannel = GrpcChannel.ForAddress("https://localhost:5015", new GrpcChannelOptions { HttpClient = httpClient });
-            services.AddSingleton(new LoansClient(transactionsChannel));
+            services.AddSingleton(new LoansClient(loansChannel));
         }
     }
 }
