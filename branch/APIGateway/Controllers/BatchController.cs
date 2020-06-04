@@ -42,5 +42,21 @@ namespace APIGateway.Controllers
                 Payments = payments
             };
         }
+
+        [HttpPost]
+        public async Task Process(BatchProcess data)
+        {
+            var messages = data.Messages.Select(m => mapper.Map<Message>(m));
+            var transfers = data.Transfers.Select(t => mapper.Map<Transfer>(t));
+            var request = new ProcessBatchRequest
+            {
+                Transfers = { transfers },
+                Messages = { messages },
+                RepaidInstalmentsIds = { data.RepaidInstalmentsIds }
+            };
+            request.FlowId = (long)HttpContext.Items["flowId"];
+
+            await batchesBranchClient.ProcessAsync(request);
+        }
     }
 }

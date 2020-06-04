@@ -33,7 +33,7 @@ namespace LoansMicroservice.Repository
         private float InstalmentAmount(Loan loan)
         {
             var regularAmount = loan.TotalAmount / loan.Instalments;
-            var toRepay = loan.PaidAmount - loan.TotalAmount;
+            var toRepay = loan.TotalAmount - loan.PaidAmount;
             if (regularAmount > toRepay)
                 return toRepay;
             return regularAmount;

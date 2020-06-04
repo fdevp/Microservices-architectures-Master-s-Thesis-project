@@ -56,19 +56,19 @@ namespace BatchesBranchMicroservice
         public override async Task<Empty> Process(ProcessBatchRequest request, ServerCallContext context)
         {
             var tasks = new List<Task>();
-            tasks.Add(new Task(async () => await usersClient.BatchAddMessagesAsync(new BatchAddMessagesRequest
+            tasks.Add(Task.Run(async () => await usersClient.BatchAddMessagesAsync(new BatchAddMessagesRequest
             {
                 FlowId = request.FlowId,
                 Messages = { request.Messages }
             })));
 
-            tasks.Add(new Task(async () => await accountsClient.BatchTransferAsync(new BatchTransferRequest
+            tasks.Add(Task.Run(async () => await accountsClient.BatchTransferAsync(new BatchTransferRequest
             {
                 FlowId = request.FlowId,
                 Transfers = { request.Transfers }
             })));
 
-            tasks.Add(new Task(async () => await loansClient.BatchRepayInstalmentsAsync(new BatchRepayInstalmentsRequest
+            tasks.Add(Task.Run(async () => await loansClient.BatchRepayInstalmentsAsync(new BatchRepayInstalmentsRequest
             {
                 FlowId = request.FlowId,
                 Ids = { request.RepaidInstalmentsIds }
