@@ -1,0 +1,32 @@
+syntax = "proto3";
+import "common/transaction.proto";
+import "common/loan.proto";
+import "common/payment.proto";
+import "common/empty.proto";
+
+option csharp_namespace = "PaymentsWriteMicroservice";
+
+package PaymentsWriteMicroservice;
+
+service PaymentsWrite {
+  rpc Create (CreatePaymentRequest) returns (CreatePaymentResult);
+  rpc Cancel (CancelPaymentsRequest) returns (Empty);
+}
+
+message CreatePaymentRequest {
+  int64 flowId = 1;
+  float amount = 2;
+  int64 startTimestamp = 3;
+  int64 interval = 4;
+  string accountId = 5;
+  string recipient = 6;
+}
+
+message CreatePaymentResult {
+  Payment payment = 1;
+}
+
+message CancelPaymentsRequest {
+  int64 flowId = 1;
+  repeated string ids = 2;
+}

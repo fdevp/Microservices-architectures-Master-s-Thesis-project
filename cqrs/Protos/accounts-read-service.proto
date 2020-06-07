@@ -1,0 +1,59 @@
+syntax = "proto3";
+import "common/transaction.proto";
+import "common/balance.proto";
+import "common/account.proto";
+import "common/transfer.proto";
+import "common/empty.proto";
+
+option csharp_namespace = "AccountsReadMicroservice";
+
+package AccountsMicroservice;
+
+service AccountsRead {
+  rpc Get (GetAccountsRequest) returns (GetAccountsResponse);
+  rpc GetUserAccounts (GetUserAccountsRequest) returns (GetAccountsResponse);
+  rpc GetBalance (GetBalanceRequest) returns (GetBalanceResponse);
+  rpc GetTransactions (GetTransactionsRequest) returns (GetTransactionsResponse);
+  rpc Update (UpdateRequest) returns (Empty);
+  rpc Setup(SetupRequest) returns (Empty);
+}
+
+message GetAccountsRequest {
+  int64 flowId = 1;
+  repeated string ids = 2;
+}
+
+message GetUserAccountsRequest {
+  int64 flowId = 1;
+  string userId = 2;
+}
+
+message GetAccountsResponse {
+  repeated Account accounts = 1;
+}
+
+message GetBalanceRequest {
+  int64 flowId = 1;
+  repeated string ids = 2;
+}
+
+message GetBalanceResponse {
+  repeated Balance balances = 1;
+}
+
+message GetTransactionsRequest {
+  int64 flowId = 1;
+  repeated string ids = 2;
+}
+
+message GetTransactionsResponse {
+  repeated Transaction transactions = 1;
+}
+
+message UpdateRequest {
+  repeated Account accounts = 1;
+}
+
+message SetupRequest {
+  repeated Account accounts = 1;
+}

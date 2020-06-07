@@ -1,0 +1,35 @@
+syntax = "proto3";
+import "common/transaction.proto";
+import "common/empty.proto";
+
+option csharp_namespace = "TransactionsReadMicroservice";
+package TransactionsMicroservice;
+
+service TransactionsRead {
+  rpc Get (GetTransactionsRequest) returns (GetTransactionsResult);
+  rpc Filter(FilterTransactionsRequest) returns (GetTransactionsResult);
+  rpc Setup(SetupRequest) returns (Empty);
+}
+
+message GetTransactionsRequest {
+  int64 flowId = 1;
+  repeated string ids = 2;
+}
+
+message FilterTransactionsRequest {
+  int64 flowId = 1;
+  repeated string recipients = 2;
+  repeated string senders = 3;
+  repeated string payments = 4;
+  repeated string cards = 5;
+  int64 timestampFrom = 6;
+  int64 timestampTo = 7;
+}
+
+message GetTransactionsResult {
+  repeated Transaction transactions = 1;
+}
+
+message SetupRequest {
+  repeated Transaction transactions = 1;
+}

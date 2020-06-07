@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+message Loan {
+  string id = 1;
+  float paidAmount = 2;
+  float totalAmount = 3;
+  int32 instalments = 4;
+  string paymentId = 5;
+}

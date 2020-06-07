@@ -1,0 +1,46 @@
+syntax = "proto3";
+import "common/empty.proto";
+import "common/message.proto";
+
+package UsersMicroservice;
+
+option csharp_namespace = "UsersMicroservice";
+
+service Users {
+  rpc Token (SignInRequest) returns (TokenReply);
+  rpc Logout (LogoutRequest) returns (Empty);
+  rpc BatchAddMessages (BatchAddMessagesRequest) returns (Empty);
+  rpc Setup(SetupRequest) returns (Empty);
+  rpc TearDown(Empty) returns (Empty);
+}
+
+message User {
+  string id = 1;
+  string login = 2;
+  string password = 3;
+}
+
+message SignInRequest {
+  int64 flowId = 1;
+  string login = 2;
+  string password = 3;
+}
+
+message TokenReply {
+  string Token = 1;
+}
+
+message LogoutRequest {
+  int64 flowId = 1;
+  string Token = 2;
+}
+
+message BatchAddMessagesRequest {
+  int64 flowId = 1;
+  repeated Message messages = 2;
+}
+
+message SetupRequest {
+  repeated User users = 1;
+  repeated Message messages = 2;
+}

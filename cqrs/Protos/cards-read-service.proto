@@ -1,0 +1,60 @@
+syntax = "proto3";
+import "common/transaction.proto";
+import "common/card.proto";
+import "common/empty.proto";
+import "common/block.proto";
+
+option csharp_namespace = "CardsReadMicroservice";
+
+package CardsMicroservice;
+
+service CardsRead {
+  rpc Get (GetCardsRequest) returns (GetCardsResponse);
+  rpc GetByAccounts (GetCardsByAccountsRequest) returns (GetCardsResponse);
+  rpc GetBlocks (GetBlocksRequest) returns (GetBlocksResponse);
+  rpc GetTransactions (GetTransactionsRequest) returns (GetTransactionsResponse);
+  rpc Update (UpdateRequest) returns (Empty);
+  rpc Setup(SetupRequest) returns (Empty);
+}
+
+message GetCardsRequest {
+  int64 flowId = 1;
+  repeated string ids = 2;
+}
+
+message GetCardsByAccountsRequest {
+  int64 flowId = 1;
+  repeated string accountIds = 2;
+}
+
+message GetCardsResponse {
+  repeated Card cards = 1;
+}
+
+message GetBlocksRequest {
+  int64 flowId = 1;
+  string cardId = 2;
+}
+
+message GetBlocksResponse {
+  repeated Block blocks = 1;
+}
+
+message GetTransactionsRequest {
+  int64 flowId = 1;
+  repeated string ids = 2;
+}
+
+message GetTransactionsResponse {
+  repeated Transaction transactions = 1;
+}
+
+message SetupRequest {
+  repeated Card cards = 1;
+  repeated Block blocks = 2;
+}
+
+message UpdateRequest {
+  repeated Card cards = 1;
+  repeated Block blocks = 2;
+}

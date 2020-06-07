@@ -1,0 +1,16 @@
+syntax = "proto3";
+import "common/empty.proto";
+import "common/loan.proto";
+
+option csharp_namespace = "LoansWriteMicroservice";
+
+package LoansMicroservice;
+
+service LoansWrite {
+  rpc BatchRepayInstalments (BatchRepayInstalmentsRequest) returns (Empty);
+}
+
+message BatchRepayInstalmentsRequest {
+  int64 flowId = 1;
+  repeated string ids = 2;
+}

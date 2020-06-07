@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+option csharp_namespace = "ReportsMicroservice";
+
+package ReportsMicroservice;
+
+service Reports {
+  rpc Generate (GenerateReportRequest) returns (GenerateReportResponse);
+}
+
+// The request message containing the user's name.
+message GenerateReportRequest {
+}
+
+// The response message containing the greetings.
+message GenerateReportResponse {
+}

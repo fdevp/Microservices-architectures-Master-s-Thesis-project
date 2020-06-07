@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ContentModelStore">
+    <e p="C:\Users\PR3DATOR\AppData\Local\JetBrains\Rider2020.1\extResources" t="IncludeRecursive" />
+    <e p="C:\Users\PR3DATOR\AppData\Local\JetBrains\Rider2020.1\resharper-host\Local\Transient\ReSharperHost\v201\SolutionCaches\_.19.00" t="ExcludeRecursive" />
+    <e p="F:\magisterka code\mgr\cqrs\Protos" t="Include">
+      <e p="common" t="Include">
+        <e p="empty.proto" t="Include" />
+        <e p="transaction.proto" t="Include" />
+      </e>
+      <e p="transactions-service.proto" t="Include" />
+    </e>
+    <e p="F:\magisterka code\mgr\cqrs\TransactionsReadMicroservice" t="IncludeRecursive">
+      <e p="appsettings.Development.json" t="Include" />
+      <e p="appsettings.json" t="Include" />
+      <e p="bin" t="ExcludeRecursive" />
+      <e p="log-20200529.txt" t="Include" />
+      <e p="log-20200602.txt" t="Include" />
+      <e p="log-20200603.txt" t="Include" />
+      <e p="log-20200604.txt" t="Include" />
+      <e p="obj" t="ExcludeRecursive">
+        <e p="Debug" t="Include">
+          <e p="netcoreapp3.1" t="Include">
+            <e p="Empty.cs" t="Include" />
+            <e p="EmptyGrpc.cs" t="Include" />
+            <e p="Transaction.cs" t="Include" />
+            <e p="TransactionGrpc.cs" t="Include" />
+            <e p="Transactions-serviceGrpc.cs" t="Include" />
+            <e p="TransactionsService.cs" t="Include" />
+          </e>
+        </e>
+      </e>
+      <e p="packages" t="ExcludeRecursive" />
+      <e p="Program.cs" t="Include" />
+      <e p="Properties" t="Include">
+        <e p="launchSettings.json" t="Include" />
+      </e>
+      <e p="Services" t="Include">
+        <e p="repository" t="Include">
+          <e p="Filters.cs" t="Include" />
+          <e p="Transaction.cs" t="Include" />
+          <e p="TransactionsRepository.cs" t="Include" />
+        </e>
+        <e p="TransactionsService.cs" t="Include" />
+      </e>
+      <e p="Startup.cs" t="Include" />
+      <e p="TransactionsReadMicroservice.csproj" t="IncludeRecursive" />
+    </e>
+  </component>
+</project>

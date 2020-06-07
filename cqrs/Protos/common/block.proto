@@ -1,0 +1,8 @@
+syntax = "proto3";
+
+message Block {
+  string id = 1;
+  string cardId = 2;
+  string transactionId = 3;
+  int64 timestamp = 4;
+}

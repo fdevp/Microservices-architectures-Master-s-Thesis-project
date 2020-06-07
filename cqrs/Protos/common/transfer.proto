@@ -1,0 +1,8 @@
+syntax = "proto3";
+
+message Transfer {
+  string accountId = 2;
+  string recipient = 3;
+  string title = 4;
+  float amount = 5;
+}

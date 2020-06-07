@@ -1,0 +1,34 @@
+syntax = "proto3";
+import "common/transaction.proto";
+import "common/empty.proto";
+
+option csharp_namespace = "TransactionsWriteMicroservice";
+package TransactionsWriteMicroservice;
+
+service TransactionsWrite {
+  rpc Create (CreateTransactionRequest) returns (CreateTransactionResult);
+  rpc BatchCreate (BatchCreateTransactionRequest) returns (BatchCreateTransactionResult);
+}
+
+message CreateTransactionRequest {
+  int64 flowId = 1;
+  string title = 2;
+  float amount = 3;
+  string recipient = 4;
+  string sender = 5;
+  string paymentId = 6;
+  string cardId = 7;
+}
+
+message CreateTransactionResult {
+  Transaction transaction = 1;
+}
+
+message BatchCreateTransactionRequest {
+  int64 flowId = 1;
+  repeated CreateTransactionRequest requests = 2;
+}
+
+message BatchCreateTransactionResult {
+  repeated Transaction transactions = 1;
+}

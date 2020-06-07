@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+message Transaction {
+  string id = 1;
+  string title = 2;
+  float amount = 3;
+  int64 timestamp = 4;
+  string recipient = 5;
+  string sender = 6;
+  string paymentId = 7;
+  string cardId = 8;
+}

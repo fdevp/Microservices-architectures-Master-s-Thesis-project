@@ -1,0 +1,6 @@
+syntax = "proto3";
+
+message Balance {
+  string id = 1;
+  float balance = 2;
+}

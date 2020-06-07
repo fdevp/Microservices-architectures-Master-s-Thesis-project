@@ -1,0 +1,24 @@
+syntax = "proto3";
+import "common/transaction.proto";
+import "common/card.proto";
+import "common/empty.proto";
+import "common/block.proto";
+
+option csharp_namespace = "CardsWriteMicroservice";
+
+package CardsMicroservice;
+
+service CardsWrite {
+  rpc Transfer (TransferRequest) returns (TransferResponse);
+}
+
+message TransferRequest {
+  int64 flowId = 1;
+  string cardId = 2;
+  string recipient = 3;
+  float amount = 4;
+}
+
+message TransferResponse {
+  Transaction transaction = 1;
+}

@@ -1,0 +1,36 @@
+syntax = "proto3";
+import "common/empty.proto";
+import "common/loan.proto";
+
+option csharp_namespace = "LoansReadMicroservice";
+
+package LoansMicroservice;
+
+service LoansRead {
+  rpc Get (GetLoansRequest) returns (GetLoansResponse);
+  rpc GetPaymentsLoans (GetPaymentsLoansRequest) returns (GetLoansResponse);
+  rpc Setup(SetupRequest) returns (Empty);
+  rpc Update(UpdateRequest) returns (Empty);
+}
+
+message GetLoansRequest {
+  int64 flowId = 1;
+  repeated string ids = 2;
+}
+
+message GetPaymentsLoansRequest {
+  int64 flowId = 1;
+  repeated string paymentsIds = 2;
+}
+
+message GetLoansResponse {
+  repeated Loan loans = 1;
+}
+
+message SetupRequest {
+  repeated Loan loans = 1;
+}
+
+message UpdateRequest {
+  repeated Loan loans = 1;
+}
