@@ -13,8 +13,6 @@ service CardsRead {
   rpc GetByAccounts (GetCardsByAccountsRequest) returns (GetCardsResponse);
   rpc GetBlocks (GetBlocksRequest) returns (GetBlocksResponse);
   rpc GetTransactions (GetTransactionsRequest) returns (GetTransactionsResponse);
-  rpc Update (UpdateRequest) returns (Empty);
-  rpc Setup(SetupRequest) returns (Empty);
 }
 
 message GetCardsRequest {
@@ -47,14 +45,4 @@ message GetTransactionsRequest {
 
 message GetTransactionsResponse {
   repeated Transaction transactions = 1;
-}
-
-message SetupRequest {
-  repeated Card cards = 1;
-  repeated Block blocks = 2;
-}
-
-message UpdateRequest {
-  repeated Card cards = 1;
-  repeated Block blocks = 2;
 }

@@ -9,8 +9,6 @@ package LoansMicroservice;
 service LoansRead {
   rpc Get (GetLoansRequest) returns (GetLoansResponse);
   rpc GetPaymentsLoans (GetPaymentsLoansRequest) returns (GetLoansResponse);
-  rpc Setup(SetupRequest) returns (Empty);
-  rpc Update(UpdateRequest) returns (Empty);
 }
 
 message GetLoansRequest {
@@ -24,13 +22,5 @@ message GetPaymentsLoansRequest {
 }
 
 message GetLoansResponse {
-  repeated Loan loans = 1;
-}
-
-message SetupRequest {
-  repeated Loan loans = 1;
-}
-
-message UpdateRequest {
   repeated Loan loans = 1;
 }

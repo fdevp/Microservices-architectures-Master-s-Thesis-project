@@ -14,8 +14,6 @@ service AccountsRead {
   rpc GetUserAccounts (GetUserAccountsRequest) returns (GetAccountsResponse);
   rpc GetBalance (GetBalanceRequest) returns (GetBalanceResponse);
   rpc GetTransactions (GetTransactionsRequest) returns (GetTransactionsResponse);
-  rpc Update (UpdateRequest) returns (Empty);
-  rpc Setup(SetupRequest) returns (Empty);
 }
 
 message GetAccountsRequest {
@@ -48,12 +46,4 @@ message GetTransactionsRequest {
 
 message GetTransactionsResponse {
   repeated Transaction transactions = 1;
-}
-
-message UpdateRequest {
-  repeated Account accounts = 1;
-}
-
-message SetupRequest {
-  repeated Account accounts = 1;
 }

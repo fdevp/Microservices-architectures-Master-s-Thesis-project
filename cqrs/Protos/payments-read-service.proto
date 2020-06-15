@@ -12,8 +12,6 @@ service PaymentsRead {
   rpc Get (GetPaymentsRequest) returns (GetPaymentsResult);
   rpc GetWithLoans (GetPaymentsWithLoansRequest) returns (GetPaymentsWithLoansResult);
   rpc GetTransactions (GetTransactionsRequest) returns (GetTransactionsResult);
-  rpc Setup(SetupRequest) returns (Empty);
-  rpc Update(UpdateRequest) returns (Empty);
 }
 
 message GetPaymentsRequest {
@@ -45,12 +43,4 @@ message GetTransactionsRequest {
 
 message GetTransactionsResult {
   repeated Transaction transactions = 1;
-}
-
-message SetupRequest {
-  repeated Payment payments = 1;
-}
-
-message UpdateRequest {
-  repeated Payment payments = 1;
 }
