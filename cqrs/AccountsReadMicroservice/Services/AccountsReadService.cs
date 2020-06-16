@@ -53,17 +53,5 @@ namespace AccountsReadMicroservice
             var response = await transactionsClient.FilterAsync(filters);
             return new GetTransactionsResponse { Transactions = { response.Transactions } };
         }
-
-        public override Task<Empty> Setup(SetupRequest request, ServerCallContext context)
-        {
-            var accounts = request.Accounts.Select(a => mapper.Map<Repository.Account>(a));
-            accountsRepository.Setup(accounts);
-            return Task.FromResult(new Empty());
-        }
-
-        public override Task<Empty> Update(UpdateRequest request, ServerCallContext context)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

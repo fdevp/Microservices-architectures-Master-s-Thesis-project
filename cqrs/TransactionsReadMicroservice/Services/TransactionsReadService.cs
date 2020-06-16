@@ -46,12 +46,5 @@ namespace TransactionsReadMicroservice
             var transactions = transactionsRepository.GetMany(filters).Select(t => mapper.Map<Transaction>(t));
             return Task.FromResult(new GetTransactionsResult { Transactions = { transactions } });
         }
-
-        public override Task<Empty> Setup(SetupRequest request, ServerCallContext context)
-        {
-            var transactions = request.Transactions.Select(t => mapper.Map<Repository.Transaction>(t));
-            transactionsRepository.Setup(transactions);
-            return Task.FromResult(new Empty());
-        }
     }
 }

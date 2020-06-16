@@ -59,13 +59,5 @@ namespace CardsReadMicroservice
             var transactions = accountTransactions.Transactions.Where(t => cardAccountsIds.Contains(t.CardId));
             return new GetTransactionsResponse { Transactions = { transactions } };
         }
-
-        public override Task<Empty> Setup(SetupRequest request, ServerCallContext context)
-        {
-            var cards = request.Cards.Select(c => mapper.Map<Repository.Card>(c));
-            var blocks = request.Blocks.Select(b => mapper.Map<Repository.Block>(b));
-            cardsRepository.Setup(cards, blocks);
-            return Task.FromResult(new Empty());
-        }
     }
 }

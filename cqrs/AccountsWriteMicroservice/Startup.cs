@@ -9,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using SharedClasses;
+using SharedClasses.Messaging;
 using static TransactionsWriteMicroservice.TransactionsWrite;
 
 namespace AccountsWriteMicroservice
@@ -26,6 +27,8 @@ namespace AccountsWriteMicroservice
             services.AddSingleton(CreateMapper());
             services.AddSingleton(CreateTransactionsClient());
             services.AddSingleton(new AccountsRepository());
+
+            new RabbitMqChannelFactory().CreateWriteChannel();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

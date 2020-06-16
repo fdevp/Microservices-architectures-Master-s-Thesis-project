@@ -9,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using SharedClasses;
+using SharedClasses.Messaging;
 using static TransactionsReadMicroservice.TransactionsRead;
 
 namespace AccountsReadMicroservice
@@ -26,6 +27,8 @@ namespace AccountsReadMicroservice
             services.AddSingleton(CreateMapper());
             services.AddSingleton(CreateTransactionsClient());
             services.AddSingleton(new AccountsRepository());
+
+            new RabbitMqChannelFactory().CreateReadChannel();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -64,7 +67,6 @@ namespace AccountsReadMicroservice
                 HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
             var httpClient = new HttpClient(httpClientHandler);
             var channel = GrpcChannel.ForAddress("https://localhost:5001", new GrpcChannelOptions { HttpClient = httpClient });
-
             return new TransactionsReadClient(channel);
         }
     }
