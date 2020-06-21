@@ -5,16 +5,8 @@ namespace SharedClasses.Messaging
 {
     public class RabbitMqChannelFactory
     {
-        public RabbitMqConsumer CreateReadChannel()
+        public RabbitMqConsumer<TUpsert, TRemove> CreateReadChannel<TUpsert, TRemove>(RabbitMqConfig config)
         {
-            RabbitMqConfig config = new RabbitMqConfig
-            {
-                HostName = "localhost",
-                UserName = "accounts-read",
-                Password = "guest",
-                QueueName = "accounts-projection",
-            };
-
             var connectionFactory = new ConnectionFactory
             {
                 HostName = config.HostName,
@@ -32,19 +24,11 @@ namespace SharedClasses.Messaging
                             autoAck: true,
                             consumer: consumer);
 
-            return new RabbitMqConsumer(connection, channel, config.QueueName, consumer);
+            return new RabbitMqConsumer<TUpsert, TRemove>(connection, channel, config.QueueName, consumer);
         }
 
-        public RabbitMqPublisher CreateWriteChannel()
+        public RabbitMqPublisher CreateWriteChannel(RabbitMqConfig config)
         {
-            RabbitMqConfig config = new RabbitMqConfig
-            {
-                HostName = "localhost",
-                UserName = "accounts-write",
-                Password = "guest",
-                QueueName = "accounts-projection",
-            };
-
             var connectionFactory = new ConnectionFactory
             {
                 HostName = config.HostName,

@@ -34,14 +34,20 @@ namespace TransactionsReadMicroservice.Repository
             return transactions.Values.Where(t => SelectTransaction(t, filters)).ToArray();
         }
 
-        public void Setup(IEnumerable<Repository.Transaction> transactions)
+        public void Upsert(Transaction[] update)
         {
-            this.transactions = transactions.ToDictionary(t => t.Id, t => t);
+            foreach (var transaction in update)
+            {
+                transactions[transaction.Id] = transaction;
+            }
         }
 
-        public void TearDown()
+        public void Remove(string[] ids)
         {
-            this.transactions = new Dictionary<string, Transaction>();
+            foreach (var id in ids)
+            {
+                transactions.Remove(id);
+            }
         }
 
         private bool SelectTransaction(Transaction transaction, Filters filters)

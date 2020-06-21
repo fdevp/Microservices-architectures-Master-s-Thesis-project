@@ -21,7 +21,7 @@ namespace SharedClasses.Messaging
             this.properties = properties;
         }
 
-        public void Publish(string msgType, object content)
+        public void Publish(object content)
         {
             using (var sw = new StringWriter())
             {
