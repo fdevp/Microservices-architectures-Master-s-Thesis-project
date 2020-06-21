@@ -4,25 +4,13 @@ namespace TransactionsReadMicroservice.Repository
 {
     public class Transaction
     {
-        public string Id { get; }
-        public string Title { get; }
-        public float Amount { get; }
-        public long Timestamp { get; }
-        public string Recipient { get; }
-        public string Sender { get; }
-        public string PaymentId { get; }
-        public string CardId { get; }
-
-        public Transaction(string id, string title, float amount, long timestamp, string recipient, string sender, string paymentId, string cardId)
-        {
-            Id = id;
-            Title = title;
-            Amount = amount;
-            Timestamp = timestamp;
-            Recipient = recipient;
-            Sender = sender;
-            PaymentId = paymentId;
-            CardId = cardId;
-        }
+        public string Id { get; set; }
+        public string Title { get; set; }
+        public float Amount { get; set; }
+        public long Timestamp { get; set; }
+        public string Recipient { get; set; }
+        public string Sender { get; set; }
+        public string PaymentId { get; set; }
+        public string CardId { get; set; }
     }
 }

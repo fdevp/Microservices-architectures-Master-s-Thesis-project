@@ -17,36 +17,23 @@ namespace LoansReadMicroservice.Repository
         public Loan[] GetByPayment(IEnumerable<string> paymentIds)
         {
             var payments = paymentIds.ToHashSet();
-            return loans.Values.Where(l=> payments.Contains(l.PaymentId)).ToArray();
+            return loans.Values.Where(l => payments.Contains(l.PaymentId)).ToArray();
         }
 
-        public bool RepayInstalment(string id)
+        public void Upsert(Loan[] update)
         {
-            var loan = loans[id];
-            var amount = InstalmentAmount(loan);
-            loan.Repay(amount);
-            if (loan.PaidAmount >= loan.TotalAmount)
-                return true;
-            return false;
+            foreach (var loan in update)
+            {
+                loans[loan.Id] = loan;
+            }
         }
 
-        private float InstalmentAmount(Loan loan)
+        public void Remove(string[] ids)
         {
-            var regularAmount = loan.TotalAmount / loan.Instalments;
-            var toRepay = loan.TotalAmount - loan.PaidAmount;
-            if (regularAmount > toRepay)
-                return toRepay;
-            return regularAmount;
-        }
-
-        public void Setup(IEnumerable<Repository.Loan> loans)
-        {
-            this.loans = loans.ToDictionary(l => l.Id, l => l);
-        }
-
-        public void TearDown()
-        {
-            this.loans = new Dictionary<string, Loan>();
+            foreach (var id in ids)
+            {
+                loans.Remove(id);
+            }
         }
     }
 }
