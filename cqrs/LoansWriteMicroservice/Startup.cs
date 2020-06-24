@@ -73,7 +73,7 @@ namespace LoansWriteMicroservice
             httpClientHandler.ServerCertificateCustomValidationCallback =
                 HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
             var httpClient = new HttpClient(httpClientHandler);
-            var channel = GrpcChannel.ForAddress("https://localhost:5013", new GrpcChannelOptions { HttpClient = httpClient });
+            var channel = GrpcChannel.ForAddress("https://localhost:5031", new GrpcChannelOptions { HttpClient = httpClient });
             return new PaymentsWriteClient(channel);
         }
     }

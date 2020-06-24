@@ -79,10 +79,10 @@ namespace PaymentsWriteMicroservice
                 HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
             var httpClient = new HttpClient(httpClientHandler);
 
-            var transactionsChannel = GrpcChannel.ForAddress("https://localhost:5001", new GrpcChannelOptions { HttpClient = httpClient });
+            var transactionsChannel = GrpcChannel.ForAddress("https://localhost:5011", new GrpcChannelOptions { HttpClient = httpClient });
             services.AddSingleton(new TransactionsWriteClient(transactionsChannel));
 
-            var loansChannel = GrpcChannel.ForAddress("https://localhost:5015", new GrpcChannelOptions { HttpClient = httpClient });
+            var loansChannel = GrpcChannel.ForAddress("https://localhost:5051", new GrpcChannelOptions { HttpClient = httpClient });
             services.AddSingleton(new LoansWriteClient(loansChannel));
         }
     }
