@@ -11,11 +11,20 @@ using Microsoft.Extensions.Logging;
 using PaymentsWriteMicroservice.Repository;
 using static LoansWriteMicroservice.LoansWrite;
 using static TransactionsWriteMicroservice.TransactionsWrite;
+using Microsoft.Extensions.Configuration;
+using SharedClasses.Messaging;
 
 namespace PaymentsWriteMicroservice
 {
     public class Startup
     {
+        private readonly IConfiguration configuration;
+
+        public Startup(IConfiguration configuration)
+        {
+            this.configuration = configuration;
+        }
+
         // This method gets called by the runtime. Use this method to add services to the container.
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
@@ -26,7 +35,8 @@ namespace PaymentsWriteMicroservice
             });
             services.AddSingleton(CreateMapper());
             services.AddSingleton(new PaymentsRepository());
-            CreateClients(services);
+            services.AddRabbitMqPublisher(configuration);
+            CreateClients(services);            
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

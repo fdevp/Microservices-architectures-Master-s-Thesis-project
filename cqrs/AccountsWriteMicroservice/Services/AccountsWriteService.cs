@@ -96,5 +96,13 @@ namespace AccountsWriteMicroservice
 
             return transcation;
         }
+
+        public override Task<Empty> Setup(SetupRequest request, ServerCallContext context)
+        {
+            var accounts = request.Accounts.Select(a => mapper.Map<Repository.Account>(a));
+            accountsRepository.Setup(accounts);
+            projectionChannel.Publish(new DataProjection<Repository.Account, string> { Upsert = accounts.ToArray() });
+            return Task.FromResult(new Empty());
+        }
     }
 }

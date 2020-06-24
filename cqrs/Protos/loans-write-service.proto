@@ -8,9 +8,14 @@ package LoansMicroservice;
 
 service LoansWrite {
   rpc BatchRepayInstalments (BatchRepayInstalmentsRequest) returns (Empty);
+  rpc Setup(SetupRequest) returns (Empty);
 }
 
 message BatchRepayInstalmentsRequest {
   int64 flowId = 1;
   repeated string ids = 2;
+}
+
+message SetupRequest {
+  repeated Loan loans = 1;
 }

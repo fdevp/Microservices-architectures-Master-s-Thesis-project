@@ -37,16 +37,16 @@ namespace CardsReadMicroservice
             services.AddSingleton(CreateMapper());
             services.AddSingleton(CreateAccountsClient());
             services.AddSingleton(repository);
+            SetProjectionListener(repository);
+        }
 
+        private void SetProjectionListener(CardsRepository repository)
+        {
             var config = new RabbitMqConfig();
             configuration.GetSection("RabbitMq").Bind(config);
             var rabbitMq = new RabbitMqChannelFactory().CreateReadChannel<CardsUpsert, CardsRemove>(config);
-            SetProjectionListener(rabbitMq, repository);
-        }
 
-        private void SetProjectionListener(RabbitMqConsumer<CardsUpsert, CardsRemove> consumer, CardsRepository repository)
-        {
-            consumer.Received += (sender, projection) =>
+            rabbitMq.Received += (sender, projection) =>
             {
                 if (projection.Upsert != null)
                     repository.Upsert(projection.Upsert);

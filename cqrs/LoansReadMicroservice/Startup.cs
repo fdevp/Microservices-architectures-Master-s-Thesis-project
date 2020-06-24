@@ -36,16 +36,16 @@ namespace LoansReadMicroservice
             services.AddSingleton(CreateMapper());
             services.AddSingleton(CreatePaymentsClient());
             services.AddSingleton(repository);
+            SetProjectionListener(repository);
+        }
 
+        private void SetProjectionListener( LoansRepository repository)
+        {
             var config = new RabbitMqConfig();
             configuration.GetSection("RabbitMq").Bind(config);
             var rabbitMq = new RabbitMqChannelFactory().CreateReadChannel<Repository.Loan, string>(config);
-            SetProjectionListener(rabbitMq, repository);
-        }
 
-        private void SetProjectionListener(RabbitMqConsumer<Repository.Loan, string> consumer, LoansRepository repository)
-        {
-            consumer.Received += (sender, projection) =>
+            rabbitMq.Received += (sender, projection) =>
             {
                 if (projection.Upsert != null)
                     repository.Upsert(projection.Upsert);

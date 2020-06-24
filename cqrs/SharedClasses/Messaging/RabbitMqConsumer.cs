@@ -20,6 +20,7 @@ namespace SharedClasses.Messaging
             this.channel = channel;
             this.queueName = queueName;
             this.consumer = consumer;
+            this.consumer.Received += HandleMessage;
         }
 
         private void HandleMessage(object sender, BasicDeliverEventArgs ea)

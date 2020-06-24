@@ -24,7 +24,7 @@ namespace AccountsReadMicroservice
             this.configuration = configuration;
         }
 
-        
+
         // This method gets called by the runtime. Use this method to add services to the container.
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
@@ -38,16 +38,16 @@ namespace AccountsReadMicroservice
             services.AddSingleton(CreateMapper());
             services.AddSingleton(CreateTransactionsClient());
             services.AddSingleton(repository);
+            SetProjectionListener(repository);
+        }
 
+        public void SetProjectionListener(AccountsRepository repository)
+        {
             var config = new RabbitMqConfig();
             configuration.GetSection("RabbitMq").Bind(config);
             var rabbitMq = new RabbitMqChannelFactory().CreateReadChannel<Repository.Account, string>(config);
-            SetProjectionListener(rabbitMq, repository);
-        }
 
-        public void SetProjectionListener(RabbitMqConsumer<Repository.Account, string> consumer, AccountsRepository repository)
-        {
-            consumer.Received += (sender, projection) =>
+            rabbitMq.Received += (sender, projection) =>
             {
                 if (projection.Upsert != null)
                     repository.Upsert(projection.Upsert);

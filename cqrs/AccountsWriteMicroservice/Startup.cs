@@ -35,12 +35,7 @@ namespace AccountsWriteMicroservice
             services.AddSingleton(CreateMapper());
             services.AddSingleton(CreateTransactionsClient());
             services.AddSingleton(new AccountsRepository());
-
-
-            var config = new RabbitMqConfig();
-            configuration.GetSection("RabbitMq").Bind(config);
-            var writeChannel = new RabbitMqChannelFactory().CreateWriteChannel(config);
-            services.AddSingleton(writeChannel);
+            services.AddRabbitMqPublisher(configuration);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

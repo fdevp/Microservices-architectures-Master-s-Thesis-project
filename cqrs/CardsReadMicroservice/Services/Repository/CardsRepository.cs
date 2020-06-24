@@ -27,12 +27,6 @@ namespace CardsReadMicroservice.Repository
             return blocks.Values.Where(b => b.CardId == cardId).ToArray();
         }
 
-        public void Setup(IEnumerable<Repository.Card> cards, IEnumerable<Repository.Block> blocks)
-        {
-            this.cards = cards.ToDictionary(c => c.Id, c => c);
-            this.blocks = blocks.ToDictionary(b => b.Id, b => b);
-        }
-
         public void Upsert(CardsUpsert[] updates)
         {
             foreach (var update in updates)
@@ -63,7 +57,6 @@ namespace CardsReadMicroservice.Repository
                     blocks.Remove(update.BlockId);
                 }
             }
-
         }
     }
 }

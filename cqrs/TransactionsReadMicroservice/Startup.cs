@@ -32,16 +32,16 @@ namespace TransactionsReadMicroservice
             });
             services.AddSingleton(CreateMapper());
             services.AddSingleton(repository);
+            SetProjectionListener(repository);
+        }
 
+        public void SetProjectionListener(TransactionsRepository repository)
+        {
             var config = new RabbitMqConfig();
             configuration.GetSection("RabbitMq").Bind(config);
             var rabbitMq = new RabbitMqChannelFactory().CreateReadChannel<Repository.Transaction, string>(config);
-            SetProjectionListener(rabbitMq, repository);
-        }
 
-        public void SetProjectionListener(RabbitMqConsumer<Repository.Transaction, string> consumer, TransactionsRepository repository)
-        {
-            consumer.Received += (sender, projection) =>
+            rabbitMq.Received += (sender, projection) =>
             {
                 if (projection.Upsert != null)
                     repository.Upsert(projection.Upsert);
