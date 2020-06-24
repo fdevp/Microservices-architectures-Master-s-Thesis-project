@@ -13,6 +13,7 @@ using static LoansWriteMicroservice.LoansWrite;
 using static TransactionsWriteMicroservice.TransactionsWrite;
 using Microsoft.Extensions.Configuration;
 using SharedClasses.Messaging;
+using SharedClasses.Commands;
 
 namespace PaymentsWriteMicroservice
 {
@@ -29,14 +30,17 @@ namespace PaymentsWriteMicroservice
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            var commandsRepository = new CommandsRepository();
+            services.AddSingleton(commandsRepository);
             services.AddGrpc(options =>
             {
                 options.Interceptors.Add<LoggingInterceptor>("Payments");
+                options.Interceptors.Add<CommandsInterceptor>(commandsRepository);
             });
             services.AddSingleton(CreateMapper());
             services.AddSingleton(new PaymentsRepository());
             services.AddRabbitMqPublisher(configuration);
-            CreateClients(services);            
+            CreateClients(services);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

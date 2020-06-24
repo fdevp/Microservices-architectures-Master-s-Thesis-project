@@ -12,6 +12,7 @@ using CardsWriteMicroservice.Repository;
 using static AccountsWriteMicroservice.AccountsWrite;
 using Microsoft.Extensions.Configuration;
 using SharedClasses.Messaging;
+using SharedClasses.Commands;
 
 namespace CardsWriteMicroservice
 {
@@ -28,9 +29,12 @@ namespace CardsWriteMicroservice
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            var commandsRepository = new CommandsRepository();
+            services.AddSingleton(commandsRepository);
             services.AddGrpc(options =>
             {
                 options.Interceptors.Add<LoggingInterceptor>("Cards");
+                options.Interceptors.Add<CommandsInterceptor>(commandsRepository);
             });
             services.AddSingleton(CreateMapper());
             services.AddSingleton(CreateAccountsClient());

@@ -10,6 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using SharedClasses;
+using SharedClasses.Commands;
 using SharedClasses.Messaging;
 using static PaymentsWriteMicroservice.PaymentsWrite;
 
@@ -28,9 +29,12 @@ namespace LoansWriteMicroservice
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            var commandsRepository = new CommandsRepository();
+            services.AddSingleton(commandsRepository);
             services.AddGrpc(options =>
             {
                 options.Interceptors.Add<LoggingInterceptor>("Loans");
+                options.Interceptors.Add<CommandsInterceptor>(commandsRepository);
             });
             services.AddSingleton(CreateMapper());
             services.AddSingleton(CreatePaymentsClient());
