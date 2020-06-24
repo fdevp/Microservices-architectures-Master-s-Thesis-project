@@ -5,27 +5,53 @@ using LoansReadMicroservice.Repository;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using SharedClasses;
+using SharedClasses.Messaging;
 using static PaymentsReadMicroservice.PaymentsRead;
 
 namespace LoansReadMicroservice
 {
     public class Startup
     {
+        private readonly IConfiguration configuration;
+
+        public Startup(IConfiguration configuration)
+        {
+            this.configuration = configuration;
+        }
+
         // This method gets called by the runtime. Use this method to add services to the container.
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            var repository = new LoansRepository();
             services.AddGrpc(options =>
             {
                 options.Interceptors.Add<LoggingInterceptor>("Loans");
             });
             services.AddSingleton(CreateMapper());
             services.AddSingleton(CreatePaymentsClient());
-            services.AddSingleton(new LoansRepository());
+            services.AddSingleton(repository);
+            SetProjectionListener(repository);
+        }
+
+        private void SetProjectionListener( LoansRepository repository)
+        {
+            var config = new RabbitMqConfig();
+            configuration.GetSection("RabbitMq").Bind(config);
+            var rabbitMq = new RabbitMqChannelFactory().CreateReadChannel<Repository.Loan, string>(config);
+
+            rabbitMq.Received += (sender, projection) =>
+            {
+                if (projection.Upsert != null)
+                    repository.Upsert(projection.Upsert);
+                if (projection.Remove != null)
+                    repository.Remove(projection.Remove);
+            };
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -63,7 +89,7 @@ namespace LoansReadMicroservice
             httpClientHandler.ServerCertificateCustomValidationCallback =
                 HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
             var httpClient = new HttpClient(httpClientHandler);
-            var channel = GrpcChannel.ForAddress("https://localhost:5013", new GrpcChannelOptions { HttpClient = httpClient });
+            var channel = GrpcChannel.ForAddress("https://localhost:5032", new GrpcChannelOptions { HttpClient = httpClient });
             return new PaymentsReadClient(channel);
         }
     }

@@ -27,24 +27,36 @@ namespace CardsReadMicroservice.Repository
             return blocks.Values.Where(b => b.CardId == cardId).ToArray();
         }
 
-        public Block CreateBlock(string cardId, string transactionId, DateTime timestamp)
+        public void Upsert(CardsUpsert[] updates)
         {
-            var block = new Block(Guid.NewGuid().ToString(), cardId, transactionId, timestamp.Ticks);
-            blocks.Add(block.Id, block);
-            return block;
+            foreach (var update in updates)
+            {
+                if (update.Card != null)
+                {
+                    cards[update.Card.Id] = update.Card;
+                }
+
+                if (update.Block != null)
+                {
+                    blocks[update.Block.Id] = update.Block;
+                }
+            }
         }
 
-        public void Setup(IEnumerable<Repository.Card> cards, IEnumerable<Repository.Block> blocks)
+        public void Remove(CardsRemove[] updates)
         {
-            this.cards = cards.ToDictionary(c => c.Id, c => c);
-            this.blocks = blocks.ToDictionary(b => b.Id, b => b);
-        }
+            foreach (var update in updates)
+            {
+                if (update.CardId != null)
+                {
+                    cards.Remove(update.CardId);
+                }
 
-        public void TearDown()
-        {
-            this.cards = new Dictionary<string, Card>();
-            this.blocks = new Dictionary<string, Block>();
+                if (update.BlockId != null)
+                {
+                    blocks.Remove(update.BlockId);
+                }
+            }
         }
-
     }
 }

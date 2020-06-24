@@ -39,12 +39,5 @@ namespace CardsWriteMicroservice.Repository
             this.cards = cards.ToDictionary(c => c.Id, c => c);
             this.blocks = blocks.ToDictionary(b => b.Id, b => b);
         }
-
-        public void TearDown()
-        {
-            this.cards = new Dictionary<string, Card>();
-            this.blocks = new Dictionary<string, Block>();
-        }
-
     }
 }

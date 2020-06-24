@@ -8,20 +8,6 @@ namespace TransactionsReadMicroservice.Repository
     {
         private Dictionary<string, Transaction> transactions = new Dictionary<string, Transaction>();
 
-        public TransactionsRepository()
-        {
-            transactions.Add("1", new Transaction("123", "Initial transaciton", 100, DateTime.UtcNow.Ticks, "5423", "1", null, null));
-        }
-
-        public Transaction Create(string title, float amount, string recipient, string sender, string paymentId, string cardId)
-        {
-            var id = Guid.NewGuid().ToString();
-            var timestamp = DateTime.UtcNow;
-            var transaction = new Repository.Transaction(id, title, amount, timestamp.Ticks, recipient, sender, paymentId, cardId);
-            transactions.Add(id, transaction);
-            return transaction;
-        }
-
         public Transaction Get(string id)
         {
             if (transactions.ContainsKey(id))
@@ -34,14 +20,20 @@ namespace TransactionsReadMicroservice.Repository
             return transactions.Values.Where(t => SelectTransaction(t, filters)).ToArray();
         }
 
-        public void Setup(IEnumerable<Repository.Transaction> transactions)
+        public void Upsert(Transaction[] update)
         {
-            this.transactions = transactions.ToDictionary(t => t.Id, t => t);
+            foreach (var transaction in update)
+            {
+                transactions[transaction.Id] = transaction;
+            }
         }
 
-        public void TearDown()
+        public void Remove(string[] ids)
         {
-            this.transactions = new Dictionary<string, Transaction>();
+            foreach (var id in ids)
+            {
+                transactions.Remove(id);
+            }
         }
 
         private bool SelectTransaction(Transaction transaction, Filters filters)

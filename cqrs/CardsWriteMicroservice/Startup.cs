@@ -10,22 +10,36 @@ using SharedClasses;
 using Microsoft.Extensions.Logging;
 using CardsWriteMicroservice.Repository;
 using static AccountsWriteMicroservice.AccountsWrite;
+using Microsoft.Extensions.Configuration;
+using SharedClasses.Messaging;
+using SharedClasses.Commands;
 
 namespace CardsWriteMicroservice
 {
     public class Startup
     {
+        private readonly IConfiguration configuration;
+
+        public Startup(IConfiguration configuration)
+        {
+            this.configuration = configuration;
+        }
+
         // This method gets called by the runtime. Use this method to add services to the container.
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            var commandsRepository = new CommandsRepository();
+            services.AddSingleton(commandsRepository);
             services.AddGrpc(options =>
             {
                 options.Interceptors.Add<LoggingInterceptor>("Cards");
+                options.Interceptors.Add<CommandsInterceptor>(commandsRepository);
             });
             services.AddSingleton(CreateMapper());
             services.AddSingleton(CreateAccountsClient());
             services.AddSingleton(new CardsRepository());
+            services.AddRabbitMqPublisher(configuration);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -67,7 +81,7 @@ namespace CardsWriteMicroservice
             httpClientHandler.ServerCertificateCustomValidationCallback =
                 HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
             var httpClient = new HttpClient(httpClientHandler);
-            var channel = GrpcChannel.ForAddress("https://localhost:5011", new GrpcChannelOptions { HttpClient = httpClient });
+            var channel = GrpcChannel.ForAddress("https://localhost:5021", new GrpcChannelOptions { HttpClient = httpClient });
             return new AccountsWriteClient(channel);
         }
     }

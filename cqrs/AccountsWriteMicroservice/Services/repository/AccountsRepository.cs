@@ -55,10 +55,5 @@ namespace AccountsWriteMicroservice.Repository
         {
             this.accounts = accounts.ToDictionary(a => a.Id, a => a);
         }
-
-        public void TearDown()
-        {
-            this.accounts = new Dictionary<string, Account>();
-        }
     }
 }

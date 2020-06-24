@@ -8,6 +8,7 @@ package TransactionsWriteMicroservice;
 service TransactionsWrite {
   rpc Create (CreateTransactionRequest) returns (CreateTransactionResult);
   rpc BatchCreate (BatchCreateTransactionRequest) returns (BatchCreateTransactionResult);
+  rpc Setup(SetupRequest) returns (Empty);
 }
 
 message CreateTransactionRequest {
@@ -30,5 +31,9 @@ message BatchCreateTransactionRequest {
 }
 
 message BatchCreateTransactionResult {
+  repeated Transaction transactions = 1;
+}
+
+message SetupRequest {
   repeated Transaction transactions = 1;
 }

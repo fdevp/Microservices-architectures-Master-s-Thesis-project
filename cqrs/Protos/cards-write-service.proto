@@ -10,6 +10,7 @@ package CardsMicroservice;
 
 service CardsWrite {
   rpc Transfer (TransferRequest) returns (TransferResponse);
+  rpc Setup(SetupRequest) returns (Empty);
 }
 
 message TransferRequest {
@@ -21,4 +22,9 @@ message TransferRequest {
 
 message TransferResponse {
   Transaction transaction = 1;
+}
+
+message SetupRequest {
+  repeated Card cards = 1;
+  repeated Block blocks = 2;
 }

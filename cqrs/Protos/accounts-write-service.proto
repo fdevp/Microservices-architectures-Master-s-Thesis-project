@@ -1,6 +1,5 @@
 syntax = "proto3";
 import "common/transaction.proto";
-import "common/balance.proto";
 import "common/account.proto";
 import "common/transfer.proto";
 import "common/empty.proto";
@@ -12,6 +11,7 @@ package AccountsMicroservice;
 service AccountsWrite {
   rpc Transfer (TransferRequest) returns (TransferResponse);
   rpc BatchTransfer (BatchTransferRequest) returns (BatchTransferResponse);
+  rpc Setup(SetupRequest) returns (Empty);
 }
 
 message TransferRequest {
@@ -30,4 +30,8 @@ message BatchTransferRequest {
 
 message BatchTransferResponse {
   repeated Transaction transactions = 1;
+}
+
+message SetupRequest {
+  repeated Account accounts = 1;
 }

@@ -39,12 +39,5 @@ namespace LoansReadMicroservice
                 .Select(loan => mapper.Map<Loan>(loan));
             return Task.FromResult(new GetLoansResponse { Loans = { loans } });
         }
-
-        public override Task<Empty> Setup(SetupRequest request, ServerCallContext context)
-        {
-            var loans = request.Loans.Select(l => mapper.Map<Repository.Loan>(l));
-            loansRepository.Setup(loans);
-            return Task.FromResult(new Empty());
-        }
     }
 }

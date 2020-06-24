@@ -58,12 +58,5 @@ namespace PaymentsReadMicroservice
             var transactionsResponse = await transactionsClient.FilterAsync(transactionsRequest);
             return new GetTransactionsResult { Transactions = { transactionsResponse.Transactions } };
         }
-
-        public override Task<Empty> Setup(SetupRequest request, Grpc.Core.ServerCallContext context)
-        {
-            var payments = request.Payments.Select(p => mapper.Map<Repository.Payment>(p));
-            paymentsRepository.Setup(payments);
-            return Task.FromResult(new Empty());
-        }
     }
 }

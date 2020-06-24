@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using SharedClasses;
+using SharedClasses.Commands;
 using UsersMicroservice.Repository;
 
 namespace UsersMicroservice
@@ -15,9 +16,12 @@ namespace UsersMicroservice
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            var commandsRepository = new CommandsRepository();
+            services.AddSingleton(commandsRepository);
             services.AddGrpc(options =>
             {
                 options.Interceptors.Add<LoggingInterceptor>("Users");
+                options.Interceptors.Add<CommandsInterceptor>(commandsRepository);
             });
             services.AddSingleton(new UsersRepository());
         }

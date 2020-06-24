@@ -11,6 +11,7 @@ package PaymentsWriteMicroservice;
 service PaymentsWrite {
   rpc Create (CreatePaymentRequest) returns (CreatePaymentResult);
   rpc Cancel (CancelPaymentsRequest) returns (Empty);
+  rpc Setup(SetupRequest) returns (Empty);
 }
 
 message CreatePaymentRequest {
@@ -29,4 +30,8 @@ message CreatePaymentResult {
 message CancelPaymentsRequest {
   int64 flowId = 1;
   repeated string ids = 2;
+}
+
+message SetupRequest {
+  repeated Payment payments = 1;
 }

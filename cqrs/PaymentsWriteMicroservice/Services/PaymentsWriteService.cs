@@ -4,6 +4,7 @@ using AutoMapper;
 using Grpc.Core;
 using Microsoft.Extensions.Logging;
 using PaymentsWriteMicroservice.Repository;
+using SharedClasses.Messaging;
 using static LoansWriteMicroservice.LoansWrite;
 using static TransactionsWriteMicroservice.TransactionsWrite;
 
@@ -15,19 +16,22 @@ namespace PaymentsWriteMicroservice
         private readonly Mapper mapper;
         private readonly TransactionsWriteClient transactionsClient;
         private readonly LoansWriteClient loansClient;
+        private readonly RabbitMqPublisher projectionChannel;
         private readonly PaymentsRepository paymentsRepository;
 
-        public PaymentsWriteService(PaymentsRepository paymentsRepository, ILogger<PaymentsWriteService> logger, Mapper mapper, TransactionsWriteClient transactionsClient, LoansWriteClient loansClient)
+        public PaymentsWriteService(PaymentsRepository paymentsRepository, ILogger<PaymentsWriteService> logger, Mapper mapper, TransactionsWriteClient transactionsClient, LoansWriteClient loansClient, RabbitMqPublisher projectionChannel)
         {
             this.paymentsRepository = paymentsRepository;
             this.logger = logger;
             this.mapper = mapper;
             this.transactionsClient = transactionsClient;
             this.loansClient = loansClient;
+            this.projectionChannel = projectionChannel;
         }
         public override Task<CreatePaymentResult> Create(CreatePaymentRequest request, ServerCallContext context)
         {
             var payment = paymentsRepository.Create(request.Amount, request.StartTimestamp, request.Interval, request.AccountId, request.Recipient);
+            projectionChannel.Publish(new DataProjection<Repository.Payment, string> { Upsert = new[] { payment } });
             return Task.FromResult(new CreatePaymentResult { Payment = mapper.Map<Payment>(payment) });
         }
 
@@ -35,6 +39,16 @@ namespace PaymentsWriteMicroservice
         {
             foreach (var id in request.Ids)
                 paymentsRepository.Cancel(id);
+            var cancelledPayments = request.Ids.Select(id => paymentsRepository.Get(id)).ToArray();
+            projectionChannel.Publish(new DataProjection<Repository.Payment, string> { Upsert = cancelledPayments });
+            return Task.FromResult(new Empty());
+        }
+
+        public override Task<Empty> Setup(SetupRequest request, Grpc.Core.ServerCallContext context)
+        {
+            var payments = request.Payments.Select(p => mapper.Map<Repository.Payment>(p));
+            paymentsRepository.Setup(payments);
+            projectionChannel.Publish(new DataProjection<Repository.Payment, string> { Upsert = payments.ToArray() });
             return Task.FromResult(new Empty());
         }
     }

@@ -17,48 +17,23 @@ namespace AccountsReadMicroservice.Repository
 
         public Account[] GetByUser(string userId)
         {
-            return accounts.Values.Where(a=>a.UserId == userId).ToArray();
+            return accounts.Values.Where(a => a.UserId == userId).ToArray();
         }
 
-        public bool CanTransfer(string sender, string recipient, float amount)
+        public void Upsert(Account[] update)
         {
-            if (!accounts.ContainsKey(sender))
-                return false;
-            if (!accounts.ContainsKey(recipient))
-                return false;
-            if (accounts[sender].Balance < amount)
-                return false;
-            return true;
+            foreach (var account in update)
+            {
+                accounts[account.Id] = account;
+            }
         }
 
-        public void Transfer(string sender, string recipient, float amount)
+        public void Remove(string[] ids)
         {
-            if (!accounts.ContainsKey(sender))
-                throw new ArgumentException("Account not found.");
-            if (!accounts.ContainsKey(recipient))
-                throw new ArgumentException("Recipient not found.");
-            if (accounts[sender].Balance < amount)
-                throw new ArgumentException("Not enough founds on the account.");
-
-            ChangeBalance(recipient, amount);
-            ChangeBalance(sender, amount * (-1));
-        }
-
-        private void ChangeBalance(string id, float amount)
-        {
-            var account = accounts[id];
-            var newBalance = account.Balance + amount;
-            account.SetBalance(newBalance);
-        }
-
-        public void Setup(IEnumerable<Repository.Account> accounts)
-        {
-            this.accounts = accounts.ToDictionary(a => a.Id, a => a);
-        }
-
-        public void TearDown()
-        {
-            this.accounts = new Dictionary<string, Account>();
+            foreach (var id in ids)
+            {
+                accounts.Remove(id);
+            }
         }
     }
 }
