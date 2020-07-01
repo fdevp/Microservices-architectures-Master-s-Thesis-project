@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Jil;
 
 namespace SharedClasses.Messaging
 {
@@ -16,7 +17,7 @@ namespace SharedClasses.Messaging
             this.routing = routing;
         }
 
-        public ConsumingRouter<T> Create(T service)
+        public static ConsumingRouter<T> Create(T service)
         {
             var serviceType = service.GetType();
             var methods = serviceType.GetMethods();
@@ -24,21 +25,33 @@ namespace SharedClasses.Messaging
             return new ConsumingRouter<T>(service, eventHandlers);
         }
 
-        public void RouteEvent(object sender, MqMessage message)
+        public void LinkConsumer(IConsumer consumer)
         {
-            if (!routing.ContainsKey(message.Type))
-                throw new InvalidOperationException("Unknown event routing.");
-
-            var method = routing[message.Type];
-            var data = MessageParser.Parse(message.Type, message.Data);
-            method.Invoke(service, new[] { message.FlowId, data });
+            consumer.Received += RouteEvent;
         }
 
-        private IEnumerable<(string typeName, MethodInfo method)> GetEventHandlersMethods(MethodInfo[] methods)
+        private void RouteEvent(object sender, MqMessage message)
+        {
+            if (!routing.ContainsKey(message.Type))
+                throw new InvalidOperationException("Unknown event.");
+
+            var method = routing[message.Type];
+            var data = Parse(message.Type, message.Data);
+            var context = new MessageContext { FlowId = message.FlowId, Type = message.Type, ReplyTo = message.ReplyTo };
+            method.Invoke(service, new[] { context, data });
+        }
+
+        private object Parse(string typeName, string message)
+        {
+            var type = Type.GetType(typeName);
+            return JSON.Deserialize(message, type);
+        }
+
+        private static IEnumerable<(string typeName, MethodInfo method)> GetEventHandlersMethods(MethodInfo[] methods)
         {
             foreach (var method in methods)
             {
-                var eventHandlerAttribute = (EventHandler)method.GetCustomAttribute(typeof(EventHandler));
+                var eventHandlerAttribute = method.GetCustomAttribute(typeof(EventHandlingMethod)) as EventHandlingMethod;
                 if (eventHandlerAttribute != null)
                     yield return (eventHandlerAttribute.Type, method);
             }

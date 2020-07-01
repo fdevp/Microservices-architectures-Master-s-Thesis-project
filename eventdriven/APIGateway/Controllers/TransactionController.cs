@@ -3,7 +3,6 @@ using APIGateway.Models.Setup;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using static TransactionsWriteMicroservice.TransactionsWrite;
 
 namespace APIGateway.Controllers
 {

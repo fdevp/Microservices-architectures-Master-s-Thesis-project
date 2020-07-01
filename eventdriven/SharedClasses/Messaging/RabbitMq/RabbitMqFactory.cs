@@ -5,24 +5,14 @@ namespace SharedClasses.Messaging.RabbitMq
 {
     public class RabbitMqFactory
     {
-        public IConsumer CreateConsumer(RabbitMqConfig config)
+        private IConnection connection;
+
+        private RabbitMqFactory(IConnection connection)
         {
-            var connectionFactory = new ConnectionFactory
-            {
-                HostName = config.HostName,
-                UserName = config.UserName,
-                Password = config.Password,
-            };
-
-            var connection = connectionFactory.CreateConnection();
-
-            var channel = connection.CreateModel();
-            channel.QueueDeclare(config.QueueName, true, false, false);
-
-            return RabbitMqConsumer.Create(channel, config.QueueName);
+            this.connection = connection;
         }
 
-        public IPublisher CreatePublisher(RabbitMqConfig config)
+        public static RabbitMqFactory Create(RabbitMqConfig config)
         {
             var connectionFactory = new ConnectionFactory
             {
@@ -32,13 +22,26 @@ namespace SharedClasses.Messaging.RabbitMq
             };
 
             var connection = connectionFactory.CreateConnection();
+            return new RabbitMqFactory(connection);
+        }
+
+        public IConsumer CreateConsumer(string queueName)
+        {
             var channel = connection.CreateModel();
-            channel.QueueDeclare(config.QueueName, true, false, false);
+            channel.QueueDeclare(queueName, true, false, false);
+
+            return RabbitMqConsumer.Create(channel, queueName);
+        }
+
+        public IPublisher CreatePublisher(string queueName)
+        {
+            var channel = connection.CreateModel();
+            channel.QueueDeclare(queueName, true, false, false);
 
             var properties = channel.CreateBasicProperties();
             properties.Persistent = true;
 
-            return new RabbitMqPublisher(channel, config.QueueName);
+            return new RabbitMqPublisher(channel, queueName);
         }
     }
 }

@@ -36,7 +36,12 @@ namespace SharedClasses.Messaging
             return tcs.Task;
         }
 
-        public void MessageHandler(object sender, MqMessage message)
+        public void BindConsumer(IConsumer consumer)
+        {
+            consumer.Received += MessageHandler;
+        }
+
+        private void MessageHandler(object sender, MqMessage message)
         {
             this.Callbacks.TryRemove(message.FlowId, out var removed);
             removed?.Invoke(message.Data);

@@ -17,7 +17,7 @@ namespace SharedClasses.Messaging.RabbitMq
             this.queueName = queueName;
         }
 
-        public void Publish(object content, string flowId)
+        public void Publish(string type, object content, string flowId, string replyTo = null)
         {
             using (var sw = new StringWriter())
             {
@@ -25,6 +25,8 @@ namespace SharedClasses.Messaging.RabbitMq
                 var body = Encoding.UTF8.GetBytes(sw.ToString());
                 var properties = channel.CreateBasicProperties();
                 properties.CorrelationId = flowId;
+                properties.Type = type;
+                properties.ReplyTo = replyTo;
 
                 channel.BasicPublish(exchange: "",
                 routingKey: queueName,

@@ -37,7 +37,7 @@ namespace SharedClasses.Messaging.RabbitMq
         private void HandleMessage(object sender, BasicDeliverEventArgs ea)
         {
             var data = Encoding.UTF8.GetString(ea.Body.ToArray());
-            var message = new MqMessage(data, ea.BasicProperties.CorrelationId, ea.BasicProperties.Type);
+            var message = new MqMessage(data, ea.BasicProperties.CorrelationId, ea.BasicProperties.Type, ea.BasicProperties.ReplyTo);
             this.Received.Invoke(this, message);
         }
 
