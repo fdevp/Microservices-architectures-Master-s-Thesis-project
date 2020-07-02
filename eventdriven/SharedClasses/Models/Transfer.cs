@@ -2,11 +2,11 @@ using System;
 
 namespace SharedClasses.Models
 {
-    public class Transfer
+    public class AccountTransfer
     {
-        public string AccountId { get; }
-        public string Recipient { get; }
-        public float Amount { get; }
-        public string Title { get; }
+        public string AccountId { get; set; }
+        public string Recipient { get; set; }
+        public float Amount { get; set; }
+        public string Title { get; set; }
     }
 }

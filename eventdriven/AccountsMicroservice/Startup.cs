@@ -36,7 +36,7 @@ namespace AccountsMicroservice
             var factory = RabbitMqFactory.Create(config);
 
             var publishers = new Dictionary<string, IPublisher>();
-            publishers.Add(Queues.Accounts, factory.CreatePublisher(Queues.APIGateway));
+            publishers.Add(Queues.APIGateway, factory.CreatePublisher(Queues.APIGateway));
             publishers.Add(Queues.Transactions, factory.CreatePublisher(Queues.Transactions));
             services.AddSingleton(new PublishingRouter(publishers));
 

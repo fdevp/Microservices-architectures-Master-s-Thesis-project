@@ -2,8 +2,8 @@ using SharedClasses.Models;
 
 namespace SharedClasses.Events.Accounts
 {
-    public class TransferEvent
+    public class AccountTransferEvent
     {
-        public Transfer Transfer { get; set; }
+        public AccountTransfer Transfer { get; set; }
     }
 }

@@ -66,8 +66,8 @@ namespace AccountsMicroservice
             return Task.CompletedTask;
         }
 
-        [EventHandlingMethod(typeof(TransferEvent))]
-        public Task Transfer(MessageContext context, TransferEvent inputEvent)
+        [EventHandlingMethod(typeof(AccountTransferEvent))]
+        public Task Transfer(MessageContext context, AccountTransferEvent inputEvent)
         {
             if (!accountsRepository.CanTransfer(inputEvent.Transfer.AccountId, inputEvent.Transfer.Recipient, inputEvent.Transfer.Amount))
                 throw new ArgumentException("Cannot transfer founds.");
@@ -107,7 +107,7 @@ namespace AccountsMicroservice
             return Task.CompletedTask;
         }
 
-        private CreateTransactionEvent TransferToCreateTransactionEvent(Transfer inputEvent)
+        private CreateTransactionEvent TransferToCreateTransactionEvent(AccountTransfer inputEvent)
         {
             var account = accountsRepository.Get(inputEvent.AccountId);
             var recipient = accountsRepository.Get(inputEvent.Recipient);

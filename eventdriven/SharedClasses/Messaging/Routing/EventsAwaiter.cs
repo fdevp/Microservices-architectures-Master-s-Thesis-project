@@ -16,7 +16,7 @@ namespace SharedClasses.Messaging
             timeout = TimeSpan.FromSeconds(30);
         }
 
-        public Task<T> AwaitResponse<T>(string flowId) where T : class
+        public Task<T> AwaitResponse<T>(string flowId)
         {
             var cancellationToken = new CancellationTokenSource(timeout).Token;
             var tcs = new TaskCompletionSource<T>();
@@ -34,6 +34,13 @@ namespace SharedClasses.Messaging
             });
 
             return tcs.Task;
+        }
+
+        public Task<T> AwaitResponse<T>(string flowId, Action action)
+        {
+            var awaitTask = AwaitResponse<T>(flowId);
+            action();
+            return awaitTask;
         }
 
         public void BindConsumer(IConsumer consumer)

@@ -3,6 +3,8 @@ using APIGateway.Models.Setup;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using SharedClasses.Events.Transactions;
+using SharedClasses.Messaging;
 
 namespace APIGateway.Controllers
 {
@@ -11,22 +13,23 @@ namespace APIGateway.Controllers
     public class TransactionController : ControllerBase
     {
         private readonly ILogger<TransactionController> logger;
-        private readonly TransactionsWriteClient transactionsWriteClient;
+        private readonly PublishingRouter publishingRouter;
         private readonly Mapper mapper;
 
-        public TransactionController(ILogger<TransactionController> logger, TransactionsWriteClient transactionsWriteClient, Mapper mapper)
+        public TransactionController(ILogger<TransactionController> logger, PublishingRouter publishingRouter, Mapper mapper)
         {
             this.logger = logger;
-            this.transactionsWriteClient = transactionsWriteClient;
+            this.publishingRouter = publishingRouter;
             this.mapper = mapper;
         }
 
         [HttpPost]
         [Route("setup")]
-        public async Task Setup(TransactionsSetup setup)
+        public Task Setup(TransactionsSetup setup)
         {
-            var request = mapper.Map<TransactionsWriteMicroservice.SetupRequest>(setup);
-            await transactionsWriteClient.SetupAsync(request);
+            var payload = mapper.Map<SetupTransactionsEvent>(setup);
+            publishingRouter.Publish(Queues.Accounts, payload, null);
+            return Task.CompletedTask;
         }
     }
 }
