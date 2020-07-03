@@ -12,7 +12,11 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 using SharedClasses.Events.Accounts;
+using SharedClasses.Events.Cards;
+using SharedClasses.Events.Loans;
+using SharedClasses.Events.Payments;
 using SharedClasses.Events.Transactions;
+using SharedClasses.Events.Users;
 using SharedClasses.Messaging;
 using SharedClasses.Messaging.RabbitMq;
 using SharedClasses.Models;
@@ -64,19 +68,18 @@ namespace APIGateway
                 cfg.CreateMap<Transaction, TransactionDTO>().ReverseMap();
                 cfg.CreateMap<Account, AccountDTO>().ReverseMap();
                 cfg.CreateMap<AccountBalance, BalanceDTO>().ReverseMap();
-
-                // cfg.CreateMap<Card, CardDTO>().ReverseMap();
-                // cfg.CreateMap<Payment, PaymentDTO>().ReverseMap();
-                // cfg.CreateMap<User, UserDTO>().ReverseMap();
-                // cfg.CreateMap<Loan, LoanDTO>().ReverseMap();
-                // cfg.CreateMap<Message, MessageDTO>().ReverseMap();
+                cfg.CreateMap<Card, CardDTO>().ReverseMap();
+                cfg.CreateMap<Payment, PaymentDTO>().ReverseMap();
+                cfg.CreateMap<User, UserDTO>().ReverseMap();
+                cfg.CreateMap<Loan, LoanDTO>().ReverseMap();
+                cfg.CreateMap<UserMessage, MessageDTO>().ReverseMap();
 
                 cfg.CreateMap<SetupTransactionsEvent, TransactionsSetup>().ReverseMap();
                 cfg.CreateMap<SetupAccountsEvent, AccountsSetup>().ReverseMap();
-                // cfg.CreateMap<SetupRequest, CardsSetup>().ReverseMap();
-                // cfg.CreateMap<SetupRequest, PaymentsSetup>().ReverseMap();
-                // cfg.CreateMap<SetupRequest, UsersSetup>().ReverseMap();
-                // cfg.CreateMap<SetupRequest, LoansSetup>().ReverseMap();
+                cfg.CreateMap<SetupCardsEvent, CardsSetup>().ReverseMap();
+                cfg.CreateMap<SetupPaymentsEvent, PaymentsSetup>().ReverseMap();
+                cfg.CreateMap<SetupUsersEvent, UsersSetup>().ReverseMap();
+                cfg.CreateMap<SetupLoansEvent, LoansSetup>().ReverseMap();
             });
             return new Mapper(config);
         }
