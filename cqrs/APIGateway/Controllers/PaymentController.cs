@@ -28,21 +28,6 @@ namespace APIGateway.Controllers
             this.mapper = mapper;
         }
 
-        [HttpGet]
-        [Route("loans")]
-        public async Task<PaymentsLoans> Loans([FromQuery(Name = "part")] int part, [FromQuery(Name = "total")] int total)
-        {
-            var flowId = (long)HttpContext.Items["flowId"];
-            var paymentsAndLoansRequest = new GetPaymentsWithLoansRequest { FlowId = flowId, Part = part, TotalParts = total };
-            var paymentsAndLoans = await paymentsReadClient.GetWithLoansAsync(paymentsAndLoansRequest);
-
-            return new PaymentsLoans
-            {
-                Loans = paymentsAndLoans.Loans.Select(l => mapper.Map<LoanDTO>(l)).ToArray(),
-                Payments = paymentsAndLoans.Payments.Select(p => mapper.Map<PaymentDTO>(p)).ToArray()
-            };
-        }
-
         [HttpPost]
         [Route("setup")]
         public async Task Setup(PaymentsSetup setup)

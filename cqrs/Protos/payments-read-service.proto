@@ -10,7 +10,8 @@ package PaymentsReadMicroservice;
 
 service PaymentsRead {
   rpc Get (GetPaymentsRequest) returns (GetPaymentsResult);
-  rpc GetWithLoans (GetPaymentsWithLoansRequest) returns (GetPaymentsWithLoansResult);
+  rpc GetPart (GetPartRequest) returns (GetPaymentsResult);
+  rpc GetByAccounts (GetPaymentsRequest) returns (GetPaymentsResult);
   rpc GetTransactions (GetTransactionsRequest) returns (GetTransactionsResult);
 }
 
@@ -23,17 +24,10 @@ message GetPaymentsResult {
   repeated Payment payments = 1;
 }
 
-message GetPaymentsWithLoansRequest {
+message GetPartRequest {
   int64 flowId = 1;
   int32 part = 2;
   int32 totalParts = 3;
-  repeated string accountIds = 4;
-}
-
-message GetPaymentsWithLoansResult 
-{
-  repeated Payment payments = 1;
-  repeated Loan loans = 2;
 }
 
 message GetTransactionsRequest {

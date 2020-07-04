@@ -25,16 +25,6 @@ namespace APIGateway.Controllers
         }
 
         [HttpPost]
-        [Route("repay")]
-        public Task Repay(BatchInstalments data)
-        {
-            var flowId = HttpContext.Items["flowId"].ToString();
-            var batchEvent = new BatchRepayInstalmentsEvent { Ids = data.RepaidInstalmentsIds };
-            publishingRouter.Publish(Queues.Loans, batchEvent, flowId);
-            return Task.CompletedTask;
-        }
-
-        [HttpPost]
         [Route("setup")]
         public Task Setup(LoansSetup setup)
         {

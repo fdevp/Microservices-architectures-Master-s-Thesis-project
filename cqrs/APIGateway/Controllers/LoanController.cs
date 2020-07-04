@@ -25,14 +25,6 @@ namespace APIGateway.Controllers
         }
 
         [HttpPost]
-        [Route("repay")]
-        public async Task Repay(BatchInstalments data)
-        {
-            var request = new BatchRepayInstalmentsRequest { FlowId = (long)HttpContext.Items["flowId"], Ids = { data.RepaidInstalmentsIds } };
-            await loansWriteClient.BatchRepayInstalmentsAsync(request);
-        }
-
-        [HttpPost]
         [Route("setup")]
         public async Task Setup(LoansSetup setup)
         {

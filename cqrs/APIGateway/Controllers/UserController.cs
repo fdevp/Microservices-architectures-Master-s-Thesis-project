@@ -7,6 +7,7 @@ using APIGateway.Models.Setup;
 using AutoMapper;
 using CardsReadMicroservice;
 using Google.Protobuf.Collections;
+using LoansReadMicroservice;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using PaymentsReadMicroservice;
@@ -14,6 +15,7 @@ using TransactionsReadMicroservice;
 using UsersMicroservice;
 using static AccountsReadMicroservice.AccountsRead;
 using static CardsReadMicroservice.CardsRead;
+using static LoansReadMicroservice.LoansRead;
 using static PaymentsReadMicroservice.PaymentsRead;
 using static TransactionsReadMicroservice.TransactionsRead;
 using static UsersMicroservice.Users;
@@ -29,6 +31,7 @@ namespace APIGateway.Controllers
         private readonly AccountsReadClient accountsReadClient;
         private readonly TransactionsReadClient transactionsReadClient;
         private readonly PaymentsReadClient paymentsReadClient;
+        private readonly LoansReadClient loansReadClient;
         private readonly CardsReadClient cardsReadClient;
         private readonly Mapper mapper;
 
@@ -37,6 +40,7 @@ namespace APIGateway.Controllers
          AccountsReadClient accountsReadClient,
          TransactionsReadClient transactionsReadClient,
          PaymentsReadClient paymentsReadClient,
+         LoansReadClient loansReadClient,
          CardsReadClient cardsReadClient,
          Mapper mapper)
         {
@@ -45,6 +49,7 @@ namespace APIGateway.Controllers
             this.accountsReadClient = accountsReadClient;
             this.transactionsReadClient = transactionsReadClient;
             this.paymentsReadClient = paymentsReadClient;
+            this.loansReadClient = loansReadClient;
             this.cardsReadClient = cardsReadClient;
             this.mapper = mapper;
         }
@@ -75,9 +80,12 @@ namespace APIGateway.Controllers
 
             parallelTasks.Add(Task.Run(async () =>
             {
-                var paymentsAndLoans = await paymentsReadClient.GetWithLoansAsync(new GetPaymentsWithLoansRequest { FlowId = flowId, AccountIds = { accountsIds } });
-                loans = paymentsAndLoans.Loans;
-                payments = paymentsAndLoans.Payments;
+                var paymentsResponse = await paymentsReadClient.GetByAccountsAsync(new GetPaymentsRequest { FlowId = flowId, Ids = { accountsIds } });
+                payments = paymentsResponse.Payments;
+
+                var paymentsIds = payments.Select(p => p.Id);
+                var loansResponse = await loansReadClient.GetPaymentsLoansAsync(new GetPaymentsLoansRequest { FlowId = flowId, PaymentsIds = { paymentsIds } });
+                loans = loansResponse.Loans;
             }));
 
             parallelTasks.Add(Task.Run(async () =>
@@ -114,15 +122,6 @@ namespace APIGateway.Controllers
         {
             var request = new UsersMicroservice.LogoutRequest { FlowId = (long)HttpContext.Items["flowId"], Token = data.Token };
             await usersClient.LogoutAsync(request);
-        }
-
-        [HttpPost]
-        [Route("messages")]
-        public async Task Messages(BatchMessages data)
-        {
-            var messages = data.Messages.Select(m => mapper.Map<Message>(m));
-            var request = new BatchAddMessagesRequest { FlowId = (long)HttpContext.Items["flowId"], Messages = { messages } };
-            await usersClient.BatchAddMessagesAsync(request);
         }
 
         [HttpPost]

@@ -38,18 +38,21 @@ namespace PaymentsReadMicroservice
             return Task.FromResult(new GetPaymentsResult { Payments = { payments } });
         }
 
-        public override async Task<GetPaymentsWithLoansResult> GetWithLoans(GetPaymentsWithLoansRequest request, ServerCallContext context)
+        public override Task<GetPaymentsResult> GetPart(GetPartRequest request, ServerCallContext context)
         {
-            var payments = request.AccountIds.Any() ? paymentsRepository.GetByAccounts(request.AccountIds) : paymentsRepository.Get(request.Part, request.TotalParts);
+            var payments = paymentsRepository.Get(request.Part, request.TotalParts);
             var mapped = payments.Where(payment => payment != null)
                 .Select(p => mapper.Map<Payment>(p))
                 .ToArray();
+            return Task.FromResult(new GetPaymentsResult { Payments = { mapped } });
+        }
 
-            var paymentsIds = payments.Select(p => p.Id);
-            var loansRequest = new GetPaymentsLoansRequest { FlowId = request.FlowId, PaymentsIds = { paymentsIds } };
-            var loansResult = await loansClient.GetPaymentsLoansAsync(loansRequest);
-
-            return new GetPaymentsWithLoansResult { Payments = { mapped }, Loans = { loansResult.Loans } };
+        public override Task<GetPaymentsResult> GetByAccounts(GetPaymentsRequest request, ServerCallContext context)
+        {
+            var payments = paymentsRepository.GetByAccounts(request.Ids)
+                .Select(p => mapper.Map<Payment>(p))
+                .ToArray();
+            return Task.FromResult(new GetPaymentsResult { Payments = { payments } });
         }
 
         public override async Task<GetTransactionsResult> GetTransactions(GetTransactionsRequest request, ServerCallContext context)

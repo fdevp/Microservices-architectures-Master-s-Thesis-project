@@ -33,6 +33,22 @@ namespace PaymentsMicroservice
             return Task.CompletedTask;
         }
 
+        [EventHandlingMethod(typeof(GetPartPaymentsEvent))]
+        public Task GetPart(MessageContext context, GetPartPaymentsEvent inputEvent)
+        {
+            var payments = paymentsRepository.Get(inputEvent.Part, inputEvent.TotalParts);
+            publishingRouter.Publish(context.ReplyTo, new SelectedPaymentsEvent { Payments = payments }, context.FlowId);
+            return Task.CompletedTask;
+        }
+
+        [EventHandlingMethod(typeof(GetPaymentsByAccountsEvent))]
+        public Task GetByAccounts(MessageContext context, GetPaymentsByAccountsEvent inputEvent)
+        {
+            var payments = paymentsRepository.GetByAccounts(inputEvent.AccountsIds);
+            publishingRouter.Publish(context.ReplyTo, new SelectedPaymentsEvent { Payments = payments }, context.FlowId);
+            return Task.CompletedTask;
+        }
+
         [EventHandlingMethod(typeof(CreatePaymentEvent))]
         public Task Create(MessageContext context, CreatePaymentEvent inputEvent)
         {

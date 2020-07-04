@@ -8,6 +8,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using SharedClasses.Events.Accounts;
 using SharedClasses.Events.Cards;
+using SharedClasses.Events.Loans;
+using SharedClasses.Events.Payments;
 using SharedClasses.Events.Transactions;
 using SharedClasses.Events.Users;
 using SharedClasses.Messaging;
@@ -58,12 +60,19 @@ namespace APIGateway.Controllers
                 panel.Transactions = mapper.Map<TransactionDTO[]>(transactionsResponse.Transactions);
             }));
 
-            // parallelTasks.Add(Task.Run(async () =>
-            // {
-            //     var paymentsAndLoans = await paymentsReadClient.GetWithLoansAsync(new GetPaymentsWithLoansRequest { FlowId = flowId, AccountIds = { accountsIds } });
-            //     loans = paymentsAndLoans.Loans;
-            //     payments = paymentsAndLoans.Payments;
-            // }));
+            parallelTasks.Add(Task.Run(async () =>
+            {
+                var paymentsFlowId = mainFlowId + "_p";
+                var paymentsEvent = new GetPaymentsByAccountsEvent { AccountsIds = accountsIds };
+                var paymentsResponse = await eventsAwaiter.AwaitResponse<SelectedPaymentsEvent>(paymentsFlowId, () => publishingRouter.Publish(Queues.Payments, paymentsEvent, paymentsFlowId, Queues.APIGateway));
+                panel.Payments = mapper.Map<PaymentDTO[]>(paymentsResponse.Payments);
+
+                var loansFlowId = mainFlowId + "_l";
+                var paymentsIds = paymentsResponse.Payments.Select(p => p.Id).ToArray();
+                var loansEvent = new GetLoansByPaymentsEvent { PaymentsIds = paymentsIds };
+                var loansResponse = await eventsAwaiter.AwaitResponse<SelectedLoansEvent>(paymentsFlowId, () => publishingRouter.Publish(Queues.Loans, loansEvent, loansFlowId, Queues.APIGateway));
+                panel.Loans = mapper.Map<LoanDTO[]>(loansResponse.Loans);
+            }));
 
             parallelTasks.Add(Task.Run(async () =>
             {
@@ -95,17 +104,6 @@ namespace APIGateway.Controllers
             var flowId = HttpContext.Items["flowId"].ToString();
             var logoutEvent = new LogoutEvent { Token = data.Token };
             publishingRouter.Publish(Queues.Users, logoutEvent, flowId);
-            return Task.CompletedTask;
-        }
-
-        [HttpPost]
-        [Route("messages")]
-        public Task Messages(BatchMessages data)
-        {
-            var flowId = HttpContext.Items["flowId"].ToString();
-            var messages = data.Messages.Select(m => mapper.Map<UserMessage>(m)).ToArray();
-            var batchMessagesEvent = new BatchAddMessagesEvent { Messages = messages };
-            publishingRouter.Publish(Queues.Users, batchMessagesEvent, flowId);
             return Task.CompletedTask;
         }
 

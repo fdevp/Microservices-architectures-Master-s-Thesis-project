@@ -71,17 +71,6 @@ namespace APIGateway.Controllers
         }
 
         [HttpPost]
-        [Route("batchTransfer")]
-        public async Task<TransactionDTO> BatchTransfer(BatchTransfers data)
-        {
-            var transfers = data.Transfers.Select(t => mapper.Map<Transfer>(t));
-            var request = new BatchTransferRequest { FlowId = (long)HttpContext.Items["flowId"], Transfers = { transfers } };
-            var response = await accountsWriteClient.BatchTransferAsync(request);
-            var transcation = mapper.Map<TransactionDTO>(response.Transactions);
-            return transcation;
-        }
-
-        [HttpPost]
         [Route("setup")]
         public async Task Setup(AccountsSetup setup)
         {

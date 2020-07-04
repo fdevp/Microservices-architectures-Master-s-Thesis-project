@@ -74,16 +74,6 @@ namespace APIGateway.Controllers
         }
 
         [HttpPost]
-        [Route("batchTransfer")]
-        public Task BatchTransfer(BatchTransfers data)
-        {
-            var flowId = HttpContext.Items["flowId"].ToString();
-            var payload = new BatchTransferEvent { Transfers = data.Transfers };
-            publishingRouter.Publish(Queues.Accounts, payload, flowId);
-            return Task.CompletedTask;
-        }
-
-        [HttpPost]
         [Route("setup")]
         public Task Setup(AccountsSetup setup)
         {
