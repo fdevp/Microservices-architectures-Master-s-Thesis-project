@@ -32,6 +32,7 @@ namespace SharedClasses.Messaging
 
         private void RouteEvent(object sender, MqMessage message)
         {
+            Console.WriteLine($"Service='' FlowId='{message.FlowId}' Method='{message.Type}' Type='Start'");
             if (!routing.ContainsKey(message.Type))
                 throw new InvalidOperationException("Unknown event.");
 

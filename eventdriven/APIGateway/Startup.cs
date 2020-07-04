@@ -96,9 +96,26 @@ namespace APIGateway
 
         private void AddAwaiter(IServiceCollection services, RabbitMqFactory factory)
         {
-            var consumer = factory.CreateConsumer(Queues.APIGateway);
             var awaiter = new EventsAwaiter();
-            awaiter.BindConsumer(consumer);
+
+            var accountConsumer = factory.CreateConsumer(Queues.Accounts);
+            awaiter.BindConsumer(accountConsumer);
+
+            var transactionsConsumer = factory.CreateConsumer(Queues.Transactions);
+            awaiter.BindConsumer(transactionsConsumer);
+
+            var cardsConsumer = factory.CreateConsumer(Queues.Cards);
+            awaiter.BindConsumer(cardsConsumer);
+
+            var loansConsumer = factory.CreateConsumer(Queues.Loans);
+            awaiter.BindConsumer(loansConsumer);
+
+            var paymentsConsumer = factory.CreateConsumer(Queues.Payments);
+            awaiter.BindConsumer(paymentsConsumer);
+
+            var userConsumer = factory.CreateConsumer(Queues.Users);
+            awaiter.BindConsumer(userConsumer);
+
             services.AddSingleton(awaiter);
         }
 
@@ -108,6 +125,10 @@ namespace APIGateway
             var publishers = new Dictionary<string, IPublisher>();
             publishers.Add(Queues.Accounts, factory.CreatePublisher(Queues.Accounts));
             publishers.Add(Queues.Transactions, factory.CreatePublisher(Queues.Transactions));
+            publishers.Add(Queues.Cards, factory.CreatePublisher(Queues.Cards));
+            publishers.Add(Queues.Loans, factory.CreatePublisher(Queues.Loans));
+            publishers.Add(Queues.Payments, factory.CreatePublisher(Queues.Payments));
+            publishers.Add(Queues.Users, factory.CreatePublisher(Queues.Users));
             services.AddSingleton(new PublishingRouter(publishers));
         }
     }

@@ -3,7 +3,11 @@ using APIGateway.Models.Setup;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using SharedClasses.Events.Accounts;
+using SharedClasses.Events.Cards;
+using SharedClasses.Events.Loans;
+using SharedClasses.Events.Payments;
 using SharedClasses.Events.Transactions;
+using SharedClasses.Events.Users;
 using SharedClasses.Messaging;
 
 namespace APIGateway.Controllers
@@ -26,12 +30,21 @@ namespace APIGateway.Controllers
         [Route("setup")]
         public Task Setup(SetupAll setup)
         {
-            //var usersRequest = mapper.Map<UsersMicroservice.SetupRequest>(setup.UsersSetup);
+            var usersEvent = mapper.Map<SetupUsersEvent>(setup.UsersSetup);
+            this.publishingRouter.Publish(Queues.Users, usersEvent, null);
+
             var accountsEvent = mapper.Map<SetupAccountsEvent>(setup.AccountsSetup);
             this.publishingRouter.Publish(Queues.Accounts, accountsEvent, null);
-            // var cardsRequest = mapper.Map<CardsWriteMicroservice.SetupRequest>(setup.CardsSetup);
-            // var loansRequest = mapper.Map<LoansWriteMicroservice.SetupRequest>(setup.LoansSetup);
-            // var paymentsRequest = mapper.Map<PaymentsWriteMicroservice.SetupRequest>(setup.PaymentsSetup);
+
+            var cardsEvent = mapper.Map<SetupCardsEvent>(setup.CardsSetup);
+            this.publishingRouter.Publish(Queues.Cards, cardsEvent, null);
+
+            var loansEvent = mapper.Map<SetupLoansEvent>(setup.LoansSetup);
+            this.publishingRouter.Publish(Queues.Loans, loansEvent, null);
+
+            var paymentsEvent = mapper.Map<SetupPaymentsEvent>(setup.PaymentsSetup);
+            this.publishingRouter.Publish(Queues.Payments, paymentsEvent, null);
+
             var transactionsEvent = mapper.Map<SetupTransactionsEvent>(setup.TransactionsSetup);
             this.publishingRouter.Publish(Queues.Transactions, transactionsEvent, null);
 
