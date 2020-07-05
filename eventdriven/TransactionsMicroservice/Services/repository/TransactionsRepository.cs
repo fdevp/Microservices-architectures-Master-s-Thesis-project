@@ -47,13 +47,13 @@ namespace TransactionsMicroservice.Repository
         
         private bool SelectTransaction(Transaction transaction, Filters filters)
         {
-            if (filters.Payments.Any() && transaction.PaymentId != null && filters.Payments.Contains(transaction.PaymentId))
+            if (filters.Payments != null && filters.Payments.Any() && transaction.PaymentId != null && filters.Payments.Contains(transaction.PaymentId))
                 return true;
-            if (filters.Cards.Any() && transaction.CardId != null && filters.Cards.Contains(transaction.CardId))
+            if (filters.Cards != null && filters.Cards.Any() && transaction.CardId != null && filters.Cards.Contains(transaction.CardId))
                 return true;
-            if (filters.Recipients.Any() && transaction.Recipient != null && filters.Recipients.Contains(transaction.Recipient))
+            if (filters.Recipients != null && filters.Recipients.Any() && transaction.Recipient != null && filters.Recipients.Contains(transaction.Recipient))
                 return true;
-            if (filters.Senders.Any() && transaction.Sender != null && filters.Senders.Contains(transaction.Sender))
+            if (filters.Senders != null && filters.Senders.Any() && transaction.Sender != null && filters.Senders.Contains(transaction.Sender))
                 return true;
             if (filters.TimestampFrom != null && transaction.Timestamp >= filters.TimestampFrom)
                 return true;

@@ -37,9 +37,9 @@ namespace CardsMicroservice
             Configuration.GetSection("RabbitMq").Bind(config);
             var factory = RabbitMqFactory.Create(config);
 
-            var accountsConsumer = factory.CreateConsumer(Queues.Accounts);
+            var cardsConsumer = factory.CreateConsumer(Queues.Cards);
             var awaiter = new EventsAwaiter();
-            awaiter.BindConsumer(accountsConsumer);
+            awaiter.BindConsumer(cardsConsumer);
             services.AddSingleton(awaiter);
 
             var publishers = new Dictionary<string, IPublisher>();
@@ -50,8 +50,7 @@ namespace CardsMicroservice
 
             var cardsService = services.BuildServiceProvider().GetService<CardsService>();
             var consumingRouter = ConsumingRouter<CardsService>.Create(cardsService);
-            var consumer = factory.CreateConsumer(Queues.Cards);
-            consumingRouter.LinkConsumer(consumer);
+            consumingRouter.LinkConsumer(cardsConsumer);
             services.AddSingleton(consumingRouter);
         }
 

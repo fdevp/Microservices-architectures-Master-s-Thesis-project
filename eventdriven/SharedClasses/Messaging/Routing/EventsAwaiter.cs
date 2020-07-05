@@ -13,7 +13,7 @@ namespace SharedClasses.Messaging
 
         public EventsAwaiter()
         {
-            timeout = TimeSpan.FromSeconds(30);
+            timeout = TimeSpan.FromSeconds(15);
         }
 
         public Task<T> AwaitResponse<T>(string flowId)
@@ -50,8 +50,11 @@ namespace SharedClasses.Messaging
 
         private void MessageHandler(object sender, MqMessage message)
         {
-            this.Callbacks.TryRemove(message.FlowId, out var removed);
-            removed?.Invoke(message.Data);
+            if (message.FlowId != null)
+            {
+                this.Callbacks.TryRemove(message.FlowId, out var removed);
+                removed?.Invoke(message.Data);
+            }
         }
     }
 }

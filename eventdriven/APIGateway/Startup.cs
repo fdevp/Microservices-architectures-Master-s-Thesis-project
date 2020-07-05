@@ -98,23 +98,8 @@ namespace APIGateway
         {
             var awaiter = new EventsAwaiter();
 
-            var accountConsumer = factory.CreateConsumer(Queues.Accounts);
-            awaiter.BindConsumer(accountConsumer);
-
-            var transactionsConsumer = factory.CreateConsumer(Queues.Transactions);
-            awaiter.BindConsumer(transactionsConsumer);
-
-            var cardsConsumer = factory.CreateConsumer(Queues.Cards);
-            awaiter.BindConsumer(cardsConsumer);
-
-            var loansConsumer = factory.CreateConsumer(Queues.Loans);
-            awaiter.BindConsumer(loansConsumer);
-
-            var paymentsConsumer = factory.CreateConsumer(Queues.Payments);
-            awaiter.BindConsumer(paymentsConsumer);
-
-            var userConsumer = factory.CreateConsumer(Queues.Users);
-            awaiter.BindConsumer(userConsumer);
+            var consumer = factory.CreateConsumer(Queues.APIGateway);
+            awaiter.BindConsumer(consumer);
 
             services.AddSingleton(awaiter);
         }

@@ -56,7 +56,7 @@ namespace APIGateway.Controllers
             {
                 var transactionsFlowId = mainFlowId + "_t";
                 var transactionsEvent = new FilterTransactionsEvent { Senders = accountsIds };
-                var transactionsResponse = await eventsAwaiter.AwaitResponse<SelectedTransactionsEvent>(transactionsFlowId, () => publishingRouter.Publish(Queues.Transactions, accountsEvent, transactionsFlowId, Queues.APIGateway));
+                var transactionsResponse = await eventsAwaiter.AwaitResponse<SelectedTransactionsEvent>(transactionsFlowId, () => publishingRouter.Publish(Queues.Transactions, transactionsEvent, transactionsFlowId, Queues.APIGateway));
                 panel.Transactions = mapper.Map<TransactionDTO[]>(transactionsResponse.Transactions);
             }));
 
@@ -70,7 +70,7 @@ namespace APIGateway.Controllers
                 var loansFlowId = mainFlowId + "_l";
                 var paymentsIds = paymentsResponse.Payments.Select(p => p.Id).ToArray();
                 var loansEvent = new GetLoansByPaymentsEvent { PaymentsIds = paymentsIds };
-                var loansResponse = await eventsAwaiter.AwaitResponse<SelectedLoansEvent>(paymentsFlowId, () => publishingRouter.Publish(Queues.Loans, loansEvent, loansFlowId, Queues.APIGateway));
+                var loansResponse = await eventsAwaiter.AwaitResponse<SelectedLoansEvent>(loansFlowId, () => publishingRouter.Publish(Queues.Loans, loansEvent, loansFlowId, Queues.APIGateway));
                 panel.Loans = mapper.Map<LoanDTO[]>(loansResponse.Loans);
             }));
 
@@ -78,7 +78,7 @@ namespace APIGateway.Controllers
             {
                 var cardsFlowId = mainFlowId + "_c";
                 var cardsEvent = new GetCardsByAccountsEvent { AccountsIds = accountsIds };
-                var cardsResponse = await eventsAwaiter.AwaitResponse<SelectedCardsEvent>(cardsFlowId, () => publishingRouter.Publish(Queues.Cards, accountsEvent, cardsFlowId, Queues.APIGateway));
+                var cardsResponse = await eventsAwaiter.AwaitResponse<SelectedCardsEvent>(cardsFlowId, () => publishingRouter.Publish(Queues.Cards, cardsEvent, cardsFlowId, Queues.APIGateway));
                 panel.Cards = mapper.Map<CardDTO[]>(cardsResponse.Cards);
             }));
 

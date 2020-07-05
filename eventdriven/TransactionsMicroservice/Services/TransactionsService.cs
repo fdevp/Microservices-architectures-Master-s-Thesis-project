@@ -58,9 +58,9 @@ namespace TransactionsMicroservice
         {
             var filters = new Filters
             {
-                Cards = inputEvent.Cards.ToHashSet(),
-                Payments = inputEvent.Payments.ToHashSet(),
-                Recipients = inputEvent.Recipients.ToHashSet(),
+                Cards = inputEvent.Cards?.ToHashSet(),
+                Payments = inputEvent.Payments?.ToHashSet(),
+                Recipients = inputEvent.Recipients?.ToHashSet(),
                 Senders = inputEvent.Senders.ToHashSet(),
                 TimestampFrom = inputEvent.TimestampFrom,
                 TimestampTo = inputEvent.TimestampTo,

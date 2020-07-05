@@ -63,7 +63,7 @@ namespace APIGateway.Controllers
                 var balancesFlowId = flowId + "_b";
                 var accountsIds = payments.Select(p => p.AccountId).ToArray();
                 var balancesEvent = new GetBalanceEvent { Ids = accountsIds };
-                var balancesRequest = await eventsAwaiter.AwaitResponse<SelectedBalancesEvent>(balancesFlowId, () => publishingRouter.Publish(Queues.Loans, balancesEvent, balancesFlowId, Queues.APIGateway));
+                var balancesRequest = await eventsAwaiter.AwaitResponse<SelectedBalancesEvent>(balancesFlowId, () => publishingRouter.Publish(Queues.Accounts, balancesEvent, balancesFlowId, Queues.APIGateway));
                 balances = balancesRequest.Balances;
             }));
 
