@@ -3,6 +3,9 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
+    <ProjectReference Include="../SharedClasses/SharedClasses.csproj" />
+  </ItemGroup>
+  <ItemGroup>
     <Protobuf Include="..\Protos\cards-service.proto" GrpcServices="Client"/>
     <Protobuf Include="..\Protos\accounts-service.proto" GrpcServices="Client"/>
     <Protobuf Include="..\Protos\batches-branch-service.proto" GrpcServices="Client"/>

@@ -17,6 +17,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using PanelsBranchMicroservice;
 using PaymentsMicroservice;
+using SharedClasses;
 using UsersMicroservice;
 using static AccountsMicroservice.Accounts;
 using static BatchesBranchMicroservice.BatchesBranch;
@@ -110,26 +111,29 @@ namespace APIGateway
 
         private void ConfigureGrpcConnections(IServiceCollection services)
         {
+            var addresses = new EndpointsAddresses();
+            Configuration.GetSection("Addresses").Bind(addresses);
+
             var httpClientHandler = new HttpClientHandler();
             httpClientHandler.ServerCertificateCustomValidationCallback =
                 HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
             var httpClient = new HttpClient(httpClientHandler);
 
-            services.AddSingleton(new TransactionsClient(CreateChannel(httpClient, "localhost", "5001")));
-            services.AddSingleton(new AccountsClient(CreateChannel(httpClient, "localhost", "5011")));
-            services.AddSingleton(new UsersClient(CreateChannel(httpClient, "localhost", "5012")));
-            services.AddSingleton(new PaymentsClient(CreateChannel(httpClient, "localhost", "5013")));
-            services.AddSingleton(new CardsClient(CreateChannel(httpClient, "localhost", "5014")));
-            services.AddSingleton(new LoansClient(CreateChannel(httpClient, "localhost", "5015")));
 
-            services.AddSingleton(new ReportsBranchClient(CreateChannel(httpClient, "localhost", "5021")));
-            services.AddSingleton(new PanelsBranchClient(CreateChannel(httpClient, "localhost", "5022")));
-            services.AddSingleton(new BatchesBranchClient(CreateChannel(httpClient, "localhost", "5023")));
+            services.AddSingleton(new TransactionsClient(GrpcChannel.ForAddress(addresses.Transactions, new GrpcChannelOptions { HttpClient = httpClient })));
+            services.AddSingleton(new AccountsClient(GrpcChannel.ForAddress(addresses.Accounts, new GrpcChannelOptions { HttpClient = httpClient })));
+            services.AddSingleton(new UsersClient(GrpcChannel.ForAddress(addresses.Users, new GrpcChannelOptions { HttpClient = httpClient })));
+            services.AddSingleton(new PaymentsClient(GrpcChannel.ForAddress(addresses.Payments, new GrpcChannelOptions { HttpClient = httpClient })));
+            services.AddSingleton(new CardsClient(GrpcChannel.ForAddress(addresses.Cards, new GrpcChannelOptions { HttpClient = httpClient })));
+            services.AddSingleton(new LoansClient(GrpcChannel.ForAddress(addresses.Loans, new GrpcChannelOptions { HttpClient = httpClient })));
+
+            services.AddSingleton(new ReportsBranchClient(GrpcChannel.ForAddress(addresses.ReportsBranch, new GrpcChannelOptions { HttpClient = httpClient })));
+            services.AddSingleton(new PanelsBranchClient(GrpcChannel.ForAddress(addresses.PanelBranch, new GrpcChannelOptions { HttpClient = httpClient })));
+            services.AddSingleton(new BatchesBranchClient(GrpcChannel.ForAddress(addresses.BatchBranch, new GrpcChannelOptions { HttpClient = httpClient })));
         }
 
-        private GrpcChannel CreateChannel(HttpClient httpClient, string host, string port)
+        private GrpcChannel CreateChannel(HttpClient httpClient, string address)
         {
-            var address = $"https://{host}:{port}";
             var channel = GrpcChannel.ForAddress(address, new GrpcChannelOptions { HttpClient = httpClient });
             return channel;
         }
