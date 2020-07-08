@@ -131,11 +131,5 @@ namespace APIGateway
             services.AddSingleton(new PanelsBranchClient(GrpcChannel.ForAddress(addresses.PanelBranch, new GrpcChannelOptions { HttpClient = httpClient })));
             services.AddSingleton(new BatchesBranchClient(GrpcChannel.ForAddress(addresses.BatchBranch, new GrpcChannelOptions { HttpClient = httpClient })));
         }
-
-        private GrpcChannel CreateChannel(HttpClient httpClient, string address)
-        {
-            var channel = GrpcChannel.ForAddress(address, new GrpcChannelOptions { HttpClient = httpClient });
-            return channel;
-        }
     }
 }

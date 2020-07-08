@@ -3,6 +3,7 @@ using Grpc.Net.Client;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -17,6 +18,13 @@ namespace PanelsBranchMicroservice
 {
     public class Startup
     {
+        public Startup(IConfiguration configuration)
+        {
+            Configuration = configuration;
+        }
+
+        public IConfiguration Configuration { get; }
+
         // This method gets called by the runtime. Use this method to add services to the container.
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
@@ -53,23 +61,19 @@ namespace PanelsBranchMicroservice
 
         private void ConfigureGrpcConnections(IServiceCollection services)
         {
+            var addresses = new EndpointsAddresses();
+            Configuration.GetSection("Addresses").Bind(addresses);
+
             var httpClientHandler = new HttpClientHandler();
             httpClientHandler.ServerCertificateCustomValidationCallback =
                 HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
             var httpClient = new HttpClient(httpClientHandler);
 
-            services.AddSingleton(new TransactionsClient(CreateChannel(httpClient, "localhost", "5001")));
-            services.AddSingleton(new AccountsClient(CreateChannel(httpClient, "localhost", "5011")));
-            services.AddSingleton(new PaymentsClient(CreateChannel(httpClient, "localhost", "5013")));
-            services.AddSingleton(new CardsClient(CreateChannel(httpClient, "localhost", "5014")));
-            services.AddSingleton(new LoansClient(CreateChannel(httpClient, "localhost", "5015")));
-        }
-
-        private GrpcChannel CreateChannel(HttpClient httpClient, string host, string port)
-        {
-            var address = $"https://{host}:{port}";
-            var channel = GrpcChannel.ForAddress(address, new GrpcChannelOptions { HttpClient = httpClient });
-            return channel;
+            services.AddSingleton(new TransactionsClient(GrpcChannel.ForAddress(addresses.Transactions, new GrpcChannelOptions { HttpClient = httpClient })));
+            services.AddSingleton(new AccountsClient(GrpcChannel.ForAddress(addresses.Accounts, new GrpcChannelOptions { HttpClient = httpClient })));
+            services.AddSingleton(new PaymentsClient(GrpcChannel.ForAddress(addresses.Payments, new GrpcChannelOptions { HttpClient = httpClient })));
+            services.AddSingleton(new CardsClient(GrpcChannel.ForAddress(addresses.Cards, new GrpcChannelOptions { HttpClient = httpClient })));
+            services.AddSingleton(new LoansClient(GrpcChannel.ForAddress(addresses.Loans, new GrpcChannelOptions { HttpClient = httpClient })));
         }
     }
 }

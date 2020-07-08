@@ -1,0 +1,9 @@
+dotnet publish --configuration Release PanelsBranchMicroservice/PanelsBranchMicroservice.csproj --output ../../publish/PanelsBranchMicroservice
+dotnet publish --configuration Release BatchesBranchMicroservice/BatchesBranchMicroservice.csproj --output ../../publish/BatchesBranchMicroservice
+dotnet publish --configuration Release ReportsBranchMicroservice/ReportsBranchMicroservice.csproj --output ../../publish/ReportsBranchMicroservice
+dotnet publish --configuration Release CardsMicroservice/CardsMicroservice.csproj --output ../../publish/CardsMicroservice
+dotnet publish --configuration Release LoansMicroservice/LoansMicroservice.csproj --output ../../publish/LoansMicroservice
+dotnet publish --configuration Release PaymentsMicroservice/PaymentsMicroservice.csproj --output ../../publish/PaymentsMicroservice
+dotnet publish --configuration Release AccountsMicroservice/AccountsMicroservice.csproj --output ../../publish/AccountsMicroservice
+dotnet publish --configuration Release TransactionsMicroservice/TransactionsMicroservice.csproj --output ../../publish/TransactionsMicroservice
+dotnet publish --configuration Release UsersMicroservice/UsersMicroservice.csproj --output ../../publish/UsersMicroservice

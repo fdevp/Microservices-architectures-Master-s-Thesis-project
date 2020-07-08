@@ -22,11 +22,6 @@ namespace UsersMicroservice
             Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
-                    // webBuilder.ConfigureKestrel(options=>{
-                    //     options.ListenLocalhost(5000, o => o.Protocols = 
-                    //          HttpProtocols.Http2);
-                    // });
-
                     webBuilder.UseStartup<Startup>();
                 });
     }
