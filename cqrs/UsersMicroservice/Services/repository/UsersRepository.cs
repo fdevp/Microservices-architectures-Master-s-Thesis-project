@@ -46,12 +46,5 @@ namespace UsersMicroservice.Repository
             this.users = users.ToDictionary(u => u.Login, u => u);
             this.inboxes = inboxes.ToDictionary(i => i.UserId, i => i);
         }
-
-        public void TearDown()
-        {
-            sessions = new Dictionary<string, Session>();
-            users = new Dictionary<string, User>();
-            inboxes = new Dictionary<string, Inbox>();
-        }
     }
 }

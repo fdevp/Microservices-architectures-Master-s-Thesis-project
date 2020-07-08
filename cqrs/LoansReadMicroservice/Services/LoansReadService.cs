@@ -33,7 +33,7 @@ namespace LoansReadMicroservice
             return Task.FromResult(new GetLoansResponse { Loans = { loans } });
         }
 
-        public override Task<GetLoansResponse> GetPaymentsLoans(GetPaymentsLoansRequest request, ServerCallContext context)
+        public override Task<GetLoansResponse> GetLoansByPayments(GetLoansByPaymentsRequest request, ServerCallContext context)
         {
             var loans = loansRepository.GetByPayment(request.PaymentsIds)
                 .Select(loan => mapper.Map<Loan>(loan));

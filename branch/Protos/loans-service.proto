@@ -9,9 +9,8 @@ package LoansMicroservice;
 service Loans {
   rpc BatchRepayInstalments (BatchRepayInstalmentsRequest) returns (Empty);
   rpc Get (GetLoansRequest) returns (GetLoansResponse);
-  rpc GetPaymentsLoans (GetPaymentsLoansRequest) returns (GetLoansResponse);
+  rpc GetLoansByPayments (GetLoansByPaymentsRequest) returns (GetLoansResponse);
   rpc Setup(SetupRequest) returns (Empty);
-  rpc TearDown(Empty) returns (Empty);
 }
 
 message BatchRepayInstalmentsRequest {
@@ -24,7 +23,7 @@ message GetLoansRequest {
   repeated string ids = 2;
 }
 
-message GetPaymentsLoansRequest {
+message GetLoansByPaymentsRequest {
   int64 flowId = 1;
   repeated string paymentsIds = 2;
 }

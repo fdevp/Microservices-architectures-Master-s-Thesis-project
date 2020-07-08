@@ -39,11 +39,6 @@ namespace TransactionsWriteMicroservice.Repository
             this.transactions = transactions.ToDictionary(t => t.Id, t => t);
         }
 
-        public void TearDown()
-        {
-            this.transactions = new Dictionary<string, Transaction>();
-        }
-
         private bool SelectTransaction(Transaction transaction, Filters filters)
         {
             if (filters.Payments.Any() && transaction.PaymentId != null && filters.Payments.Contains(transaction.PaymentId))

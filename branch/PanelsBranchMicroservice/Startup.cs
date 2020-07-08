@@ -31,7 +31,7 @@ namespace PanelsBranchMicroservice
         {
             services.AddGrpc(options =>
             {
-                options.Interceptors.Add<LoggingInterceptor>("Panels_branch");
+                options.Interceptors.Add<LoggingInterceptor>("PanelsBranch");
             });
             ConfigureGrpcConnections(services);
         }

@@ -96,7 +96,7 @@ namespace APIGateway
 
         private void AddAwaiter(IServiceCollection services, RabbitMqFactory factory)
         {
-            var awaiter = new EventsAwaiter();
+            var awaiter = new EventsAwaiter("APIGateway");
 
             var consumer = factory.CreateConsumer(Queues.APIGateway);
             awaiter.BindConsumer(consumer);

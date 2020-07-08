@@ -30,7 +30,7 @@ namespace BatchesBranchMicroservice
         {
             services.AddGrpc(options =>
             {
-                options.Interceptors.Add<LoggingInterceptor>("Batches_branch");
+                options.Interceptors.Add<LoggingInterceptor>("BatchesBranch");
             });
             CreateClients(services);
         }

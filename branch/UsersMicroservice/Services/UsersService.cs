@@ -47,11 +47,5 @@ namespace UsersMicroservice
             usersRepository.Setup(users, inboxes);
             return Task.FromResult(new Empty());
         }
-
-        public override Task<Empty> TearDown(Empty request, ServerCallContext context)
-        {
-            usersRepository.TearDown();
-            return Task.FromResult(new Empty());
-        }
     }
 }

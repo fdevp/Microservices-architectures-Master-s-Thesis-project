@@ -43,10 +43,5 @@ namespace LoansWriteMicroservice.Repository
         {
             this.loans = loans.ToDictionary(l => l.Id, l => l);
         }
-
-        public void TearDown()
-        {
-            this.loans = new Dictionary<string, Loan>();
-        }
     }
 }

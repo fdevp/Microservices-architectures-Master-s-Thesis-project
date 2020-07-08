@@ -95,11 +95,5 @@ namespace CardsMicroservice
             cardsRepository.Setup(cards, blocks);
             return Task.FromResult(new Empty());
         }
-
-        public override Task<Empty> TearDown(Empty request, ServerCallContext context)
-        {
-            cardsRepository.TearDown();
-            return Task.FromResult(new Empty());
-        }
     }
 }

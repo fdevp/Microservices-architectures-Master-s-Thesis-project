@@ -64,7 +64,7 @@ namespace PanelsBranchMicroservice
 
             parallelTasks.Add(Task.Run(async () =>
             {
-                var paymentsAndLoans = await paymentsClient.GetWithLoansAsync(new GetPaymentsWithLoansRequest { FlowId = request.FlowId, AccountIds = { accountsIds } });
+                var paymentsAndLoans = await paymentsClient.GetByAccountAsync(new GetByAccountRequest { FlowId = request.FlowId, AccountIds = { accountsIds } });
                 loans = paymentsAndLoans.Loans;
                 payments = paymentsAndLoans.Payments;
             }));

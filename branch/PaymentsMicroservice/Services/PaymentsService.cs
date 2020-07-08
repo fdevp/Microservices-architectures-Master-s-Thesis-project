@@ -40,18 +40,16 @@ namespace PaymentsMicroservice
             return Task.FromResult(new GetPaymentsResult { Payments = { payments } });
         }
 
-        public override async Task<GetPaymentsWithLoansResult> GetWithLoans(GetPaymentsWithLoansRequest request, ServerCallContext context)
+        public override Task<GetPaymentsWithLoansResult> GetByAccount(GetByAccountRequest request, ServerCallContext context)
         {
-            var payments = request.AccountIds.Any() ? paymentsRepository.GetByAccounts(request.AccountIds) : paymentsRepository.Get(request.Part, request.TotalParts);
-            var mapped = payments.Where(payment => payment != null)
-                .Select(p => mapper.Map<Payment>(p))
-                .ToArray();
+            var payments = paymentsRepository.GetByAccounts(request.AccountIds);
+            return WithLoans(payments, request.FlowId);
+        }
 
-            var paymentsIds = payments.Select(p => p.Id);
-            var loansRequest = new GetPaymentsLoansRequest { FlowId = request.FlowId, PaymentsIds = { paymentsIds } };
-            var loansResult = await loansClient.GetPaymentsLoansAsync(loansRequest);
-
-            return new GetPaymentsWithLoansResult { Payments = { mapped }, Loans = { loansResult.Loans } };
+        public override Task<GetPaymentsWithLoansResult> GetPart(GetPartRequest request, ServerCallContext context)
+        {
+            var payments = paymentsRepository.Get(request.Part, request.TotalParts);
+            return WithLoans(payments, request.FlowId);
         }
 
         public override Task<CreatePaymentResult> Create(CreatePaymentRequest request, ServerCallContext context)
@@ -81,10 +79,17 @@ namespace PaymentsMicroservice
             return Task.FromResult(new Empty());
         }
 
-        public override Task<Empty> TearDown(Empty request, Grpc.Core.ServerCallContext context)
+        private async Task<GetPaymentsWithLoansResult> WithLoans(Repository.Payment[] payments, long flowId)
         {
-            paymentsRepository.TearDown();
-            return Task.FromResult(new Empty());
+            var mapped = payments.Where(payment => payment != null)
+                            .Select(p => mapper.Map<Payment>(p))
+                            .ToArray();
+
+            var paymentsIds = payments.Select(p => p.Id);
+            var loansRequest = new GetLoansByPaymentsRequest { FlowId = flowId, PaymentsIds = { paymentsIds } };
+            var loansResult = await loansClient.GetLoansByPaymentsAsync(loansRequest);
+
+            return new GetPaymentsWithLoansResult { Payments = { mapped }, Loans = { loansResult.Loans } };
         }
     }
 }

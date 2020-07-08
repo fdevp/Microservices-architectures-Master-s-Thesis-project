@@ -30,12 +30,5 @@ namespace APIGateway.Controllers
             var request = mapper.Map<SetupRequest>(setup);
             await loansClient.SetupAsync(request);
         }
-
-        [HttpPost]
-        [Route("teardown")]
-        public async Task TearDown()
-        {
-            await loansClient.TearDownAsync(new Empty());
-        }
     }
 }

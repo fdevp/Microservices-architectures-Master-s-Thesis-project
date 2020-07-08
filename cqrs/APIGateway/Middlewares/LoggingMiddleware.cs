@@ -21,7 +21,7 @@ namespace APIGateway.Middlewares
             var flowId = FlowIdProvider.Create();
             httpContext.Items.Add("flowId", flowId);
 
-            logger.LogInformation($"Service='API Gateway' FlowId='{flowId}' Method='{httpContext.Request.Path}' Type='Start'");
+            logger.LogInformation($"Service='APIGateway' FlowId='{flowId}' Method='{httpContext.Request.Path}' Type='Start'");
             var stopwatch = Stopwatch.StartNew();
             try
             {
@@ -29,7 +29,7 @@ namespace APIGateway.Middlewares
             }
             finally
             {
-                logger.LogInformation($"Service='API Gateway' FlowId='{flowId}' Method='{httpContext.Request.Path}' Type='End' Processing='{stopwatch.ElapsedMilliseconds}'");
+                logger.LogInformation($"Service='APIGateway' FlowId='{flowId}' Method='{httpContext.Request.Path}' Type='End' Processing='{stopwatch.ElapsedMilliseconds}'");
             }
         }
     }

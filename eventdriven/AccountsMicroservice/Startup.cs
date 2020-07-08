@@ -42,7 +42,7 @@ namespace AccountsMicroservice
 
             var accountsService = services.BuildServiceProvider().GetService<AccountsService>();
 
-            var consumingRouter = ConsumingRouter<AccountsService>.Create(accountsService);
+            var consumingRouter = ConsumingRouter<AccountsService>.Create(accountsService, "Accounts");
             var consumer = factory.CreateConsumer(Queues.Accounts);
             consumingRouter.LinkConsumer(consumer);
             services.AddSingleton(consumingRouter);

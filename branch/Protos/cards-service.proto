@@ -14,7 +14,6 @@ service Cards {
   rpc GetTransactions (GetTransactionsRequest) returns (GetTransactionsResponse);
   rpc Transfer (TransferRequest) returns (TransferResponse);
   rpc Setup(SetupRequest) returns (Empty);
-  rpc TearDown(Empty) returns (Empty);
 }
 
 message Block {

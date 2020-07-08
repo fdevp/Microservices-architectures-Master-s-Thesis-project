@@ -67,13 +67,5 @@ namespace APIGateway.Controllers
             var request = mapper.Map<SetupRequest>(setup);
             await accountClient.SetupAsync(request);
         }
-
-        [HttpPost]
-        [Route("teardown")]
-        public async Task TearDown()
-        {
-            await accountClient.TearDownAsync(new Empty());
-        }
-
     }
 }

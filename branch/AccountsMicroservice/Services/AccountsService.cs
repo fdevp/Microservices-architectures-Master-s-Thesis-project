@@ -91,12 +91,6 @@ namespace AccountsMicroservice
             return Task.FromResult(new Empty());
         }
 
-        public override Task<Empty> TearDown(Empty request, ServerCallContext context)
-        {
-            accountsRepository.TearDown();
-            return Task.FromResult(new Empty());
-        }
-
         private CreateTransactionRequest CreateRequest(long flowId, Transfer request)
         {
             var account = accountsRepository.Get(request.AccountId);

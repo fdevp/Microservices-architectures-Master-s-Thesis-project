@@ -63,17 +63,5 @@ namespace APIGateway.Controllers
             var transactionsRequest = mapper.Map<TransactionsMicroservice.SetupRequest>(setup.TransactionsSetup);
             await transactionsClient.SetupAsync(transactionsRequest);
         }
-
-        [HttpPost]
-        [Route("teardown")]
-        public async Task TearDown()
-        {
-            await accountsClient.TearDownAsync(new Empty());
-            await cardsClient.TearDownAsync(new Empty());
-            await loansClient.TearDownAsync(new Empty());
-            await paymentsClient.TearDownAsync(new Empty());
-            await transactionsClient.TearDownAsync(new Empty());
-            await usersClient.TearDownAsync(new Empty());
-        }
     }
 }

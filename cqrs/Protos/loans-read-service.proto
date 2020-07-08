@@ -8,7 +8,7 @@ package LoansMicroservice;
 
 service LoansRead {
   rpc Get (GetLoansRequest) returns (GetLoansResponse);
-  rpc GetPaymentsLoans (GetPaymentsLoansRequest) returns (GetLoansResponse);
+  rpc GetLoansByPayments (GetLoansByPaymentsRequest) returns (GetLoansResponse);
 }
 
 message GetLoansRequest {
@@ -16,7 +16,7 @@ message GetLoansRequest {
   repeated string ids = 2;
 }
 
-message GetPaymentsLoansRequest {
+message GetLoansByPaymentsRequest {
   int64 flowId = 1;
   repeated string paymentsIds = 2;
 }

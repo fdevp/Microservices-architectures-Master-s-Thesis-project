@@ -42,7 +42,7 @@ namespace LoansMicroservice
 
             var loansService = services.BuildServiceProvider().GetService<LoansService>();
 
-            var consumingRouter = ConsumingRouter<LoansService>.Create(loansService);
+            var consumingRouter = ConsumingRouter<LoansService>.Create(loansService, "Loans");
             var consumer = factory.CreateConsumer(Queues.Loans);
             consumingRouter.LinkConsumer(consumer);
             services.AddSingleton(consumingRouter);

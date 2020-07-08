@@ -11,7 +11,6 @@ service Transactions {
   rpc Create (CreateTransactionRequest) returns (CreateTransactionResult);
   rpc BatchCreate (BatchCreateTransactionRequest) returns (BatchCreateTransactionResult);
   rpc Setup(SetupRequest) returns (Empty);
-  rpc TearDown(Empty) returns (Empty);
 }
 
 message GetTransactionsRequest {

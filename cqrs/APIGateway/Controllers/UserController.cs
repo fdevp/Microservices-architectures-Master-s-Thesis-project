@@ -84,7 +84,7 @@ namespace APIGateway.Controllers
                 payments = paymentsResponse.Payments;
 
                 var paymentsIds = payments.Select(p => p.Id);
-                var loansResponse = await loansReadClient.GetPaymentsLoansAsync(new GetPaymentsLoansRequest { FlowId = flowId, PaymentsIds = { paymentsIds } });
+                var loansResponse = await loansReadClient.GetLoansByPaymentsAsync(new GetLoansByPaymentsRequest { FlowId = flowId, PaymentsIds = { paymentsIds } });
                 loans = loansResponse.Loans;
             }));
 

@@ -43,10 +43,5 @@ namespace PaymentsWriteMicroservice.Repository
         {
             this.payments = payments.ToDictionary(p => p.Id, p => p);
         }
-
-        public void TearDown()
-        {
-            this.payments = new Dictionary<string, Payment>();
-        }
     }
 }

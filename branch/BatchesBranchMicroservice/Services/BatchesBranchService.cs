@@ -38,8 +38,8 @@ namespace BatchesBranchMicroservice
 
         public override async Task<GetDataToProcessResponse> Get(GetDataToProcessRequest request, ServerCallContext context)
         {
-            var paymentsAndLoansRequest = new GetPaymentsWithLoansRequest { FlowId = request.FlowId, Part = request.Part, TotalParts = request.TotalParts };
-            var paymentsAndLoans = await paymentsClient.GetWithLoansAsync(paymentsAndLoansRequest);
+            var paymentsAndLoansRequest = new GetPartRequest { FlowId = request.FlowId, Part = request.Part, TotalParts = request.TotalParts };
+            var paymentsAndLoans = await paymentsClient.GetPartAsync(paymentsAndLoansRequest);
 
             var paymentAccounts = paymentsAndLoans.Payments.Select(p => p.AccountId);
             var accountsRequest = new GetBalanceRequest { FlowId = request.FlowId, Ids = { paymentAccounts } };
@@ -56,25 +56,32 @@ namespace BatchesBranchMicroservice
         public override async Task<Empty> Process(ProcessBatchRequest request, ServerCallContext context)
         {
             var tasks = new List<Task>();
-            tasks.Add(Task.Run(async () => await usersClient.BatchAddMessagesAsync(new BatchAddMessagesRequest
-            {
-                FlowId = request.FlowId,
-                Messages = { request.Messages }
-            })));
+            if (request.Messages.Count > 0)
+                tasks.Add(Task.Run(async () => await usersClient.BatchAddMessagesAsync(new BatchAddMessagesRequest
+                {
+                    FlowId = request.FlowId,
+                    Messages = { request.Messages }
+                })));
 
-            tasks.Add(Task.Run(async () => await accountsClient.BatchTransferAsync(new BatchTransferRequest
-            {
-                FlowId = request.FlowId,
-                Transfers = { request.Transfers }
-            })));
 
-            tasks.Add(Task.Run(async () => await loansClient.BatchRepayInstalmentsAsync(new BatchRepayInstalmentsRequest
-            {
-                FlowId = request.FlowId,
-                Ids = { request.RepaidInstalmentsIds }
-            })));
+            if (request.Transfers.Count > 0)
+                tasks.Add(Task.Run(async () => await accountsClient.BatchTransferAsync(new BatchTransferRequest
+                {
+                    FlowId = request.FlowId,
+                    Transfers = { request.Transfers }
+                })));
 
-            await Task.WhenAll(tasks.ToArray());
+
+            if (request.RepaidInstalmentsIds.Count > 0)
+                tasks.Add(Task.Run(async () => await loansClient.BatchRepayInstalmentsAsync(new BatchRepayInstalmentsRequest
+                {
+                    FlowId = request.FlowId,
+                    Ids = { request.RepaidInstalmentsIds }
+                })));
+
+
+            if (tasks.Count > 0)
+                await Task.WhenAll(tasks.ToArray());
 
             return new Empty();
         }

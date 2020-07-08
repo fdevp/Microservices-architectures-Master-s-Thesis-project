@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Jil;
@@ -8,12 +9,14 @@ namespace SharedClasses.Messaging
 {
     public class EventsAwaiter
     {
+        private readonly string serviceName;
         private ConcurrentDictionary<string, Action<string>> Callbacks = new ConcurrentDictionary<string, Action<string>>();
         private TimeSpan timeout;
 
-        public EventsAwaiter()
+        public EventsAwaiter(string serviceName)
         {
             timeout = TimeSpan.FromSeconds(15);
+            this.serviceName = serviceName;
         }
 
         public Task<T> AwaitResponse<T>(string flowId)
@@ -52,8 +55,18 @@ namespace SharedClasses.Messaging
         {
             if (message.FlowId != null)
             {
-                this.Callbacks.TryRemove(message.FlowId, out var removed);
-                removed?.Invoke(message.Data);
+                this.Callbacks.TryRemove(message.FlowId, out var callback);
+
+                Console.WriteLine($"Service='{serviceName}' FlowId='{message.FlowId}' Method='{message.Type}' Type='Start'");
+                var stopwatch = Stopwatch.StartNew();
+                try
+                {
+                    callback?.Invoke(message.Data);
+                }
+                finally
+                {
+                    Console.WriteLine($"Service='{serviceName}' FlowId='{message.FlowId}' Method='{message.Type}' Type='End'");
+                }
             }
         }
     }

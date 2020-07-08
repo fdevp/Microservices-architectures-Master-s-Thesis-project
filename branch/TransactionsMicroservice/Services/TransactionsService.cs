@@ -68,10 +68,5 @@ namespace TransactionsMicroservice
             transactionsRepository.Setup(transactions);
             return Task.FromResult(new Empty());
         }
-
-        public override Task<Empty> TearDown(Empty request, ServerCallContext context)
-        {
-            return Task.FromResult(new Empty());
-        }
     }
 }

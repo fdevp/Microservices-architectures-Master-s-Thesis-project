@@ -45,7 +45,7 @@ namespace UsersMicroservice
 
             var usersService = services.BuildServiceProvider().GetService<UsersService>();
 
-            var consumingRouter = ConsumingRouter<UsersService>.Create(usersService);
+            var consumingRouter = ConsumingRouter<UsersService>.Create(usersService, "Users");
             var consumer = factory.CreateConsumer(Queues.Users);
             consumingRouter.LinkConsumer(consumer);
             services.AddSingleton(consumingRouter);

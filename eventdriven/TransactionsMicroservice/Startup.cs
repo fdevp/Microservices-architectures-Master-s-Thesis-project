@@ -40,7 +40,7 @@ namespace TransactionsMicroservice
             services.AddSingleton(new PublishingRouter(publishers));
 
             var transactionsService = services.BuildServiceProvider().GetService<TransactionsService>();
-            var consumingRouter = ConsumingRouter<TransactionsService>.Create(transactionsService);
+            var consumingRouter = ConsumingRouter<TransactionsService>.Create(transactionsService, "Transactions");
 
             var consumer = factory.CreateConsumer(Queues.Transactions);
             consumingRouter.LinkConsumer(consumer);

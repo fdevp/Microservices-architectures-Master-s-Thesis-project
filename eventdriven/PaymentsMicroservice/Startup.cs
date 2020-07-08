@@ -41,7 +41,7 @@ namespace PaymentsMicroservice
 
             var paymentsService = services.BuildServiceProvider().GetService<PaymentsService>();
 
-            var consumingRouter = ConsumingRouter<PaymentsService>.Create(paymentsService);
+            var consumingRouter = ConsumingRouter<PaymentsService>.Create(paymentsService, "Payments");
             var consumer = factory.CreateConsumer(Queues.Payments);
             consumingRouter.LinkConsumer(consumer);
             services.AddSingleton(consumingRouter);
