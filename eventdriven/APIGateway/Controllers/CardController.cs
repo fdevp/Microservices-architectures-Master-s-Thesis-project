@@ -5,6 +5,7 @@ using APIGateway.Models.Setup;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using SharedClasses.Events;
 using SharedClasses.Events.Cards;
 using SharedClasses.Events.Transactions;
 using SharedClasses.Messaging;
@@ -31,9 +32,9 @@ namespace APIGateway.Controllers
 
         [HttpPost]
         [Route("transfer")]
-        public async Task<TransactionDTO> Transfer(CardTransfer data)
+        public async Task<TransactionDTO> Transfer(Transfer transfer)
         {
-            var transferEvent = mapper.Map<CardTransferEvent>(data);
+            var transferEvent = new TransferEvent { Transfer = transfer };
             var flowId = HttpContext.Items["flowId"].ToString();
             var response = await eventsAwaiter.AwaitResponse<SelectedTransactionsEvent>(flowId, () => publishingRouter.Publish(Queues.Cards, transferEvent, flowId, Queues.APIGateway));
             var transaction = response.Transactions.Single();

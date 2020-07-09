@@ -62,7 +62,7 @@ namespace APIGateway.Controllers
             {
                 var balancesFlowId = flowId + "_b";
                 var accountsIds = payments.Select(p => p.AccountId).ToArray();
-                var balancesEvent = new GetBalanceEvent { Ids = accountsIds };
+                var balancesEvent = new GetBalancesEvent { Ids = accountsIds };
                 var balancesRequest = await eventsAwaiter.AwaitResponse<SelectedBalancesEvent>(balancesFlowId, () => publishingRouter.Publish(Queues.Accounts, balancesEvent, balancesFlowId, Queues.APIGateway));
                 balances = balancesRequest.Balances;
             }));
@@ -88,10 +88,9 @@ namespace APIGateway.Controllers
                 publishingRouter.Publish(Queues.Users, messagesEvent, flowId);
             }
 
-            var transfers = data.Transfers.Select(t => mapper.Map<AccountTransfer>(t)).ToArray();
-            if (messages.Length > 0)
+            if (data.Transfers.Length > 0)
             {
-                var transfersEvent = new BatchTransferEvent { Transfers = transfers };
+                var transfersEvent = new BatchTransferEvent { Transfers = data.Transfers };
                 publishingRouter.Publish(Queues.Accounts, transfersEvent, flowId);
             }
 

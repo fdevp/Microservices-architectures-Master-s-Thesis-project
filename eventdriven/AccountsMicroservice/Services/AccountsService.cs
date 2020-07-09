@@ -46,8 +46,8 @@ namespace AccountsMicroservice
         }
 
 
-        [EventHandlingMethod(typeof(GetBalanceEvent))]
-        public Task GetBalance(MessageContext context, GetBalanceEvent inputEvent)
+        [EventHandlingMethod(typeof(GetBalancesEvent))]
+        public Task GetBalances(MessageContext context, GetBalancesEvent inputEvent)
         {
             var balances = inputEvent.Ids.Select(id => accountsRepository.Get(id))
                 .Where(account => account != null)
@@ -66,8 +66,8 @@ namespace AccountsMicroservice
             return Task.CompletedTask;
         }
 
-        [EventHandlingMethod(typeof(AccountTransferEvent))]
-        public Task Transfer(MessageContext context, AccountTransferEvent inputEvent)
+        [EventHandlingMethod(typeof(TransferEvent))]
+        public Task Transfer(MessageContext context, TransferEvent inputEvent)
         {
             if (!accountsRepository.CanTransfer(inputEvent.Transfer.AccountId, inputEvent.Transfer.Recipient, inputEvent.Transfer.Amount))
                 throw new ArgumentException("Cannot transfer founds.");
@@ -107,7 +107,7 @@ namespace AccountsMicroservice
             return Task.CompletedTask;
         }
 
-        private CreateTransactionEvent TransferToCreateTransactionEvent(AccountTransfer inputEvent)
+        private CreateTransactionEvent TransferToCreateTransactionEvent(Transfer inputEvent)
         {
             var account = accountsRepository.Get(inputEvent.AccountId);
             var recipient = accountsRepository.Get(inputEvent.Recipient);
@@ -117,7 +117,8 @@ namespace AccountsMicroservice
                 Sender = inputEvent.AccountId,
                 Recipient = inputEvent.Recipient,
                 Title = inputEvent.Title,
-                Amount = inputEvent.Amount
+                Amount = inputEvent.Amount,
+                CardId = inputEvent.CardId
             };
 
             return transcation;

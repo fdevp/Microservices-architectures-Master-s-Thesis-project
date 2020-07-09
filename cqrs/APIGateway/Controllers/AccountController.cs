@@ -44,18 +44,18 @@ namespace APIGateway.Controllers
         [Route("balance/{accountId}")]
         public async Task<float> Balance(string accountId)
         {
-            var request = new GetBalanceRequest { FlowId = (long)HttpContext.Items["flowId"], Ids = { accountId } };
-            var repsonse = await accountsReadClient.GetBalanceAsync(request);
+            var request = new GetBalancesRequest { FlowId = (long)HttpContext.Items["flowId"], Ids = { accountId } };
+            var repsonse = await accountsReadClient.GetBalancesAsync(request);
             var balance = repsonse.Balances.Single();
-            return balance.Balance_;
+            return balance.Balance;
         }
 
         [HttpGet]
         [Route("balances")]
         public async Task<BalanceDTO[]> Balance(string[] ids)
         {
-            var request = new GetBalanceRequest { FlowId = (long)HttpContext.Items["flowId"], Ids = { ids } };
-            var response = await accountsReadClient.GetBalanceAsync(request);
+            var request = new GetBalancesRequest { FlowId = (long)HttpContext.Items["flowId"], Ids = { ids } };
+            var response = await accountsReadClient.GetBalancesAsync(request);
             return response.Balances.Select(b => mapper.Map<BalanceDTO>(b)).ToArray();
         }
 

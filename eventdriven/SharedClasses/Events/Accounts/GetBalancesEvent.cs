@@ -1,6 +1,6 @@
 namespace SharedClasses.Events.Accounts
 {
-    public class GetBalanceEvent
+    public class GetBalancesEvent
     {
         public string[] Ids { get; set; }
     }

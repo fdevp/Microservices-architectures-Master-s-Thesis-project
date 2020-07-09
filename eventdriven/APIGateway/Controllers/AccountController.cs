@@ -6,6 +6,7 @@ using APIGateway.Models.Setup;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using SharedClasses.Events;
 using SharedClasses.Events.Accounts;
 using SharedClasses.Events.Transactions;
 using SharedClasses.Messaging;
@@ -46,7 +47,7 @@ namespace APIGateway.Controllers
         public async Task<float> Balance(string accountId)
         {
             var flowId = HttpContext.Items["flowId"].ToString();
-            var payload = new GetBalanceEvent { Ids = new[] { accountId } };
+            var payload = new GetBalancesEvent { Ids = new[] { accountId } };
             var response = await eventsAwaiter.AwaitResponse<SelectedBalancesEvent>(flowId, () => publishingRouter.Publish(Queues.Accounts, payload, flowId, Queues.APIGateway));
             var balance = response.Balances.Single();
             return balance.Balance;
@@ -57,17 +58,17 @@ namespace APIGateway.Controllers
         public async Task<BalanceDTO[]> Balance(string[] ids)
         {
             var flowId = HttpContext.Items["flowId"].ToString();
-            var payload = new GetBalanceEvent { Ids = ids };
+            var payload = new GetBalancesEvent { Ids = ids };
             var response = await eventsAwaiter.AwaitResponse<SelectedBalancesEvent>(flowId, () => publishingRouter.Publish(Queues.Accounts, payload, flowId, Queues.APIGateway));
             return response.Balances.Select(b => mapper.Map<BalanceDTO>(b)).ToArray();
         }
 
         [HttpPost]
         [Route("transfer")]
-        public async Task<TransactionDTO> Transfer(AccountTransfer data)
+        public async Task<TransactionDTO> Transfer(Transfer transfer)
         {
             var flowId = HttpContext.Items["flowId"].ToString();
-            var payload = new AccountTransferEvent { Transfer = data };
+            var payload = new TransferEvent { Transfer = transfer };
             var response = await eventsAwaiter.AwaitResponse<SelectedTransactionsEvent>(flowId, () => publishingRouter.Publish(Queues.Accounts, payload, flowId, Queues.APIGateway));
             var transcation = response.Transactions.First();
             return mapper.Map<TransactionDTO>(transcation);

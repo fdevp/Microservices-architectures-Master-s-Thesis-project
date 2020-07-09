@@ -59,7 +59,7 @@ namespace APIGateway.Controllers
 
             RepeatedField<Loan> loans = new RepeatedField<Loan>();
             RepeatedField<Payment> payments = new RepeatedField<Payment>();
-            RepeatedField<Balance> balances = new RepeatedField<Balance>();
+            RepeatedField<AccountBalance> balances = new RepeatedField<AccountBalance>();
 
             var paymentsResponse = await paymentsReadClient.GetPartAsync(new GetPartRequest { FlowId = flowId, Part = part, TotalParts = total });
             payments = paymentsResponse.Payments;
@@ -74,8 +74,8 @@ namespace APIGateway.Controllers
             parallelTasks.Add(Task.Run(async () =>
             {
                 var accountsIds = payments.Select(p => p.AccountId);
-                var balancesRequest = await accountsReadClient.GetBalanceAsync(new GetBalanceRequest { FlowId = flowId, Ids = { accountsIds } });
-                balances = balancesRequest.Balances;
+                var balancesResponse = await accountsReadClient.GetBalancesAsync(new GetBalancesRequest { FlowId = flowId, Ids = { accountsIds } });
+                balances = balancesResponse.Balances;
             }));
 
             await Task.WhenAll(parallelTasks);

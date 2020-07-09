@@ -39,12 +39,12 @@ namespace AccountsMicroservice
             return Task.FromResult(new GetAccountsResponse { Accounts = { accounts } });
         }
 
-        public override Task<GetBalanceResponse> GetBalance(GetBalanceRequest request, ServerCallContext context)
+        public override Task<GetBalancesResponse> GetBalances(GetBalancesRequest request, ServerCallContext context)
         {
             var balances = request.Ids.Select(id => accountsRepository.Get(id))
                 .Where(account => account != null)
-                .Select(account => new Balance { Id = account.Id, Balance_ = account.Balance });
-            return Task.FromResult(new GetBalanceResponse { Balances = { balances } });
+                .Select(account => new AccountBalance { Id = account.Id, Balance = account.Balance });
+            return Task.FromResult(new GetBalancesResponse { Balances = { balances } });
         }
 
         public override async Task<GetTransactionsResponse> GetTransactions(GetTransactionsRequest request, ServerCallContext context)

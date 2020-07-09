@@ -1,3 +1,4 @@
+dotnet build APIGateway/APIGateway.csproj
 dotnet build PanelsBranchMicroservice/PanelsBranchMicroservice.csproj
 dotnet build BatchesBranchMicroservice/BatchesBranchMicroservice.csproj
 dotnet build ReportsBranchMicroservice/ReportsBranchMicroservice.csproj

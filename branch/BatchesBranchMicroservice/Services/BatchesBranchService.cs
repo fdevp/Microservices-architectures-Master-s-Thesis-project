@@ -42,8 +42,8 @@ namespace BatchesBranchMicroservice
             var paymentsAndLoans = await paymentsClient.GetPartAsync(paymentsAndLoansRequest);
 
             var paymentAccounts = paymentsAndLoans.Payments.Select(p => p.AccountId);
-            var accountsRequest = new GetBalanceRequest { FlowId = request.FlowId, Ids = { paymentAccounts } };
-            var balances = await accountsClient.GetBalanceAsync(accountsRequest);
+            var accountsRequest = new GetBalancesRequest { FlowId = request.FlowId, Ids = { paymentAccounts } };
+            var balances = await accountsClient.GetBalancesAsync(accountsRequest);
 
             return new GetDataToProcessResponse
             {

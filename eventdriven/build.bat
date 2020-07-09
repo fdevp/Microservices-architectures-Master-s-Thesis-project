@@ -1,3 +1,4 @@
+dotnet build APIGateway/APIGateway.csproj
 dotnet build ReportsMicroservice/ReportsMicroservice.csproj
 dotnet build CardsMicroservice/CardsMicroservice.csproj
 dotnet build LoansMicroservice/LoansMicroservice.csproj

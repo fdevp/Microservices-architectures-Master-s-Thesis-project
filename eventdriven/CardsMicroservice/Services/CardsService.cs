@@ -68,8 +68,8 @@ namespace CardsMicroservice
         }
 
 
-        [EventHandlingMethod(typeof(CardTransferEvent))]
-        public async Task Transfer(MessageContext context, CardTransferEvent inputEvent)
+        [EventHandlingMethod(typeof(TransferEvent))]
+        public async Task Transfer(MessageContext context, TransferEvent inputEvent)
         {
             var card = cardsRepository.GetCard(inputEvent.Transfer.CardId);
             if (card == null)
@@ -78,15 +78,16 @@ namespace CardsMicroservice
             var blockRequestTime = DateTime.UtcNow;
             var title = $"{DateTime.UtcNow} card usage for a transfer worth {inputEvent.Transfer.Amount} EUR";
 
-            var accountTransfer = new AccountTransfer
+            var transfer = new Transfer
             {
                 AccountId = card.AccountId,
+                CardId = card.Id,
                 Recipient = inputEvent.Transfer.Recipient,
                 Amount = inputEvent.Transfer.Amount,
                 Title = title
             };
 
-            var accountTransferEvent = new AccountTransferEvent { Transfer = accountTransfer };
+            var accountTransferEvent = new TransferEvent { Transfer = transfer };
             var reply = await eventsAwaiter.AwaitResponse<SelectedTransactionsEvent>(context.FlowId, () => publishingRouter.Publish(Queues.Accounts, accountTransferEvent, context.FlowId, Queues.Cards));
             var transaction = reply.Transactions.Single();
             cardsRepository.CreateBlock(card.Id, transaction.Id, blockRequestTime);

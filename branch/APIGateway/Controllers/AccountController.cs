@@ -41,11 +41,11 @@ namespace APIGateway.Controllers
         [Route("balance/{accountId}")]
         public async Task<float> Balance(string accountId)
         {
-            var request = new GetBalanceRequest { Ids = { accountId } };
+            var request = new GetBalancesRequest { Ids = { accountId } };
             request.FlowId = (long)HttpContext.Items["flowId"];
-            var repsonse = await accountClient.GetBalanceAsync(request);
+            var repsonse = await accountClient.GetBalancesAsync(request);
             var balance = repsonse.Balances.Single();
-            return balance.Balance_;
+            return balance.Balance;
         }
 
         [HttpPost]

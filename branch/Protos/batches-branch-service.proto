@@ -24,7 +24,7 @@ message GetDataToProcessRequest {
 message GetDataToProcessResponse {
   repeated Loan loans = 1;
   repeated Payment payments = 2;
-  repeated Balance balances = 3;
+  repeated AccountBalance balances = 3;
 }
 
 message ProcessBatchRequest {

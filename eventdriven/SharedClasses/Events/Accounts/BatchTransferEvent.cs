@@ -4,6 +4,6 @@ namespace SharedClasses.Events.Accounts
 {
     public class BatchTransferEvent
     {
-        public AccountTransfer[] Transfers { get; set; }
+        public Transfer[] Transfers { get; set; }
     }
 }

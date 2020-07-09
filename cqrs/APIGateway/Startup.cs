@@ -88,7 +88,7 @@ namespace APIGateway
                 cfg.CreateMap<User, UserDTO>().ReverseMap();
                 cfg.CreateMap<Loan, LoanDTO>().ReverseMap();
                 cfg.CreateMap<Message, MessageDTO>().ReverseMap();
-                cfg.CreateMap<Balance, BalanceDTO>().ForMember(balance => balance.Amount, m => m.MapFrom(dto => dto.Balance_));
+                cfg.CreateMap<AccountBalance, BalanceDTO>().ForMember(balance => balance.Amount, m => m.MapFrom(dto => dto.Balance));
 
                 cfg.CreateMap<UsersMicroservice.SetupRequest, UsersSetup>().ReverseMap();
                 cfg.CreateMap<TransactionsWriteMicroservice.SetupRequest, TransactionsSetup>().ReverseMap();
