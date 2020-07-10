@@ -1,5 +1,4 @@
 syntax = "proto3";
-import "common/empty.proto";
 import "common/loan.proto";
 
 option csharp_namespace = "LoansReadMicroservice";

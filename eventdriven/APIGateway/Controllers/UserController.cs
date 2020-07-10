@@ -21,6 +21,7 @@ namespace APIGateway.Controllers
     [Route("[controller]")]
     public class UserController : ControllerBase
     {
+        private const int PanelTransactionsCount = 5;
         private readonly ILogger<UserController> logger;
         private readonly PublishingRouter publishingRouter;
         private readonly EventsAwaiter eventsAwaiter;
@@ -55,7 +56,7 @@ namespace APIGateway.Controllers
             parallelTasks.Add(Task.Run(async () =>
             {
                 var transactionsFlowId = mainFlowId + "_t";
-                var transactionsEvent = new FilterTransactionsEvent { Senders = accountsIds };
+                var transactionsEvent = new FilterTransactionsEvent { Senders = accountsIds, Top = PanelTransactionsCount };
                 var transactionsResponse = await eventsAwaiter.AwaitResponse<SelectedTransactionsEvent>(transactionsFlowId, () => publishingRouter.Publish(Queues.Transactions, transactionsEvent, transactionsFlowId, Queues.APIGateway));
                 panel.Transactions = mapper.Map<TransactionDTO[]>(transactionsResponse.Transactions);
             }));

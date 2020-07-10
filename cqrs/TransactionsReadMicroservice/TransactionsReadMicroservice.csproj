@@ -4,7 +4,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Protobuf Include="..\Protos\transactions-read-service.proto" GrpcServices="Server"/>
-    <Protobuf Include="..\Protos\common\empty.proto"/>
     <Protobuf Include="..\Protos\common\transaction.proto"/>
   </ItemGroup>
   <ItemGroup>

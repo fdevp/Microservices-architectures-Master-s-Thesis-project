@@ -19,6 +19,7 @@ namespace PanelsBranchMicroservice
 {
     public class PanelsBranchService : PanelsBranch.PanelsBranchBase
     {
+        private const int PanelTransactionsCount = 5;
         private readonly ILogger<PanelsBranchService> logger;
         private readonly TransactionsClient transactionsClient;
         private readonly PaymentsClient paymentsClient;
@@ -58,8 +59,7 @@ namespace PanelsBranchMicroservice
             var parallelTasks = new List<Task>();
             parallelTasks.Add(Task.Run(async () =>
             {
-                var transactionsResponse = await transactionsClient.FilterAsync(new FilterTransactionsRequest { FlowId = request.FlowId, Senders = { accountsIds } });
-                transactions = transactionsResponse.Transactions;
+                var transactionsResponse = await transactionsClient.FilterAsync(new FilterTransactionsRequest { FlowId = request.FlowId, Senders = { accountsIds }, Top = PanelTransactionsCount });
             }));
 
             parallelTasks.Add(Task.Run(async () =>
@@ -77,14 +77,14 @@ namespace PanelsBranchMicroservice
 
 
             await Task.WhenAll(parallelTasks);
-            
+
             return new GetPanelResponse
             {
                 Cards = { cards },
                 Payments = { payments },
                 Accounts = { accounts },
                 Loans = { loans },
-                Transactions = { transactions }
+                Transactions = { transactions.OrderByDescending(t => t.Timestamp) }
             };
         }
     }

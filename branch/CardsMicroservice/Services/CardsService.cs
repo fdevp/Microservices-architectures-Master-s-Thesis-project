@@ -6,7 +6,9 @@ using AutoMapper;
 using CardsMicroservice.Repository;
 using Grpc.Core;
 using Microsoft.Extensions.Logging;
+using TransactionsMicroservice;
 using static AccountsMicroservice.Accounts;
+using static TransactionsMicroservice.Transactions;
 
 namespace CardsMicroservice
 {
@@ -15,13 +17,15 @@ namespace CardsMicroservice
         private readonly ILogger<CardsService> logger;
         private readonly Mapper mapper;
         private readonly AccountsClient accountsClient;
+        private readonly TransactionsClient transactionsClient;
         private CardsRepository cardsRepository;
-        public CardsService(CardsRepository cardsRepository, ILogger<CardsService> logger, Mapper mapper, AccountsClient accountsClient)
+        public CardsService(CardsRepository cardsRepository, ILogger<CardsService> logger, Mapper mapper, AccountsClient accountsClient, TransactionsClient transactionsClient)
         {
             this.cardsRepository = cardsRepository;
             this.logger = logger;
             this.mapper = mapper;
             this.accountsClient = accountsClient;
+            this.transactionsClient = transactionsClient;
         }
 
         public override Task<GetCardsResponse> Get(GetCardsRequest request, ServerCallContext context)
@@ -49,15 +53,9 @@ namespace CardsMicroservice
 
         public override async Task<GetTransactionsResponse> GetTransactions(GetTransactionsRequest request, ServerCallContext context)
         {
-            var cardAccountsIds = request.Ids.Select(id => cardsRepository.GetCard(id))
-                .Where(card => card != null)
-                .Select(card => card.AccountId)
-                .ToHashSet();
-
-            var transactionsRequest = new AccountsMicroservice.GetTransactionsRequest { FlowId = request.FlowId, Ids = { cardAccountsIds } };
-            var accountTransactions = await accountsClient.GetTransactionsAsync(transactionsRequest);
-            var transactions = accountTransactions.Transactions.Where(t => cardAccountsIds.Contains(t.CardId));
-            return new GetTransactionsResponse { Transactions = { transactions } };
+            var transactionsRequest = new FilterTransactionsRequest { FlowId = request.FlowId, Cards = { request.Ids } };
+            var transactionsResponse = await transactionsClient.FilterAsync(transactionsRequest);
+            return new GetTransactionsResponse { Transactions = { transactionsResponse.Transactions } };
         }
 
         public override async Task<TransferResponse> Transfer(TransferRequest request, ServerCallContext context)

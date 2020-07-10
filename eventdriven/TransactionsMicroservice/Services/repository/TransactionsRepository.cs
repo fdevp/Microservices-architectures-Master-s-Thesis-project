@@ -35,9 +35,12 @@ namespace TransactionsMicroservice.Repository
             return null;
         }
 
-        public Transaction[] GetMany(Filters filters)
+        public Transaction[] GetMany(Filters filters, int? top)
         {
-            return transactions.Values.Where(t => SelectTransaction(t, filters)).ToArray();
+            var selected = transactions.Values.Where(t => SelectTransaction(t, filters));
+            if (top.HasValue && top.Value > 0)
+                selected = selected.Take(top.Value);
+            return selected.ToArray();
         }
 
         public void Setup(IEnumerable<Transaction> transactions)

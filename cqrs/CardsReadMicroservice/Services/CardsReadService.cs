@@ -6,7 +6,8 @@ using AutoMapper;
 using CardsReadMicroservice.Repository;
 using Grpc.Core;
 using Microsoft.Extensions.Logging;
-using static AccountsReadMicroservice.AccountsRead;
+using TransactionsReadMicroservice;
+using static TransactionsReadMicroservice.TransactionsRead;
 
 namespace CardsReadMicroservice
 {
@@ -14,14 +15,14 @@ namespace CardsReadMicroservice
     {
         private readonly ILogger<CardsReadService> logger;
         private readonly Mapper mapper;
-        private readonly AccountsReadClient accountsClient;
+        private readonly TransactionsReadClient transactionsReadClient;
         private CardsRepository cardsRepository;
-        public CardsReadService(CardsRepository cardsRepository, ILogger<CardsReadService> logger, Mapper mapper, AccountsReadClient accountsClient)
+        public CardsReadService(CardsRepository cardsRepository, ILogger<CardsReadService> logger, Mapper mapper, TransactionsReadClient transactionsReadClient)
         {
             this.cardsRepository = cardsRepository;
             this.logger = logger;
             this.mapper = mapper;
-            this.accountsClient = accountsClient;
+            this.transactionsReadClient = transactionsReadClient;
         }
 
         public override Task<GetCardsResponse> Get(GetCardsRequest request, ServerCallContext context)
@@ -49,15 +50,9 @@ namespace CardsReadMicroservice
 
         public override async Task<GetTransactionsResponse> GetTransactions(GetTransactionsRequest request, ServerCallContext context)
         {
-            var cardAccountsIds = request.Ids.Select(id => cardsRepository.GetCard(id))
-                .Where(card => card != null)
-                .Select(card => card.AccountId)
-                .ToHashSet();
-
-            var transactionsRequest = new AccountsReadMicroservice.GetTransactionsRequest { FlowId = request.FlowId, Ids = { cardAccountsIds } };
-            var accountTransactions = await accountsClient.GetTransactionsAsync(transactionsRequest);
-            var transactions = accountTransactions.Transactions.Where(t => cardAccountsIds.Contains(t.CardId));
-            return new GetTransactionsResponse { Transactions = { transactions } };
+            var transactionsRequest = new FilterTransactionsRequest { FlowId = request.FlowId, Cards = { request.Ids } };
+            var transactionsResponse = await transactionsReadClient.FilterAsync(transactionsRequest);
+            return new GetTransactionsResponse { Transactions = { transactionsResponse.Transactions } };
         }
     }
 }

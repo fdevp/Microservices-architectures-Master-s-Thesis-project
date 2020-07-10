@@ -15,9 +15,12 @@ namespace TransactionsReadMicroservice.Repository
             return null;
         }
 
-        public Transaction[] GetMany(Filters filters)
+        public Transaction[] GetMany(Filters filters, int top)
         {
-            return transactions.Values.Where(t => SelectTransaction(t, filters)).ToArray();
+            var selected = transactions.Values.Where(t => SelectTransaction(t, filters));
+            if (top > 0)
+                selected = selected.Take(top);
+            return selected.ToArray();
         }
 
         public void Upsert(Transaction[] update)

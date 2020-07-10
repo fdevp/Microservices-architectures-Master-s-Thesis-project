@@ -10,5 +10,6 @@ namespace SharedClasses.Events.Transactions
         public string[] Cards { get; set; }
         public DateTime TimestampFrom { get; set; }
         public DateTime TimestampTo { get; set; }
+        public int? Top { get; set; }
     }
 }

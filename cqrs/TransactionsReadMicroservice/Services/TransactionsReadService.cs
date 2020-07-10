@@ -43,7 +43,7 @@ namespace TransactionsReadMicroservice
                 TimestampTo = request.TimestampTo,
             };
 
-            var transactions = transactionsRepository.GetMany(filters).Select(t => mapper.Map<Transaction>(t));
+            var transactions = transactionsRepository.GetMany(filters, request.Top).Select(t => mapper.Map<Transaction>(t));
             return Task.FromResult(new GetTransactionsResult { Transactions = { transactions } });
         }
     }

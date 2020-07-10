@@ -33,8 +33,8 @@ namespace CardsMicroservice
                 options.Interceptors.Add<LoggingInterceptor>("Cards");
             });
             services.AddSingleton(CreateMapper());
-            services.AddSingleton(CreateAccountsClient());
             services.AddSingleton(new CardsRepository());
+            ConfigureGrpcConnections(services);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -70,7 +70,7 @@ namespace CardsMicroservice
             return new Mapper(config);
         }
 
-        private AccountsClient CreateAccountsClient()
+        private void ConfigureGrpcConnections(IServiceCollection services)
         {
             var addresses = new EndpointsAddresses();
             Configuration.GetSection("Addresses").Bind(addresses);
@@ -78,9 +78,13 @@ namespace CardsMicroservice
             var httpClientHandler = new HttpClientHandler();
             httpClientHandler.ServerCertificateCustomValidationCallback =
                 HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
+
             var httpClient = new HttpClient(httpClientHandler);
-            var channel = GrpcChannel.ForAddress(addresses.Accounts, new GrpcChannelOptions { HttpClient = httpClient });
-            return new AccountsClient(channel);
+            var accountsChannel = GrpcChannel.ForAddress(addresses.Accounts, new GrpcChannelOptions { HttpClient = httpClient });
+            services.AddSingleton(new AccountsClient(accountsChannel));
+
+            var transactionsChannel = GrpcChannel.ForAddress(addresses.Transactions, new GrpcChannelOptions { HttpClient = httpClient });
+            services.AddSingleton(new AccountsClient(transactionsChannel));
         }
     }
 }

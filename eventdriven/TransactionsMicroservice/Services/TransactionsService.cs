@@ -66,7 +66,7 @@ namespace TransactionsMicroservice
                 TimestampTo = inputEvent.TimestampTo,
             };
 
-            var transactions = transactionsRepository.GetMany(filters);
+            var transactions = transactionsRepository.GetMany(filters, inputEvent.Top);
             publishingRouter.Publish(context.ReplyTo, new SelectedTransactionsEvent { Transactions = transactions }, context.FlowId);
             return Task.CompletedTask;
         }

@@ -4,8 +4,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Protobuf Include="..\Protos\cards-read-service.proto" GrpcServices="Server"/>
-    <Protobuf Include="..\Protos\accounts-read-service.proto" GrpcServices="Client"/>
-    <Protobuf Include="..\Protos\common\empty.proto"/>
+    <Protobuf Include="..\Protos\transactions-read-service.proto" GrpcServices="Client"/>
     <Protobuf Include="..\Protos\common\transaction.proto"/>
     <Protobuf Include="..\Protos\common\transfer.proto"/>
     <Protobuf Include="..\Protos\common\balance.proto"/>

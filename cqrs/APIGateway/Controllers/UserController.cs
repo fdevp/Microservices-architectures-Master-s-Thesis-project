@@ -26,6 +26,7 @@ namespace APIGateway.Controllers
     [Route("[controller]")]
     public class UserController : ControllerBase
     {
+        private const int PanelTransactionsCount = 5;
         private readonly ILogger<UserController> logger;
         private readonly UsersClient usersClient;
         private readonly AccountsReadClient accountsReadClient;
@@ -74,7 +75,7 @@ namespace APIGateway.Controllers
             var parallelTasks = new List<Task>();
             parallelTasks.Add(Task.Run(async () =>
             {
-                var transactionsResponse = await transactionsReadClient.FilterAsync(new FilterTransactionsRequest { FlowId = flowId, Senders = { accountsIds } });
+                var transactionsResponse = await transactionsReadClient.FilterAsync(new FilterTransactionsRequest { FlowId = flowId, Senders = { accountsIds }, Top = PanelTransactionsCount });
                 transactions = transactionsResponse.Transactions;
             }));
 

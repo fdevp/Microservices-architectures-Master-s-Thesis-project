@@ -9,9 +9,9 @@ using Microsoft.Extensions.Hosting;
 using SharedClasses;
 using Microsoft.Extensions.Logging;
 using CardsReadMicroservice.Repository;
-using static AccountsReadMicroservice.AccountsRead;
 using Microsoft.Extensions.Configuration;
 using SharedClasses.Messaging;
+using static TransactionsReadMicroservice.TransactionsRead;
 
 namespace CardsReadMicroservice
 {
@@ -35,8 +35,8 @@ namespace CardsReadMicroservice
                 options.Interceptors.Add<LoggingInterceptor>("Cards");
             });
             services.AddSingleton(CreateMapper());
-            services.AddSingleton(CreateAccountsClient());
             services.AddSingleton(repository);
+            ConfigureGrpcConnections(services);
             SetProjectionListener(repository);
         }
 
@@ -87,15 +87,16 @@ namespace CardsReadMicroservice
             });
             return new Mapper(config);
         }
-
-        private AccountsReadClient CreateAccountsClient()
+        
+        private void ConfigureGrpcConnections(IServiceCollection services)
         {
             var httpClientHandler = new HttpClientHandler();
             httpClientHandler.ServerCertificateCustomValidationCallback =
                 HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
+
             var httpClient = new HttpClient(httpClientHandler);
-            var channel = GrpcChannel.ForAddress("https://localhost:5022", new GrpcChannelOptions { HttpClient = httpClient });
-            return new AccountsReadClient(channel);
+            var transactionsChannel = GrpcChannel.ForAddress("https://localhost:5012", new GrpcChannelOptions { HttpClient = httpClient });
+            services.AddSingleton(new TransactionsReadClient(transactionsChannel));
         }
     }
 }

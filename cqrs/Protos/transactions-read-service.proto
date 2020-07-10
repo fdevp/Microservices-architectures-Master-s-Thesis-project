@@ -1,6 +1,5 @@
 syntax = "proto3";
 import "common/transaction.proto";
-import "common/empty.proto";
 
 option csharp_namespace = "TransactionsReadMicroservice";
 package TransactionsMicroservice;
@@ -23,6 +22,7 @@ message FilterTransactionsRequest {
   repeated string cards = 5;
   int64 timestampFrom = 6;
   int64 timestampTo = 7;
+  int32 top = 8;
 }
 
 message GetTransactionsResult {
