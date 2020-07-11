@@ -17,6 +17,7 @@ using static LoansReadMicroservice.LoansRead;
 using static TransactionsReadMicroservice.TransactionsRead;
 using Microsoft.Extensions.Configuration;
 using SharedClasses.Messaging;
+using Serilog;
 
 namespace PaymentsReadMicroservice
 {
@@ -34,22 +35,25 @@ namespace PaymentsReadMicroservice
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddLogging(c => c.AddSerilog().AddFile("log.txt"));
             var repository = new PaymentsRepository();
             services.AddGrpc(options =>
             {
-                options.Interceptors.Add<LoggingInterceptor>("Payments");
+                options.Interceptors.Add<LoggingInterceptor>("PaymentsRead");
             });
             services.AddSingleton(CreateMapper());
             services.AddSingleton(repository);
             CreateClients(services);
-            SetProjectionListener(repository);
+            SetProjectionListener(repository, services);
         }
 
-        private void SetProjectionListener(PaymentsRepository repository)
+        private void SetProjectionListener(PaymentsRepository repository, IServiceCollection services)
         {
             var config = new RabbitMqConfig();
             configuration.GetSection("RabbitMq").Bind(config);
-            var rabbitMq = new RabbitMqChannelFactory().CreateReadChannel<Repository.Payment, string>(config);
+
+            var logger = services.BuildServiceProvider().GetService<ILogger<RabbitMqPublisher>>();
+            var rabbitMq = new RabbitMqChannelFactory().CreateReadChannel<Repository.Payment, string>(config, "PaymentsRead", logger);
 
             rabbitMq.Received += (sender, projection) =>
             {
@@ -61,7 +65,7 @@ namespace PaymentsReadMicroservice
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
             {
@@ -79,8 +83,6 @@ namespace PaymentsReadMicroservice
                     await context.Response.WriteAsync("Communication with gRPC endpoints must be made through a gRPC client. To learn how to create a client, visit: https://go.microsoft.com/fwlink/?linkid=2086909");
                 });
             });
-
-            loggerFactory.AddFile("log.txt");
         }
 
         private Mapper CreateMapper()

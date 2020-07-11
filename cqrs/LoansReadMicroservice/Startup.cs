@@ -9,6 +9,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Serilog;
 using SharedClasses;
 using SharedClasses.Messaging;
 using static PaymentsReadMicroservice.PaymentsRead;
@@ -28,22 +29,25 @@ namespace LoansReadMicroservice
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddLogging(c => c.AddSerilog().AddFile("log.txt"));
             var repository = new LoansRepository();
             services.AddGrpc(options =>
             {
-                options.Interceptors.Add<LoggingInterceptor>("Loans");
+                options.Interceptors.Add<LoggingInterceptor>("LoansRead");
             });
             services.AddSingleton(CreateMapper());
             services.AddSingleton(CreatePaymentsClient());
             services.AddSingleton(repository);
-            SetProjectionListener(repository);
+            SetProjectionListener(repository, services);
         }
 
-        private void SetProjectionListener( LoansRepository repository)
+        private void SetProjectionListener(LoansRepository repository, IServiceCollection services)
         {
             var config = new RabbitMqConfig();
             configuration.GetSection("RabbitMq").Bind(config);
-            var rabbitMq = new RabbitMqChannelFactory().CreateReadChannel<Repository.Loan, string>(config);
+
+            var logger = services.BuildServiceProvider().GetService<ILogger<RabbitMqPublisher>>();
+            var rabbitMq = new RabbitMqChannelFactory().CreateReadChannel<Repository.Loan, string>(config, "LoansRead", logger);
 
             rabbitMq.Received += (sender, projection) =>
             {
@@ -73,8 +77,6 @@ namespace LoansReadMicroservice
                     await context.Response.WriteAsync("Communication with gRPC endpoints must be made through a gRPC client. To learn how to create a client, visit: https://go.microsoft.com/fwlink/?linkid=2086909");
                 });
             });
-
-            loggerFactory.AddFile("log.txt");
         }
 
         private Mapper CreateMapper()

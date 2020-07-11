@@ -10,6 +10,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Serilog;
 using SharedClasses.Messaging;
 using SharedClasses.Messaging.RabbitMq;
 
@@ -26,6 +27,7 @@ namespace CardsMicroservice
 
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddLogging(c => c.AddSerilog().AddFile("log.txt"));
             services.AddSingleton<CardsRepository>();
             services.AddSingleton<CardsService>();
             ConfigureRabbitMq(services);
@@ -48,16 +50,18 @@ namespace CardsMicroservice
             publishers.Add(Queues.Transactions, factory.CreatePublisher(Queues.Transactions));
             services.AddSingleton(new PublishingRouter(publishers));
 
-            var cardsService = services.BuildServiceProvider().GetService<CardsService>();
-            var consumingRouter = ConsumingRouter<CardsService>.Create(cardsService, "Cards");
+            var servicesProvider = services.BuildServiceProvider();
+            var logger = servicesProvider.GetService<ILogger<IConsumer>>();
+            var cardsService = servicesProvider.GetService<CardsService>();
+
+            var consumingRouter = ConsumingRouter<CardsService>.Create(cardsService, "Cards", logger);
             consumingRouter.LinkConsumer(cardsConsumer);
             services.AddSingleton(consumingRouter);
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory)
         {
-            loggerFactory.AddFile("log.txt");
+            
         }
     }
 }

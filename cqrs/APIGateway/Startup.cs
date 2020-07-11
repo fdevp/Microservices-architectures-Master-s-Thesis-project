@@ -12,6 +12,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Serilog;
 using UsersMicroservice;
 using static AccountsReadMicroservice.AccountsRead;
 using static AccountsWriteMicroservice.AccountsWrite;
@@ -40,13 +41,14 @@ namespace APIGateway
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddLogging(c => c.AddSerilog().AddFile("log.txt"));
             services.AddControllers().AddNewtonsoftJson();
             services.AddSingleton(CreateMapper());
             ConfigureGrpcConnections(services);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
             {
@@ -65,8 +67,6 @@ namespace APIGateway
             {
                 endpoints.MapControllers();
             });
-
-            loggerFactory.AddFile("log.txt");
         }
 
         private Mapper CreateMapper()

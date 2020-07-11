@@ -13,6 +13,7 @@ using static AccountsWriteMicroservice.AccountsWrite;
 using Microsoft.Extensions.Configuration;
 using SharedClasses.Messaging;
 using SharedClasses.Commands;
+using Serilog;
 
 namespace CardsWriteMicroservice
 {
@@ -29,21 +30,22 @@ namespace CardsWriteMicroservice
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddLogging(c => c.AddSerilog().AddFile("log.txt"));
             var commandsRepository = new CommandsRepository();
             services.AddSingleton(commandsRepository);
             services.AddGrpc(options =>
             {
-                options.Interceptors.Add<LoggingInterceptor>("Cards");
+                options.Interceptors.Add<LoggingInterceptor>("CardsWrite");
                 options.Interceptors.Add<CommandsInterceptor>(commandsRepository);
             });
             services.AddSingleton(CreateMapper());
             services.AddSingleton(CreateAccountsClient());
             services.AddSingleton(new CardsRepository());
-            services.AddRabbitMqPublisher(configuration);
+            services.AddRabbitMqPublisher(configuration, "CardsWrite");
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
             {
@@ -61,8 +63,6 @@ namespace CardsWriteMicroservice
                     await context.Response.WriteAsync("Communication with gRPC endpoints must be made through a gRPC client. To learn how to create a client, visit: https://go.microsoft.com/fwlink/?linkid=2086909");
                 });
             });
-
-            loggerFactory.AddFile("log.txt");
         }
 
         private Mapper CreateMapper()

@@ -9,6 +9,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Serilog;
 using SharedClasses.Messaging;
 using SharedClasses.Messaging.RabbitMq;
 using UsersMicroservice.Repository;
@@ -18,7 +19,7 @@ namespace UsersMicroservice
     public class Startup
     {
         public IConfiguration Configuration { get; }
-        
+
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -28,6 +29,7 @@ namespace UsersMicroservice
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddLogging(c => c.AddSerilog().AddFile("log.txt"));
             services.AddSingleton<UsersRepository>();
             services.AddSingleton<UsersService>();
             ConfigureRabbitMq(services);
@@ -43,9 +45,11 @@ namespace UsersMicroservice
             publishers.Add(Queues.APIGateway, factory.CreatePublisher(Queues.APIGateway));
             services.AddSingleton(new PublishingRouter(publishers));
 
+            var servicesProvider = services.BuildServiceProvider();
+            var logger = servicesProvider.GetService<ILogger<IConsumer>>();
             var usersService = services.BuildServiceProvider().GetService<UsersService>();
 
-            var consumingRouter = ConsumingRouter<UsersService>.Create(usersService, "Users");
+            var consumingRouter = ConsumingRouter<UsersService>.Create(usersService, "Users", logger);
             var consumer = factory.CreateConsumer(Queues.Users);
             consumingRouter.LinkConsumer(consumer);
             services.AddSingleton(consumingRouter);
@@ -53,7 +57,7 @@ namespace UsersMicroservice
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory)
         {
-            loggerFactory.AddFile("log.txt");
+            
         }
     }
 }

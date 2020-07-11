@@ -6,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Serilog;
 using SharedClasses;
 using SharedClasses.Messaging;
 using TransactionsReadMicroservice.Repository;
@@ -25,21 +26,24 @@ namespace TransactionsReadMicroservice
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddLogging(c => c.AddSerilog().AddFile("log.txt"));
             var repository = new TransactionsRepository();
             services.AddGrpc(options =>
             {
-                options.Interceptors.Add<LoggingInterceptor>("Transactions");
+                options.Interceptors.Add<LoggingInterceptor>("TransactionsRead");
             });
             services.AddSingleton(CreateMapper());
             services.AddSingleton(repository);
-            SetProjectionListener(repository);
+            SetProjectionListener(repository, services);
         }
 
-        public void SetProjectionListener(TransactionsRepository repository)
+        public void SetProjectionListener(TransactionsRepository repository, IServiceCollection services)
         {
             var config = new RabbitMqConfig();
             configuration.GetSection("RabbitMq").Bind(config);
-            var rabbitMq = new RabbitMqChannelFactory().CreateReadChannel<Repository.Transaction, string>(config);
+
+            var logger = services.BuildServiceProvider().GetService<ILogger<RabbitMqPublisher>>();
+            var rabbitMq = new RabbitMqChannelFactory().CreateReadChannel<Repository.Transaction, string>(config, "TransactionsRead", logger);
 
             rabbitMq.Received += (sender, projection) =>
             {
@@ -51,7 +55,7 @@ namespace TransactionsReadMicroservice
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
             {
@@ -69,8 +73,6 @@ namespace TransactionsReadMicroservice
                     await context.Response.WriteAsync("Communication with gRPC endpoints must be made through a gRPC client. To learn how to create a client, visit: https://go.microsoft.com/fwlink/?linkid=2086909");
                 });
             });
-
-            loggerFactory.AddFile("log.txt");
         }
 
         private Mapper CreateMapper()

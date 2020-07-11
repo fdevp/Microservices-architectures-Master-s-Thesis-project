@@ -11,6 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
+using Serilog;
 using SharedClasses.Events.Accounts;
 using SharedClasses.Events.Cards;
 using SharedClasses.Events.Loans;
@@ -35,6 +36,7 @@ namespace APIGateway
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddLogging(c => c.AddSerilog().AddFile("log.txt"));
             services.AddControllers().AddNewtonsoftJson();
             services.AddSingleton(CreateMapper());
             ConfigureRabbitMq(services);
@@ -57,8 +59,6 @@ namespace APIGateway
             {
                 endpoints.MapControllers();
             });
-
-            loggerFactory.AddFile("log.txt");
         }
 
         private Mapper CreateMapper()

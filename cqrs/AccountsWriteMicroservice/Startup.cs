@@ -9,6 +9,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Serilog;
 using SharedClasses;
 using SharedClasses.Commands;
 using SharedClasses.Messaging;
@@ -29,21 +30,23 @@ namespace AccountsWriteMicroservice
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddLogging(c => c.AddSerilog().AddFile("log.txt"));
             var commandsRepository = new CommandsRepository();
             services.AddSingleton(commandsRepository);
             services.AddGrpc(options =>
             {
-                options.Interceptors.Add<LoggingInterceptor>("Accounts");
+                options.Interceptors.Add<LoggingInterceptor>("AccountsWrite");
                 options.Interceptors.Add<CommandsInterceptor>(commandsRepository);
             });
+
             services.AddSingleton(CreateMapper());
             services.AddSingleton(CreateTransactionsClient());
             services.AddSingleton(new AccountsRepository());
-            services.AddRabbitMqPublisher(configuration);
+            services.AddRabbitMqPublisher(configuration, "AccountsWrite");
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
             {
@@ -61,8 +64,6 @@ namespace AccountsWriteMicroservice
                     await context.Response.WriteAsync("Communication with gRPC endpoints must be made through a gRPC client. To learn how to create a client, visit: https://go.microsoft.com/fwlink/?linkid=2086909");
                 });
             });
-
-            loggerFactory.AddFile("log.txt");
         }
 
         private Mapper CreateMapper()

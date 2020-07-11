@@ -2,27 +2,32 @@ using System;
 using System.IO;
 using System.Text;
 using Jil;
+using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 
 namespace SharedClasses.Messaging
 {
     public class RabbitMqPublisher : IDisposable
     {
-        private readonly IConnection connection;
         private readonly IModel channel;
         private readonly string queueName;
-        private readonly IBasicProperties properties;
+        private readonly string serviceName;
+        private readonly ILogger logger;
 
-        public RabbitMqPublisher(IConnection connection, IModel channel, string queueName, IBasicProperties properties)
+        public RabbitMqPublisher(IModel channel, string queueName, string serviceName, ILogger logger)
         {
-            this.connection = connection;
             this.channel = channel;
             this.queueName = queueName;
-            this.properties = properties;
+            this.serviceName = serviceName;
+            this.logger = logger;
         }
 
-        public void Publish(object content)
+        public void Publish(string flowId, object content)
         {
+            logger.LogInformation($"Service='{serviceName}' FlowId='{flowId}' Method='Projection' Type='Start'");
+
+            var properties = channel.CreateBasicProperties();
+            properties.CorrelationId = flowId;
             using (var sw = new StringWriter())
             {
                 JSON.Serialize(content, sw);
@@ -38,7 +43,6 @@ namespace SharedClasses.Messaging
         public void Dispose()
         {
             channel.Dispose();
-            connection.Dispose();
         }
     }
 

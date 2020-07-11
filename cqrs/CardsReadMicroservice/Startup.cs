@@ -12,6 +12,7 @@ using CardsReadMicroservice.Repository;
 using Microsoft.Extensions.Configuration;
 using SharedClasses.Messaging;
 using static TransactionsReadMicroservice.TransactionsRead;
+using Serilog;
 
 namespace CardsReadMicroservice
 {
@@ -28,23 +29,26 @@ namespace CardsReadMicroservice
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddLogging(c => c.AddSerilog().AddFile("log.txt"));
             var repository = new CardsRepository();
 
             services.AddGrpc(options =>
             {
-                options.Interceptors.Add<LoggingInterceptor>("Cards");
+                options.Interceptors.Add<LoggingInterceptor>("CardsRead");
             });
             services.AddSingleton(CreateMapper());
             services.AddSingleton(repository);
             ConfigureGrpcConnections(services);
-            SetProjectionListener(repository);
+            SetProjectionListener(repository, services);
         }
 
-        private void SetProjectionListener(CardsRepository repository)
+        private void SetProjectionListener(CardsRepository repository, IServiceCollection services)
         {
             var config = new RabbitMqConfig();
             configuration.GetSection("RabbitMq").Bind(config);
-            var rabbitMq = new RabbitMqChannelFactory().CreateReadChannel<CardsUpsert, CardsRemove>(config);
+
+            var logger = services.BuildServiceProvider().GetService<ILogger<RabbitMqPublisher>>();
+            var rabbitMq = new RabbitMqChannelFactory().CreateReadChannel<CardsUpsert, CardsRemove>(config, "CardsRead", logger);
 
             rabbitMq.Received += (sender, projection) =>
             {
@@ -56,7 +60,7 @@ namespace CardsReadMicroservice
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
             {
@@ -74,8 +78,6 @@ namespace CardsReadMicroservice
                     await context.Response.WriteAsync("Communication with gRPC endpoints must be made through a gRPC client. To learn how to create a client, visit: https://go.microsoft.com/fwlink/?linkid=2086909");
                 });
             });
-
-            loggerFactory.AddFile("log.txt");
         }
 
         private Mapper CreateMapper()
@@ -87,7 +89,7 @@ namespace CardsReadMicroservice
             });
             return new Mapper(config);
         }
-        
+
         private void ConfigureGrpcConnections(IServiceCollection services)
         {
             var httpClientHandler = new HttpClientHandler();

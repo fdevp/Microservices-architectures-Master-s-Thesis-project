@@ -43,8 +43,8 @@ namespace AccountsWriteMicroservice
 
             accountsRepository.Transfer(request.Transfer.AccountId, request.Transfer.Recipient, request.Transfer.Amount);
             var affectedAccounts = new[] { accountsRepository.Get(request.Transfer.AccountId), accountsRepository.Get(request.Transfer.Recipient) };
-            projectionChannel.Publish(new DataProjection<Repository.Account, string> { Upsert = affectedAccounts });
-            
+            projectionChannel.Publish(request.FlowId.ToString(), new DataProjection<Repository.Account, string> { Upsert = affectedAccounts });
+
             return new TransferResponse { Transaction = result.Transaction };
         }
 
@@ -62,7 +62,7 @@ namespace AccountsWriteMicroservice
             var result = await transactionsClient.BatchCreateAsync(batchAddTransactionsRequest);
 
             var affectedAccounts = ApplyBatchToRepository(request);
-            projectionChannel.Publish(new DataProjection<Repository.Account, string> { Upsert = affectedAccounts.ToArray() });
+            projectionChannel.Publish(request.FlowId.ToString(), new DataProjection<Repository.Account, string> { Upsert = affectedAccounts.ToArray() });
 
             return new BatchTransferResponse { Transactions = { { result.Transactions } } };
         }
@@ -101,7 +101,7 @@ namespace AccountsWriteMicroservice
         {
             var accounts = request.Accounts.Select(a => mapper.Map<Repository.Account>(a));
             accountsRepository.Setup(accounts);
-            projectionChannel.Publish(new DataProjection<Repository.Account, string> { Upsert = accounts.ToArray() });
+            projectionChannel.Publish(null, new DataProjection<Repository.Account, string> { Upsert = accounts.ToArray() });
             return Task.FromResult(new Empty());
         }
     }

@@ -53,7 +53,7 @@ namespace CardsWriteMicroservice
             var transferResponse = await accountsClient.TransferAsync(transferRequest);
             var block = cardsRepository.CreateBlock(card.Id, transferResponse.Transaction.Id, blockRequestTime);
             var upsert = new CardsUpsert { Block = block };
-            projectionChannel.Publish(new DataProjection<CardsUpsert, string> { Upsert = new[] { upsert } });
+            projectionChannel.Publish(request.FlowId.ToString(), new DataProjection<CardsUpsert, string> { Upsert = new[] { upsert } });
 
             return new TransferResponse { Transaction = transferResponse.Transaction };
         }
@@ -66,7 +66,7 @@ namespace CardsWriteMicroservice
 
             var upsert = cards.Select(c => new CardsUpsert { Card = c });
             upsert = upsert.Concat(blocks.Select(b => new CardsUpsert { Block = b }));
-            projectionChannel.Publish(new DataProjection<CardsUpsert, string> { Upsert = upsert.ToArray() });
+            projectionChannel.Publish(null, new DataProjection<CardsUpsert, string> { Upsert = upsert.ToArray() });
             return Task.FromResult(new Empty());
         }
     }

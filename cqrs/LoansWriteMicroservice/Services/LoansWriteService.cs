@@ -47,7 +47,7 @@ namespace LoansWriteMicroservice
             await paymentsClient.CancelAsync(cancelPaymentsRequest);
 
             var repaidInstalments = request.Ids.Select(id => loansRepository.Get(id)).ToArray();
-            projectionChannel.Publish(new DataProjection<Repository.Loan, string> { Upsert = repaidInstalments });
+            projectionChannel.Publish(request.FlowId.ToString(), new DataProjection<Repository.Loan, string> { Upsert = repaidInstalments });
             return new Empty();
         }
 
@@ -55,7 +55,7 @@ namespace LoansWriteMicroservice
         {
             var loans = request.Loans.Select(l => mapper.Map<Repository.Loan>(l));
             loansRepository.Setup(loans);
-            projectionChannel.Publish(new DataProjection<Repository.Loan, string> { Upsert = loans.ToArray() });
+            projectionChannel.Publish(null, new DataProjection<Repository.Loan, string> { Upsert = loans.ToArray() });
             return Task.FromResult(new Empty());
         }
     }

@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using Jil;
+using Microsoft.Extensions.Logging;
 
 namespace SharedClasses.Messaging
 {
@@ -11,21 +13,23 @@ namespace SharedClasses.Messaging
     {
         private IReadOnlyDictionary<string, MethodInfo> routing;
         private readonly string serviceName;
+        private readonly ILogger logger;
         private readonly T service;
 
-        private ConsumingRouter(T service, IReadOnlyDictionary<string, MethodInfo> routing, string serviceName)
+        private ConsumingRouter(T service, IReadOnlyDictionary<string, MethodInfo> routing, string serviceName, ILogger logger)
         {
             this.service = service;
             this.routing = routing;
             this.serviceName = serviceName;
+            this.logger = logger;
         }
 
-        public static ConsumingRouter<T> Create(T service, string serviceName)
+        public static ConsumingRouter<T> Create(T service, string serviceName, ILogger logger)
         {
             var serviceType = service.GetType();
             var methods = serviceType.GetMethods();
             var eventHandlers = GetEventHandlersMethods(methods).ToDictionary(k => k.typeName, v => v.method);
-            return new ConsumingRouter<T>(service, eventHandlers, serviceName);
+            return new ConsumingRouter<T>(service, eventHandlers, serviceName, logger);
         }
 
         public void LinkConsumer(IConsumer consumer)
@@ -33,7 +37,7 @@ namespace SharedClasses.Messaging
             consumer.Received += RouteEvent;
         }
 
-        private void RouteEvent(object sender, MqMessage message)
+        private async void RouteEvent(object sender, MqMessage message)
         {
             if (!routing.ContainsKey(message.Type))
                 throw new InvalidOperationException("Unknown event.");
@@ -42,15 +46,15 @@ namespace SharedClasses.Messaging
             var data = Parse(message.Type, message.Data);
             var context = new MessageContext { FlowId = message.FlowId, Type = message.Type, ReplyTo = message.ReplyTo };
 
-            Console.WriteLine($"Service='{serviceName}' FlowId='{message.FlowId}' Method='{message.Type}' Type='Start'");
+            logger.LogInformation($"Service='{serviceName}' FlowId='{message.FlowId}' Method='{message.Type}' Type='Start'");
             var stopwatch = Stopwatch.StartNew();
             try
             {
-                method.Invoke(service, new[] { context, data });
+                await ((Task)method.Invoke(service, new[] { context, data }));
             }
             finally
             {
-                Console.WriteLine($"Service='{serviceName}' FlowId='{message.FlowId}' Method='{message.Type}' Type='End'");
+                logger.LogInformation($"Service='{serviceName}' FlowId='{message.FlowId}' Method='{message.Type}' Type='End' Processing='{stopwatch.ElapsedMilliseconds}'");
             }
         }
 

@@ -27,24 +27,24 @@ namespace TransactionsWriteMicroservice
         public override Task<CreateTransactionResult> Create(CreateTransactionRequest request, ServerCallContext context)
         {
             var transaction = transactionsRepository.Create(request.Title, request.Amount, request.Recipient, request.Sender, request.PaymentId, request.CardId);
-            projectionChannel.Publish(new DataProjection<Repository.Transaction, string> { Upsert = new[] { transaction } });
+            projectionChannel.Publish(request.FlowId.ToString(), new DataProjection<Repository.Transaction, string> { Upsert = new[] { transaction } });
             return Task.FromResult(new CreateTransactionResult { Transaction = mapper.Map<Transaction>(transaction) });
         }
 
         public override Task<BatchCreateTransactionResult> BatchCreate(BatchCreateTransactionRequest request, ServerCallContext context)
         {
             var transactions = request.Requests.Select(r => transactionsRepository.Create(r.Title, r.Amount, r.Recipient, r.Sender, r.PaymentId, r.CardId));
-            projectionChannel.Publish(new DataProjection<Repository.Transaction, string> { Upsert = transactions.ToArray() });
+            projectionChannel.Publish(request.FlowId.ToString(), new DataProjection<Repository.Transaction, string> { Upsert = transactions.ToArray() });
             var response = transactions.Select(transaction => mapper.Map<Transaction>(transaction))
                 .ToArray();
             return Task.FromResult(new BatchCreateTransactionResult { Transactions = { response } });
         }
 
-         public override Task<Empty> Setup(SetupRequest request, ServerCallContext context)
+        public override Task<Empty> Setup(SetupRequest request, ServerCallContext context)
         {
             var transactions = request.Transactions.Select(t => mapper.Map<Repository.Transaction>(t));
             transactionsRepository.Setup(transactions);
-            projectionChannel.Publish(new DataProjection<Repository.Transaction, string> { Upsert = transactions.ToArray() });
+            projectionChannel.Publish(null, new DataProjection<Repository.Transaction, string> { Upsert = transactions.ToArray() });
             return Task.FromResult(new Empty());
         }
     }

@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Serilog;
 using SharedClasses.Messaging;
 using SharedClasses.Messaging.RabbitMq;
 
@@ -23,6 +24,7 @@ namespace LoansMicroservice
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddLogging(c => c.AddSerilog().AddFile("log.txt"));
             services.AddSingleton<LoansRepository>();
             services.AddSingleton<LoansService>();
             ConfigureRabbitMq(services);
@@ -40,18 +42,19 @@ namespace LoansMicroservice
             publishers.Add(Queues.Transactions, factory.CreatePublisher(Queues.Transactions));
             services.AddSingleton(new PublishingRouter(publishers));
 
-            var loansService = services.BuildServiceProvider().GetService<LoansService>();
+            var servicesProvider = services.BuildServiceProvider();
+            var logger = servicesProvider.GetService<ILogger<IConsumer>>();
+            var loansService = servicesProvider.GetService<LoansService>();
 
-            var consumingRouter = ConsumingRouter<LoansService>.Create(loansService, "Loans");
+            var consumingRouter = ConsumingRouter<LoansService>.Create(loansService, "Loans", logger);
             var consumer = factory.CreateConsumer(Queues.Loans);
             consumingRouter.LinkConsumer(consumer);
             services.AddSingleton(consumingRouter);
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory)
         {
-            loggerFactory.AddFile("log.txt");
+            
         }
     }
 }

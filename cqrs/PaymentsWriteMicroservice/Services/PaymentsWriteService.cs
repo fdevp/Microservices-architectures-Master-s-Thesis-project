@@ -31,7 +31,7 @@ namespace PaymentsWriteMicroservice
         public override Task<CreatePaymentResult> Create(CreatePaymentRequest request, ServerCallContext context)
         {
             var payment = paymentsRepository.Create(request.Amount, request.StartTimestamp, request.Interval, request.AccountId, request.Recipient);
-            projectionChannel.Publish(new DataProjection<Repository.Payment, string> { Upsert = new[] { payment } });
+            projectionChannel.Publish(request.FlowId.ToString(), new DataProjection<Repository.Payment, string> { Upsert = new[] { payment } });
             return Task.FromResult(new CreatePaymentResult { Payment = mapper.Map<Payment>(payment) });
         }
 
@@ -40,7 +40,7 @@ namespace PaymentsWriteMicroservice
             foreach (var id in request.Ids)
                 paymentsRepository.Cancel(id);
             var cancelledPayments = request.Ids.Select(id => paymentsRepository.Get(id)).ToArray();
-            projectionChannel.Publish(new DataProjection<Repository.Payment, string> { Upsert = cancelledPayments });
+            projectionChannel.Publish(request.FlowId.ToString(), new DataProjection<Repository.Payment, string> { Upsert = cancelledPayments });
             return Task.FromResult(new Empty());
         }
 
@@ -48,7 +48,7 @@ namespace PaymentsWriteMicroservice
         {
             var payments = request.Payments.Select(p => mapper.Map<Repository.Payment>(p));
             paymentsRepository.Setup(payments);
-            projectionChannel.Publish(new DataProjection<Repository.Payment, string> { Upsert = payments.ToArray() });
+            projectionChannel.Publish(null, new DataProjection<Repository.Payment, string> { Upsert = payments.ToArray() });
             return Task.FromResult(new Empty());
         }
     }
