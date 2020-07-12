@@ -1,17 +1,33 @@
 syntax = "proto3";
+import "common/report.proto";
 
 option csharp_namespace = "ReportsBranchMicroservice";
 
 package ReportsBranchMicroservice;
 
 service ReportsBranch {
-  rpc Generate (GenerateReportRequest) returns (GenerateReportResponse);
+  rpc GenerateUserActivityReport (GenerateUserActivityReportRequest) returns (GenerateReportResponse);
+  rpc GenerateOverallReport (GenerateOverallReportRequest) returns (GenerateReportResponse);
 }
 
-// The request message containing the user's name.
-message GenerateReportRequest {
+message GenerateUserActivityReportRequest {
+  int64 flowId = 1;
+  string userId = 2;
+  int64 timestampFrom = 3;
+  int64 timestampTo = 4;
+  Granularity granularity = 5;
 }
 
-// The response message containing the greetings.
+message GenerateOverallReportRequest {
+  int64 flowId = 1;
+  repeated Aggregation aggregations = 2;
+  int64 timestampFrom = 3;
+  int64 timestampTo = 4;
+  Granularity granularity = 5;
+  ReportSubject subject = 6;
+}
+
 message GenerateReportResponse {
+  int64 flowId = 1;
+  Report report = 2;
 }

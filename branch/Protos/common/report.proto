@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+enum Granularity {
+  DAY = 0;
+  WEEK = 1;
+  MONTH = 2;
+  YEAR = 3;
+  ALL = 4;
+}
+
+enum Aggregation {
+  AVG = 0;
+  MIN = 1;
+  MAX = 2;
+  MEAN = 3;
+  COUNT = 4;
+}
+
+enum ReportSubject {
+  USERS = 0;
+  PAYMENTS = 1;
+  LOANS = 2;
+  CARDS = 3;
+  TRANSACTIONS = 4;
+}
+
+message Report {
+  bytes data = 1;
+}
