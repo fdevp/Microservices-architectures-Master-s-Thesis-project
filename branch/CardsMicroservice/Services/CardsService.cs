@@ -53,7 +53,7 @@ namespace CardsMicroservice
 
         public override async Task<GetTransactionsResponse> GetTransactions(GetTransactionsRequest request, ServerCallContext context)
         {
-            var transactionsRequest = new FilterTransactionsRequest { FlowId = request.FlowId, Cards = { request.Ids } };
+            var transactionsRequest = new FilterTransactionsRequest { FlowId = request.FlowId, Cards = { request.Ids }, TimestampFrom = request.TimestampFrom, TimestampTo = request.TimestampTo };
             var transactionsResponse = await transactionsClient.FilterAsync(transactionsRequest);
             return new GetTransactionsResponse { Transactions = { transactionsResponse.Transactions } };
         }

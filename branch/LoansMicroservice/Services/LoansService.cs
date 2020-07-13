@@ -7,7 +7,9 @@ using Grpc.Core;
 using LoansMicroservice.Repository;
 using Microsoft.Extensions.Logging;
 using PaymentsMicroservice;
+using TransactionsMicroservice;
 using static PaymentsMicroservice.Payments;
+using static TransactionsMicroservice.Transactions;
 
 namespace LoansMicroservice
 {
@@ -16,14 +18,16 @@ namespace LoansMicroservice
         private readonly ILogger<LoansService> logger;
         private readonly Mapper mapper;
         private readonly PaymentsClient paymentsClient;
+        private readonly TransactionsClient transactionsClient;
         private LoansRepository loansRepository;
 
-        public LoansService(LoansRepository loansRepository, ILogger<LoansService> logger, Mapper mapper, PaymentsClient paymentsClient)
+        public LoansService(LoansRepository loansRepository, ILogger<LoansService> logger, Mapper mapper, PaymentsClient paymentsClient, TransactionsClient transactionsClient)
         {
             this.loansRepository = loansRepository;
             this.logger = logger;
             this.mapper = mapper;
             this.paymentsClient = paymentsClient;
+            this.transactionsClient = transactionsClient;
         }
 
         public override Task<GetLoansResponse> Get(GetLoansRequest request, ServerCallContext context)
@@ -39,6 +43,13 @@ namespace LoansMicroservice
             var loans = loansRepository.GetByPayment(request.PaymentsIds)
                 .Select(loan => mapper.Map<Loan>(loan));
             return Task.FromResult(new GetLoansResponse { Loans = { loans } });
+        }
+
+        public async override Task<GetTransactionsResult> GetTransactions(GetTransactionsRequest request, ServerCallContext context)
+        {
+            var transactionsRequest = new FilterTransactionsRequest { FlowId = request.FlowId, Payments = { request.Ids }, TimestampFrom = request.TimestampFrom, TimestampTo = request.TimestampTo };
+            var transactionsResponse = await transactionsClient.FilterAsync(transactionsRequest);
+            return new GetTransactionsResult { Transactions = { transactionsResponse.Transactions } };
         }
 
         public override async Task<Empty> BatchRepayInstalments(BatchRepayInstalmentsRequest request, ServerCallContext context)

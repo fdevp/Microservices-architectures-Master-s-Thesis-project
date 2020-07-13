@@ -47,6 +47,8 @@ message GetPaymentsWithLoansResult
 message GetTransactionsRequest {
   int64 flowId = 1;
   repeated string ids = 2;
+  int64 timestampFrom = 3;
+  int64 timestampTo = 4;
 }
 
 message GetTransactionsResult {

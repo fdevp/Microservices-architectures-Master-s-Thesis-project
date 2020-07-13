@@ -17,7 +17,7 @@ namespace AccountsMicroservice
         private readonly TransactionsClient transactionsClient;
         private readonly AccountsRepository accountsRepository;
 
-        public AccountsService(AccountsRepository accountsRepository,ILogger<AccountsService> logger, Mapper mapper, TransactionsClient transactionsClient)
+        public AccountsService(AccountsRepository accountsRepository, ILogger<AccountsService> logger, Mapper mapper, TransactionsClient transactionsClient)
         {
             this.accountsRepository = accountsRepository;
             this.logger = logger;
@@ -49,7 +49,7 @@ namespace AccountsMicroservice
 
         public override async Task<GetTransactionsResponse> GetTransactions(GetTransactionsRequest request, ServerCallContext context)
         {
-            var filters = new FilterTransactionsRequest { FlowId = request.FlowId, Senders = { request.Ids } };
+            var filters = new FilterTransactionsRequest { FlowId = request.FlowId, Senders = { request.Ids }, TimestampFrom = request.TimestampFrom, TimestampTo = request.TimestampTo };
             var response = await transactionsClient.FilterAsync(filters);
             return new GetTransactionsResponse { Transactions = { response.Transactions } };
         }

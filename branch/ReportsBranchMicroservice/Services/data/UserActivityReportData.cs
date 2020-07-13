@@ -4,6 +4,7 @@ namespace ReportsBranchMicroservice
 {
     public class UserActivityRaportData
     {
+        public string UserId { get; set; }
         public DateTime? From { get; set; }
         public DateTime? To { get; set; }
         public Granularity Granularity { get; set; }

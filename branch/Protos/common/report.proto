@@ -12,16 +12,15 @@ enum Aggregation {
   AVG = 0;
   MIN = 1;
   MAX = 2;
-  MEAN = 3;
+  MEDIAN = 3;
   COUNT = 4;
 }
 
 enum ReportSubject {
-  USERS = 0;
-  PAYMENTS = 1;
-  LOANS = 2;
-  CARDS = 3;
-  TRANSACTIONS = 4;
+  PAYMENTS = 0;
+  LOANS = 1;
+  CARDS = 2;
+  TRANSACTIONS = 3;
 }
 
 message Report {

@@ -1,18 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using AccountsMicroservice;
-using CardsMicroservice;
 using Google.Protobuf;
 using Grpc.Core;
 using Microsoft.Extensions.Logging;
-using PaymentsMicroservice;
-using static AccountsMicroservice.Accounts;
-using static CardsMicroservice.Cards;
-using static PaymentsMicroservice.Payments;
-using static TransactionsMicroservice.Transactions;
 
 namespace ReportsBranchMicroservice
 {
@@ -29,23 +21,37 @@ namespace ReportsBranchMicroservice
 
         public override async Task<GenerateReportResponse> GenerateOverallReport(GenerateOverallReportRequest request, ServerCallContext context)
         {
-            string csv = null;
+            Transaction[] transactions;
+
             switch (request.Subject)
             {
                 case ReportSubject.Cards:
+                    transactions = await dataFetcher.GetCardsTransactions(request.FlowId, request.TimestampFrom, request.TimestampTo);
                     break;
                 case ReportSubject.Loans:
+                    transactions = await dataFetcher.GetLoansTransactions(request.FlowId, request.TimestampFrom, request.TimestampTo);
                     break;
                 case ReportSubject.Payments:
-                    break;
-                case ReportSubject.Users:
+                    transactions = await dataFetcher.GetPaymentsTransactions(request.FlowId, request.TimestampFrom, request.TimestampTo);
                     break;
                 case ReportSubject.Transactions:
+                    transactions = await dataFetcher.GetTransactions(request.FlowId, request.TimestampFrom, request.TimestampTo);
                     break;
                 default:
                     throw new InvalidOperationException("Unknown subject of report.");
             }
-            var report = new Report { Data = ByteString.CopyFromUtf8("asdasd") };
+
+            var data = new OverallReportData
+            {
+                From = GetDateTime(request.TimestampFrom),
+                To = GetDateTime(request.TimestampTo),
+                Granularity = request.Granularity,
+                Subject = request.Subject,
+                Aggregations = request.Aggregations.ToArray(),
+                Transactions = transactions
+            };
+            var csv = ReportGenerator.CreateOverallCsvReport(data);
+            var report = new Report { Data = ByteString.CopyFromUtf8(csv) };
             return new GenerateReportResponse { FlowId = request.FlowId, Report = report };
         }
 
@@ -59,7 +65,7 @@ namespace ReportsBranchMicroservice
             Card[] cards = null;
 
             var parallelTasks = new List<Task>();
-            parallelTasks.Add(Task.Run(async () => transactions = await dataFetcher.GetTransactions(request.FlowId, accountsIds)));
+            parallelTasks.Add(Task.Run(async () => transactions = await dataFetcher.GetAccountsTransactions(request.FlowId, accountsIds, request.TimestampFrom, request.TimestampTo)));
             parallelTasks.Add(Task.Run(async () => paymentsAndLoans = await dataFetcher.GetPaymentsWithLoans(request.FlowId, accountsIds)));
             parallelTasks.Add(Task.Run(async () => cards = await dataFetcher.GetCards(request.FlowId, accountsIds)));
             await Task.WhenAll(parallelTasks);
@@ -82,6 +88,6 @@ namespace ReportsBranchMicroservice
             return new GenerateReportResponse { FlowId = request.FlowId, Report = report };
         }
 
-        private DateTime? GetDateTime(long ticks) => ticks > 0 ? DateTime.FromBinary(ticks) : null as DateTime?;
+        private DateTime? GetDateTime(long ticks) => ticks > 0 ? new DateTime(ticks) : null as DateTime?;
     }
 }
