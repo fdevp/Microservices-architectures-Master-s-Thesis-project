@@ -20,6 +20,8 @@ namespace PaymentsMicroservice.Repository
             return payments.Values.Where((element, index) => ((index % totalParts) + 1) == part).ToArray();
         }
 
+        public string[] GetIds() => payments.Values.Select(p => p.Id).ToArray();
+
         public Payment[] GetByAccounts(IEnumerable<string> accountIds)
         {
             var accountsSet = accountIds.ToHashSet();

@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -5,6 +7,7 @@ using Grpc.Core;
 using LoansReadMicroservice;
 using Microsoft.Extensions.Logging;
 using PaymentsReadMicroservice.Repository;
+using SharedClasses;
 using TransactionsReadMicroservice;
 using static LoansReadMicroservice.LoansRead;
 using static TransactionsReadMicroservice.TransactionsRead;
@@ -55,11 +58,33 @@ namespace PaymentsReadMicroservice
             return Task.FromResult(new GetPaymentsResult { Payments = { payments } });
         }
 
-        public override async Task<GetTransactionsResult> GetTransactions(GetTransactionsRequest request, ServerCallContext context)
+        public override async Task<AggregateOverallResponse> AggregateOverall(AggregateOverallRequest request, ServerCallContext context)
         {
-            var transactionsRequest = new FilterTransactionsRequest { FlowId = request.FlowId, Payments = { request.Ids } };
-            var transactionsResponse = await transactionsClient.FilterAsync(transactionsRequest);
-            return new GetTransactionsResult { Transactions = { transactionsResponse.Transactions } };
+            var paymentsIds = paymentsRepository.GetIds();
+            var transactionsResponse = await transactionsClient.FilterAsync(new FilterTransactionsRequest { Payments = { paymentsIds }, TimestampTo = request.TimestampTo, TimestampFrom = request.TimestampFrom });
+            var aggregations = Aggregations.CreateOverallCsvReport(new OverallReportData { Aggregations = request.Aggregations.ToArray(), Granularity = request.Granularity, Transactions = transactionsResponse.Transactions.ToArray() });
+            return new AggregateOverallResponse { Portions = { aggregations } };
+        }
+
+        public override async Task<AggregateUserActivityResponse> AggregateUserActivity(AggregateUserActivityRequest request, ServerCallContext context)
+        {
+            var payments = paymentsRepository.GetByAccounts(request.AccountsIds);
+            var paymentsIds = payments.Select(p => p.Id).ToArray();
+            var transactionsResponse = await transactionsClient.FilterAsync(new FilterTransactionsRequest { Payments = { paymentsIds }, TimestampFrom = request.TimestampFrom, TimestampTo = request.TimestampTo });
+            var transactions = transactionsResponse.Transactions.ToArray();
+            var aggregated = payments.SelectMany(p => AggregateUserTransactions(p, transactions.Where(t => t.PaymentId == p.Id).ToArray(), request.Granularity));
+            return new AggregateUserActivityResponse { Portions = { aggregated } };
+        }
+
+        private IEnumerable<UserReportPortion> AggregateUserTransactions(Repository.Payment payment, Transaction[] transactions, Granularity granularity)
+        {
+            var withTimestamps = transactions.Select(t => new TransactionWithTimestamp { Timestamp = new DateTime(t.Timestamp), Transaction = t });
+            var portions = Aggregations.GroupByPeriods(granularity, withTimestamps);
+            foreach (var portion in portions)
+            {
+                var debits = portion.Where(p => p.Transaction.PaymentId == portion.Key).Sum(p => (float?)p.Transaction.Amount) ?? 0;
+                yield return new UserReportPortion { Period = portion.Key, Debits = debits, Element = payment.Id };
+            }
         }
     }
 }

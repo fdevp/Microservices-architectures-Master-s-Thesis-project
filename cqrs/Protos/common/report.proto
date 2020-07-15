@@ -1,0 +1,57 @@
+syntax = "proto3";
+
+enum Granularity {
+  DAY = 0;
+  WEEK = 1;
+  MONTH = 2;
+  YEAR = 3;
+  ALL = 4;
+}
+
+enum Aggregation {
+  AVG = 0;
+  MIN = 1;
+  MAX = 2;
+  MEDIAN = 3;
+  COUNT = 4;
+}
+
+enum ReportSubject {
+  PAYMENTS = 0;
+  LOANS = 1;
+  CARDS = 2;
+  TRANSACTIONS = 3;
+}
+
+message Report {
+  bytes data = 1;
+}
+
+message OverallReportPortion {
+  string period = 1;
+  Aggregation aggregation = 2;
+  float value = 3;
+}
+
+message UserReportPortion {
+  string element = 1;
+  string period = 2;
+  float incomes = 3;
+  float debits = 4;
+}
+
+message AggregateUserActivityResponse {
+  repeated UserReportPortion portions = 1;
+}
+
+message AggregateOverallRequest {
+  int64 flowId = 1;
+  repeated Aggregation aggregations = 2;
+  int64 timestampFrom = 3;
+  int64 timestampTo = 4;
+  Granularity granularity = 5;
+}
+
+message AggregateOverallResponse {
+  repeated OverallReportPortion portions = 1;
+}

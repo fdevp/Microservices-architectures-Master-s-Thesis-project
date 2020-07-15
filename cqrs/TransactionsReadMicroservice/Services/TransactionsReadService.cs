@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Grpc.Core;
 using Microsoft.Extensions.Logging;
+using SharedClasses;
 using TransactionsReadMicroservice.Repository;
 
 namespace TransactionsReadMicroservice
@@ -45,6 +46,14 @@ namespace TransactionsReadMicroservice
 
             var transactions = transactionsRepository.GetMany(filters, request.Top).Select(t => mapper.Map<Transaction>(t));
             return Task.FromResult(new GetTransactionsResult { Transactions = { transactions } });
+        }
+
+        public override Task<AggregateOverallResponse> AggregateOverall(AggregateOverallRequest request, Grpc.Core.ServerCallContext context)
+        {
+            var filters = new Filters { TimestampFrom = request.TimestampFrom, TimestampTo = request.TimestampTo };
+            var transactions = transactionsRepository.GetMany(filters, 0).Select(t => mapper.Map<Transaction>(t)).ToArray();
+            var aggregations = Aggregations.CreateOverallCsvReport(new OverallReportData { Aggregations = request.Aggregations.ToArray(), Granularity = request.Granularity, Transactions = transactions });
+            return Task.FromResult(new AggregateOverallResponse { Portions = { aggregations } });
         }
     }
 }

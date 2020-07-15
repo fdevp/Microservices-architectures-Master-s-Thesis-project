@@ -1,6 +1,6 @@
 syntax = "proto3";
-import "common/transaction.proto";
 import "common/payment.proto";
+import "common/report.proto";
 
 option csharp_namespace = "PaymentsReadMicroservice";
 
@@ -10,7 +10,8 @@ service PaymentsRead {
   rpc Get (GetPaymentsRequest) returns (GetPaymentsResult);
   rpc GetPart (GetPartRequest) returns (GetPaymentsResult);
   rpc GetByAccounts (GetPaymentsRequest) returns (GetPaymentsResult);
-  rpc GetTransactions (GetTransactionsRequest) returns (GetTransactionsResult);
+  rpc AggregateUserActivity (AggregateUserActivityRequest) returns (AggregateUserActivityResponse);
+  rpc AggregateOverall (AggregateOverallRequest) returns (AggregateOverallResponse);
 }
 
 message GetPaymentsRequest {
@@ -28,11 +29,10 @@ message GetPartRequest {
   int32 totalParts = 3;
 }
 
-message GetTransactionsRequest {
+message AggregateUserActivityRequest {
   int64 flowId = 1;
-  repeated string ids = 2;
-}
-
-message GetTransactionsResult {
-  repeated Transaction transactions = 1;
+  repeated string accountsIds = 2;
+  int64 timestampFrom = 3;
+  int64 timestampTo = 4;
+  Granularity granularity = 5;
 }

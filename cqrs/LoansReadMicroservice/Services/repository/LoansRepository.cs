@@ -14,6 +14,10 @@ namespace LoansReadMicroservice.Repository
             return null;
         }
 
+        public Loan[] GetAll() => loans.Values.ToArray();
+
+        public string[] GetPaymentsIds() => loans.Select(l => l.Value.PaymentId).ToArray();
+
         public Loan[] GetByPayment(IEnumerable<string> paymentIds)
         {
             var payments = paymentIds.ToHashSet();

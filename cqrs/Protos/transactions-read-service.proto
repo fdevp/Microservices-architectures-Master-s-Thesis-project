@@ -1,5 +1,6 @@
 syntax = "proto3";
 import "common/transaction.proto";
+import "common/report.proto";
 
 option csharp_namespace = "TransactionsReadMicroservice";
 package TransactionsMicroservice;
@@ -7,6 +8,7 @@ package TransactionsMicroservice;
 service TransactionsRead {
   rpc Get (GetTransactionsRequest) returns (GetTransactionsResult);
   rpc Filter(FilterTransactionsRequest) returns (GetTransactionsResult);
+  rpc AggregateOverall (AggregateOverallRequest) returns (AggregateOverallResponse);
 }
 
 message GetTransactionsRequest {

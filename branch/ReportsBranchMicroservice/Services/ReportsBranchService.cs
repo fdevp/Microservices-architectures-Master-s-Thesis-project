@@ -59,29 +59,24 @@ namespace ReportsBranchMicroservice
         {
             var accounts = await dataFetcher.GetAccounts(request.FlowId, request.UserId);
             var accountsIds = accounts.Select(a => a.Id).ToArray();
-
-            Transaction[] transactions = null;
-            PaymentsAndLoans paymentsAndLoans = null;
-            Card[] cards = null;
-
-            var parallelTasks = new List<Task>();
-            parallelTasks.Add(Task.Run(async () => transactions = await dataFetcher.GetAccountsTransactions(request.FlowId, accountsIds, request.TimestampFrom, request.TimestampTo)));
-            parallelTasks.Add(Task.Run(async () => paymentsAndLoans = await dataFetcher.GetPaymentsWithLoans(request.FlowId, accountsIds)));
-            parallelTasks.Add(Task.Run(async () => cards = await dataFetcher.GetCards(request.FlowId, accountsIds)));
-            await Task.WhenAll(parallelTasks);
-
-            //generowanie raportu
             var data = new UserActivityRaportData
             {
                 From = GetDateTime(request.TimestampFrom),
                 To = GetDateTime(request.TimestampTo),
                 Granularity = request.Granularity,
                 Accounts = accounts,
-                Transactions = transactions,
-                Cards = cards,
-                Loans = paymentsAndLoans.Loans,
-                Payments = paymentsAndLoans.Payments
             };
+
+            var parallelTasks = new List<Task>();
+            parallelTasks.Add(Task.Run(async () => data.Transactions = await dataFetcher.GetAccountsTransactions(request.FlowId, accountsIds, request.TimestampFrom, request.TimestampTo)));
+            parallelTasks.Add(Task.Run(async () =>
+            {
+                var paymentsAndLoans = await dataFetcher.GetPaymentsWithLoans(request.FlowId, accountsIds);
+                data.Payments = paymentsAndLoans.Payments;
+                data.Loans = paymentsAndLoans.Loans;
+            }));
+            parallelTasks.Add(Task.Run(async () => data.Cards = await dataFetcher.GetCards(request.FlowId, accountsIds)));
+            await Task.WhenAll(parallelTasks);
 
             var csv = ReportGenerator.CreateUserActivityCsvReport(data);
             var report = new Report { Data = ByteString.CopyFromUtf8(csv) };

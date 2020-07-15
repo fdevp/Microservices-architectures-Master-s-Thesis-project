@@ -7,7 +7,6 @@
     <Protobuf Include="..\Protos\transactions-write-service.proto" GrpcServices="Client"/>
     <Protobuf Include="..\Protos\loans-write-service.proto" GrpcServices="Client"/>
     <Protobuf Include="..\Protos\common\empty.proto"/>
-    <Protobuf Include="..\Protos\common\transaction.proto"/>
     <Protobuf Include="..\Protos\common\loan.proto"/>
     <Protobuf Include="..\Protos\common\payment.proto"/>
   </ItemGroup>

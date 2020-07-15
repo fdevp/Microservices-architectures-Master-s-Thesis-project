@@ -12,7 +12,7 @@ namespace ReportsBranchMicroservice
         public static string CreateOverallCsvReport(OverallReportData data)
         {
             var withTimestamps = data.Transactions.Select(t => new TransactionWithTimestamp { Timestamp = new DateTime(t.Timestamp), Transaction = t });
-            var grouped = GroupByGranularity(data.Granularity, withTimestamps);
+            var periods = GroupByPeriods(data.Granularity, withTimestamps);
 
             var sb = new StringBuilder();
             sb.AppendLine($"Raport całościowy dla; {data.Subject}");
@@ -20,10 +20,10 @@ namespace ReportsBranchMicroservice
             sb.AppendLine($"Zakres do; {data.To}");
             sb.AppendLine($"Granularność; {data.Granularity}");
 
-            foreach (var group in grouped)
+            foreach (var period in periods)
             {
                 foreach (var aggregation in data.Aggregations)
-                    sb.WriteAggragation(group, aggregation);
+                    sb.WriteAggragation(period, aggregation);
             }
 
             return string.Empty;
@@ -32,7 +32,7 @@ namespace ReportsBranchMicroservice
         public static string CreateUserActivityCsvReport(UserActivityRaportData data)
         {
             var withTimestamps = data.Transactions.Select(t => new TransactionWithTimestamp { Timestamp = new DateTime(t.Timestamp), Transaction = t });
-            var grouped = GroupByGranularity(data.Granularity, withTimestamps);
+            var periods = GroupByPeriods(data.Granularity, withTimestamps);
 
             var sb = new StringBuilder();
             sb.AppendLine($"Raport aktywności użytkownika; {data.UserId}");
@@ -40,14 +40,14 @@ namespace ReportsBranchMicroservice
             sb.AppendLine($"Zakres do; {data.To}");
             sb.AppendLine($"Granularność; {data.Granularity}");
 
-            sb.WriteAccountsData(grouped, data.Accounts);
-            sb.WriteCardsData(grouped, data.Cards);
-            sb.WritePaymentsData(grouped, data.Payments);
-            sb.WriteLoansData(grouped, data.Loans);
+            sb.WriteAccountsData(periods, data.Accounts);
+            sb.WriteCardsData(periods, data.Cards);
+            sb.WritePaymentsData(periods, data.Payments);
+            sb.WriteLoansData(periods, data.Loans);
 
             return sb.ToString();
         }
-        private static IEnumerable<IGrouping<string, TransactionWithTimestamp>> GroupByGranularity(Granularity granularity, IEnumerable<TransactionWithTimestamp> transactions)
+        private static IEnumerable<IGrouping<string, TransactionWithTimestamp>> GroupByPeriods(Granularity granularity, IEnumerable<TransactionWithTimestamp> transactions)
         {
             switch (granularity)
             {

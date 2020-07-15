@@ -31,6 +31,7 @@
     <Protobuf Include="..\Protos\common\block.proto"/>
     <Protobuf Include="..\Protos\common\account.proto"/>
     <Protobuf Include="..\Protos\common\card.proto"/>
+    <Protobuf Include="..\Protos\common\report.proto"/>
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Grpc.AspNetCore" Version="2.27.0"/>

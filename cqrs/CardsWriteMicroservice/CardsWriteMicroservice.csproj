@@ -6,7 +6,6 @@
     <Protobuf Include="..\Protos\cards-write-service.proto" GrpcServices="Server"/>
     <Protobuf Include="..\Protos\accounts-write-service.proto" GrpcServices="Client"/>
     <Protobuf Include="..\Protos\common\empty.proto"/>
-    <Protobuf Include="..\Protos\common\transaction.proto"/>
     <Protobuf Include="..\Protos\common\transfer.proto"/>
     <Protobuf Include="..\Protos\common\balance.proto"/>
     <Protobuf Include="..\Protos\common\card.proto"/>

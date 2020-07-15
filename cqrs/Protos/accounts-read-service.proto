@@ -1,7 +1,7 @@
 syntax = "proto3";
-import "common/transaction.proto";
 import "common/balance.proto";
 import "common/account.proto";
+import "common/report.proto";
 
 option csharp_namespace = "AccountsReadMicroservice";
 
@@ -11,7 +11,7 @@ service AccountsRead {
   rpc Get (GetAccountsRequest) returns (GetAccountsResponse);
   rpc GetUserAccounts (GetUserAccountsRequest) returns (GetAccountsResponse);
   rpc GetBalances (GetBalancesRequest) returns (GetBalancesResponse);
-  rpc GetTransactions (GetTransactionsRequest) returns (GetTransactionsResponse);
+  rpc AggregateUserActivity (AggregateUserActivityRequest) returns (AggregateUserActivityResponse);
 }
 
 message GetAccountsRequest {
@@ -37,11 +37,10 @@ message GetBalancesResponse {
   repeated AccountBalance balances = 1;
 }
 
-message GetTransactionsRequest {
+message AggregateUserActivityRequest {
   int64 flowId = 1;
-  repeated string ids = 2;
-}
-
-message GetTransactionsResponse {
-  repeated Transaction transactions = 1;
+  string userId = 2;
+  int64 timestampFrom = 3;
+  int64 timestampTo = 4;
+  Granularity granularity = 5;
 }

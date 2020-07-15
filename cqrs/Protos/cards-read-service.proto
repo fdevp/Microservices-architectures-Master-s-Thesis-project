@@ -1,7 +1,7 @@
 syntax = "proto3";
-import "common/transaction.proto";
 import "common/card.proto";
 import "common/block.proto";
+import "common/report.proto";
 
 option csharp_namespace = "CardsReadMicroservice";
 
@@ -11,7 +11,8 @@ service CardsRead {
   rpc Get (GetCardsRequest) returns (GetCardsResponse);
   rpc GetByAccounts (GetCardsByAccountsRequest) returns (GetCardsResponse);
   rpc GetBlocks (GetBlocksRequest) returns (GetBlocksResponse);
-  rpc GetTransactions (GetTransactionsRequest) returns (GetTransactionsResponse);
+  rpc AggregateUserActivity (AggregateUserActivityRequest) returns (AggregateUserActivityResponse);
+  rpc AggregateOverall (AggregateOverallRequest) returns (AggregateOverallResponse);
 }
 
 message GetCardsRequest {
@@ -37,11 +38,10 @@ message GetBlocksResponse {
   repeated Block blocks = 1;
 }
 
-message GetTransactionsRequest {
+message AggregateUserActivityRequest {
   int64 flowId = 1;
-  repeated string ids = 2;
-}
-
-message GetTransactionsResponse {
-  repeated Transaction transactions = 1;
+  repeated string accountsIds = 2;
+  int64 timestampFrom = 3;
+  int64 timestampTo = 4;
+  Granularity granularity = 5;
 }

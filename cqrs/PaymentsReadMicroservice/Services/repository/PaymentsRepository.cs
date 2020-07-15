@@ -15,6 +15,8 @@ namespace PaymentsReadMicroservice.Repository
             return null;
         }
 
+        public string[] GetIds() => payments.Select(p => p.Value.Id).ToArray();
+
         public Payment[] Get(int part, int totalParts)
         {
             return payments.Values.Where((element, index) => ((index % totalParts) + 1) == part).ToArray();

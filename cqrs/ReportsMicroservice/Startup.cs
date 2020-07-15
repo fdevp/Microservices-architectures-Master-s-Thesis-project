@@ -1,15 +1,30 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using System.Net.Http;
+using Grpc.Net.Client;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using SharedClasses;
+using static AccountsReadMicroservice.AccountsRead;
+using static CardsReadMicroservice.CardsRead;
+using static LoansReadMicroservice.LoansRead;
+using static PaymentsReadMicroservice.PaymentsRead;
+using static TransactionsReadMicroservice.TransactionsRead;
 
 namespace ReportsMicroservice
 {
     public class Startup
     {
+        public Startup(IConfiguration configuration)
+        {
+            Configuration = configuration;
+        }
+
+        public IConfiguration Configuration { get; }
+
         // This method gets called by the runtime. Use this method to add services to the container.
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
@@ -32,7 +47,7 @@ namespace ReportsMicroservice
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapGrpcService<ReportsBranchService>();
+                endpoints.MapGrpcService<ReportsService>();
 
                 endpoints.MapGet("/", async context =>
                 {
@@ -41,6 +56,32 @@ namespace ReportsMicroservice
             });
 
             loggerFactory.AddFile("log.txt");
+        }
+
+        private void CreateClients(IServiceCollection services)
+        {
+            var addresses = new EndpointsAddresses();
+            Configuration.GetSection("Addresses").Bind(addresses);
+
+            var httpClientHandler = new HttpClientHandler();
+            httpClientHandler.ServerCertificateCustomValidationCallback =
+                HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
+            var httpClient = new HttpClient(httpClientHandler);
+
+            var transactionsChannel = GrpcChannel.ForAddress("", new GrpcChannelOptions { HttpClient = httpClient });
+            services.AddSingleton(new TransactionsReadClient(transactionsChannel));
+
+            var accountsChannel = GrpcChannel.ForAddress("", new GrpcChannelOptions { HttpClient = httpClient });
+            services.AddSingleton(new AccountsReadClient(accountsChannel));
+
+            var paymentsChannel = GrpcChannel.ForAddress("", new GrpcChannelOptions { HttpClient = httpClient });
+            services.AddSingleton(new PaymentsReadClient(paymentsChannel));
+
+            var loansChannel = GrpcChannel.ForAddress("", new GrpcChannelOptions { HttpClient = httpClient });
+            services.AddSingleton(new LoansReadClient(loansChannel));
+
+            var cardsChannel = GrpcChannel.ForAddress("", new GrpcChannelOptions { HttpClient = httpClient });
+            services.AddSingleton(new CardsReadClient(loansChannel));
         }
     }
 }

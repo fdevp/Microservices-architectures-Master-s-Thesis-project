@@ -47,7 +47,8 @@ namespace LoansMicroservice
 
         public async override Task<GetTransactionsResult> GetTransactions(GetTransactionsRequest request, ServerCallContext context)
         {
-            var transactionsRequest = new FilterTransactionsRequest { FlowId = request.FlowId, Payments = { request.Ids }, TimestampFrom = request.TimestampFrom, TimestampTo = request.TimestampTo };
+            var ids = request.Ids.Any() ? request.Ids.ToArray() : loansRepository.GetPaymentsIds();
+            var transactionsRequest = new FilterTransactionsRequest { FlowId = request.FlowId, Payments = { ids }, TimestampFrom = request.TimestampFrom, TimestampTo = request.TimestampTo };
             var transactionsResponse = await transactionsClient.FilterAsync(transactionsRequest);
             return new GetTransactionsResult { Transactions = { transactionsResponse.Transactions } };
         }

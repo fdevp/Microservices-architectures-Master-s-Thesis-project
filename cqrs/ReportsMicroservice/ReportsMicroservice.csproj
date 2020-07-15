@@ -6,6 +6,17 @@
 
   <ItemGroup>
     <Protobuf Include="..\Protos\reports-service.proto" GrpcServices="Server" />
+    <Protobuf Include="..\Protos\transactions-read-service.proto" GrpcServices="Client" />
+    <Protobuf Include="..\Protos\payments-read-service.proto" GrpcServices="Client" />
+    <Protobuf Include="..\Protos\accounts-read-service.proto" GrpcServices="Client" />
+    <Protobuf Include="..\Protos\cards-read-service.proto" GrpcServices="Client" />
+    <Protobuf Include="..\Protos\loans-read-service.proto" GrpcServices="Client" />
+    <Protobuf Include="..\Protos\common\balance.proto" />
+    <Protobuf Include="..\Protos\common\account.proto" />
+    <Protobuf Include="..\Protos\common\card.proto" />
+    <Protobuf Include="..\Protos\common\payment.proto" />
+    <Protobuf Include="..\Protos\common\loan.proto" />
+    <Protobuf Include="..\Protos\common\block.proto" />
   </ItemGroup>
 
   <ItemGroup>
@@ -13,7 +24,7 @@
     <PackageReference Include="Serilog" Version="2.9.0"/>
     <PackageReference Include="Serilog.Extensions.Logging.File" Version="2.0.0"/>
   </ItemGroup>
- <ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="../SharedClasses/SharedClasses.csproj" />
   </ItemGroup>
 </Project>
