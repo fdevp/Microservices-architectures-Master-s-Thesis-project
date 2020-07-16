@@ -9,7 +9,7 @@ package CardsMicroservice;
 
 service CardsRead {
   rpc Get (GetCardsRequest) returns (GetCardsResponse);
-  rpc GetByAccounts (GetCardsByAccountsRequest) returns (GetCardsResponse);
+  rpc GetByAccounts (GetCardsRequest) returns (GetCardsResponse);
   rpc GetBlocks (GetBlocksRequest) returns (GetBlocksResponse);
   rpc AggregateUserActivity (AggregateUserActivityRequest) returns (AggregateUserActivityResponse);
   rpc AggregateOverall (AggregateOverallRequest) returns (AggregateOverallResponse);
@@ -18,11 +18,6 @@ service CardsRead {
 message GetCardsRequest {
   int64 flowId = 1;
   repeated string ids = 2;
-}
-
-message GetCardsByAccountsRequest {
-  int64 flowId = 1;
-  repeated string accountIds = 2;
 }
 
 message GetCardsResponse {

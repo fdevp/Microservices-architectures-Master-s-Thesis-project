@@ -69,8 +69,9 @@ namespace PaymentsMicroservice
         [EventHandlingMethod(typeof(GetTransactionsEvent))]
         public Task GetTransactions(MessageContext context, GetTransactionsEvent inputEvent)
         {
-            var paymentsTransactionsEvent = new FilterTransactionsEvent { Payments = inputEvent.Ids };
-            publishingRouter.Publish(context.ReplyTo, paymentsTransactionsEvent, context.FlowId);
+            var paymentsIds = inputEvent.Ids != null && inputEvent.Ids.Length > 0 ? inputEvent.Ids : paymentsRepository.GetIds();
+            var getTransactionsEvent = new FilterTransactionsEvent { Payments = paymentsIds, TimestampFrom = inputEvent.TimestampFrom, TimestampTo = inputEvent.TimestampTo };
+            publishingRouter.Publish(Queues.Transactions, getTransactionsEvent, context.FlowId, context.ReplyTo);
             return Task.CompletedTask;
         }
 

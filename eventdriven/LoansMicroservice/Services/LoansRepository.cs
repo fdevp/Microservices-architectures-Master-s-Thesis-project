@@ -15,10 +15,12 @@ namespace LoansMicroservice.Repository
             return null;
         }
 
+        public string[] GetPaymentsIds() => loans.Values.Select(l => l.PaymentId).ToArray();
+
         public Loan[] GetByPayment(IEnumerable<string> paymentIds)
         {
             var payments = paymentIds.ToHashSet();
-            return loans.Values.Where(l=> payments.Contains(l.PaymentId)).ToArray();
+            return loans.Values.Where(l => payments.Contains(l.PaymentId)).ToArray();
         }
 
         public bool RepayInstalment(string id)

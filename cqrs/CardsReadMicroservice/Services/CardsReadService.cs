@@ -35,9 +35,9 @@ namespace CardsReadMicroservice
             return Task.FromResult(new GetCardsResponse { Cards = { cards } });
         }
 
-        public override Task<GetCardsResponse> GetByAccounts(GetCardsByAccountsRequest request, ServerCallContext context)
+        public override Task<GetCardsResponse> GetByAccounts(GetCardsRequest request, ServerCallContext context)
         {
-            var cards = cardsRepository.GetByAccounts(request.AccountIds)
+            var cards = cardsRepository.GetByAccounts(request.Ids)
                                         .Select(transaction => mapper.Map<Card>(transaction))
                                         .ToArray();
             return Task.FromResult(new GetCardsResponse { Cards = { cards } });

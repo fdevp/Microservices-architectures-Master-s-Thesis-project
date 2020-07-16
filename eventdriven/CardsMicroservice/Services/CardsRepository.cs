@@ -18,6 +18,8 @@ namespace CardsMicroservice.Repository
             return null;
         }
 
+        public string[] GetIds() => cards.Values.Select(c=>c.Id).ToArray();
+
         public Card[] GetByAccounts(IEnumerable<string> accountIds)
         {
             var accountsSet = accountIds.ToHashSet();

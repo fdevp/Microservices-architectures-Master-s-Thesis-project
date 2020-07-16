@@ -11,7 +11,7 @@ package PaymentsMicroservice;
 service Payments {
   rpc Get (GetPaymentsRequest) returns (GetPaymentsResult);
   rpc GetPart (GetPartRequest) returns (GetPaymentsWithLoansResult);
-  rpc GetByAccount (GetByAccountRequest) returns (GetPaymentsWithLoansResult);
+  rpc GetByAccounts (GetPaymentsRequest) returns (GetPaymentsWithLoansResult);
   rpc GetTransactions (GetTransactionsRequest) returns (GetTransactionsResult);
   rpc Create (CreatePaymentRequest) returns (CreatePaymentResult);
   rpc Cancel (CancelPaymentsRequest) returns (Empty);
@@ -25,11 +25,6 @@ message GetPaymentsRequest {
 
 message GetPaymentsResult {
   repeated Payment payments = 1;
-}
-
-message GetByAccountRequest {
-  int64 flowId = 1;
-  repeated string accountIds = 2;
 }
 
 message GetPartRequest {

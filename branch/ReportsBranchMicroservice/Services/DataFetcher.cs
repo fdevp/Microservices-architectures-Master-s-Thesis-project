@@ -42,8 +42,8 @@ namespace ReportsBranchMicroservice
 
         public async Task<PaymentsAndLoans> GetPaymentsWithLoans(long flowId, string[] accountsIds)
         {
-            var request = new GetByAccountRequest { FlowId = flowId, AccountIds = { accountsIds } };
-            var response = await paymentsClient.GetByAccountAsync(request);
+            var request = new GetPaymentsRequest { FlowId = flowId, Ids = { accountsIds } };
+            var response = await paymentsClient.GetByAccountsAsync(request);
             return new PaymentsAndLoans
             {
                 Loans = response.Loans.ToArray(),
@@ -53,7 +53,7 @@ namespace ReportsBranchMicroservice
 
         public async Task<Card[]> GetCards(long flowId, string[] accountsIds)
         {
-            var request = new GetCardsByAccountsRequest { FlowId = flowId, AccountIds = { accountsIds } };
+            var request = new GetCardsRequest { FlowId = flowId, Ids = { accountsIds } };
             var response = await cardsClient.GetByAccountsAsync(request);
             return response.Cards.ToArray();
         }

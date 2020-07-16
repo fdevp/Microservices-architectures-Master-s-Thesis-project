@@ -6,4 +6,5 @@ message Loan {
   float totalAmount = 3;
   int32 instalments = 4;
   string paymentId = 5;
+  string accountId = 6;
 }

@@ -80,9 +80,7 @@ namespace ReportsMicroservice
             }));
             parallelTasks.Add(Task.Run(async () =>
             {
-                var paymentsResponse = await paymentsClient.GetByAccountsAsync(new GetPaymentsRequest { FlowId = flowId, Ids = { accountsIds } });
-                var paymentsIds = paymentsResponse.Payments.Select(p => p.Id);
-                var request = new LoansReadMicroservice.AggregateUserActivityRequest { PaymentsIds = { paymentsIds }, FlowId = flowId, TimestampFrom = from, TimestampTo = to, Granularity = granularity };
+                var request = new LoansReadMicroservice.AggregateUserActivityRequest { AccountsIds = { accountsIds }, FlowId = flowId, TimestampFrom = from, TimestampTo = to, Granularity = granularity };
                 var response = await loansClient.AggregateUserActivityAsync(request);
                 portions.Loans = response.Portions.ToArray();
             }));

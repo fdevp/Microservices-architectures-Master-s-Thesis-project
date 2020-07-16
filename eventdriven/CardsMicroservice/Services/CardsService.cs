@@ -57,7 +57,8 @@ namespace CardsMicroservice
         [EventHandlingMethod(typeof(GetTransactionsEvent))]
         public Task GetTransactions(MessageContext context, GetTransactionsEvent inputEvent)
         {
-            var getTransactionsEvent = new FilterTransactionsEvent { Cards = inputEvent.Ids };
+            var cardsIds = inputEvent.Ids != null && inputEvent.Ids.Length > 0 ? inputEvent.Ids : cardsRepository.GetIds();
+            var getTransactionsEvent = new FilterTransactionsEvent { Cards = cardsIds, TimestampFrom = inputEvent.TimestampFrom, TimestampTo = inputEvent.TimestampTo };
             publishingRouter.Publish(Queues.Transactions, getTransactionsEvent, context.FlowId, context.ReplyTo);
             return Task.CompletedTask;
         }

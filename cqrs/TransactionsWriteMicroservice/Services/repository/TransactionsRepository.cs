@@ -8,11 +8,6 @@ namespace TransactionsWriteMicroservice.Repository
     {
         private Dictionary<string, Transaction> transactions = new Dictionary<string, Transaction>();
 
-        public TransactionsRepository()
-        {
-            transactions.Add("1", new Transaction("123", "Initial transaciton", 100, DateTime.UtcNow.Ticks, "5423", "1", null, null));
-        }
-
         public Transaction Create(string title, float amount, string recipient, string sender, string paymentId, string cardId)
         {
             var id = Guid.NewGuid().ToString();

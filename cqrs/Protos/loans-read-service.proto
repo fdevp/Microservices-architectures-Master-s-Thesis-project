@@ -8,7 +8,8 @@ package LoansMicroservice;
 
 service LoansRead {
   rpc Get (GetLoansRequest) returns (GetLoansResponse);
-  rpc GetLoansByPayments (GetLoansByPaymentsRequest) returns (GetLoansResponse);
+  rpc GetByPayments (GetLoansRequest) returns (GetLoansResponse);
+  rpc GetByAccounts (GetLoansRequest) returns (GetLoansResponse);
   rpc AggregateUserActivity (AggregateUserActivityRequest) returns (AggregateUserActivityResponse);
   rpc AggregateOverall (AggregateOverallRequest) returns (AggregateOverallResponse);
 }
@@ -18,18 +19,13 @@ message GetLoansRequest {
   repeated string ids = 2;
 }
 
-message GetLoansByPaymentsRequest {
-  int64 flowId = 1;
-  repeated string paymentsIds = 2;
-}
-
 message GetLoansResponse {
   repeated Loan loans = 1;
 }
 
 message AggregateUserActivityRequest {
   int64 flowId = 1;
-  repeated string paymentsIds = 2;
+  repeated string accountsIds = 2;
   int64 timestampFrom = 3;
   int64 timestampTo = 4;
   Granularity granularity = 5;

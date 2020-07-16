@@ -83,15 +83,17 @@ namespace APIGateway.Controllers
             {
                 var paymentsResponse = await paymentsReadClient.GetByAccountsAsync(new GetPaymentsRequest { FlowId = flowId, Ids = { accountsIds } });
                 payments = paymentsResponse.Payments;
+            }));
 
-                var paymentsIds = payments.Select(p => p.Id);
-                var loansResponse = await loansReadClient.GetLoansByPaymentsAsync(new GetLoansByPaymentsRequest { FlowId = flowId, PaymentsIds = { paymentsIds } });
+            parallelTasks.Add(Task.Run(async () =>
+            {
+                var loansResponse = await loansReadClient.GetByAccountsAsync(new GetLoansRequest { FlowId = flowId, Ids = { accountsIds } });
                 loans = loansResponse.Loans;
             }));
 
             parallelTasks.Add(Task.Run(async () =>
             {
-                var cardsResponse = await cardsReadClient.GetByAccountsAsync(new GetCardsByAccountsRequest { FlowId = flowId, AccountIds = { accountsIds } });
+                var cardsResponse = await cardsReadClient.GetByAccountsAsync(new GetCardsRequest { FlowId = flowId, Ids = { accountsIds } });
                 cards = cardsResponse.Cards;
             }));
 

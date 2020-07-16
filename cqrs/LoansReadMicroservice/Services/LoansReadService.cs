@@ -38,9 +38,16 @@ namespace LoansReadMicroservice
             return Task.FromResult(new GetLoansResponse { Loans = { loans } });
         }
 
-        public override Task<GetLoansResponse> GetLoansByPayments(GetLoansByPaymentsRequest request, ServerCallContext context)
+        public override Task<GetLoansResponse> GetByPayments(GetLoansRequest request, ServerCallContext context)
         {
-            var loans = loansRepository.GetByPayment(request.PaymentsIds)
+            var loans = loansRepository.GetByPayments(request.Ids)
+                .Select(loan => mapper.Map<Loan>(loan));
+            return Task.FromResult(new GetLoansResponse { Loans = { loans } });
+        }
+
+         public override Task<GetLoansResponse> GetByAccounts(GetLoansRequest request, ServerCallContext context)
+        {
+            var loans = loansRepository.GetByAccounts(request.Ids)
                 .Select(loan => mapper.Map<Loan>(loan));
             return Task.FromResult(new GetLoansResponse { Loans = { loans } });
         }
@@ -55,7 +62,7 @@ namespace LoansReadMicroservice
 
         public override async Task<AggregateUserActivityResponse> AggregateUserActivity(AggregateUserActivityRequest request, ServerCallContext context)
         {
-            var loans = loansRepository.GetAll();
+            var loans = loansRepository.GetByAccounts(request.AccountsIds);
             var paymentsIds = loans.Select(l => l.PaymentId).ToArray();
             var transactionsResponse = await transactionsReadClient.FilterAsync(new FilterTransactionsRequest { Payments = { paymentsIds }, TimestampFrom = request.TimestampFrom, TimestampTo = request.TimestampTo });
             var transactions = transactionsResponse.Transactions.ToArray();

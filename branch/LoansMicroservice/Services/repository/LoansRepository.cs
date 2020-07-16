@@ -16,10 +16,16 @@ namespace LoansMicroservice.Repository
 
         public string[] GetPaymentsIds() => loans.Select(l => l.Value.PaymentId).ToArray();
 
-        public Loan[] GetByPayment(IEnumerable<string> paymentIds)
+        public Loan[] GetByPayments(IEnumerable<string> paymentIds)
         {
             var payments = paymentIds.ToHashSet();
             return loans.Values.Where(l => payments.Contains(l.PaymentId)).ToArray();
+        }
+
+        public Loan[] GetByAccounts(IEnumerable<string> accountsIds)
+        {
+            var acocunts = accountsIds.ToHashSet();
+            return loans.Values.Where(l => acocunts.Contains(l.AccountId)).ToArray();
         }
 
         public bool RepayInstalment(string id)

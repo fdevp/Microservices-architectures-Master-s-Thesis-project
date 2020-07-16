@@ -68,7 +68,7 @@ namespace APIGateway.Controllers
             parallelTasks.Add(Task.Run(async () =>
             {
                 var paymentsIds = payments.Select(p => p.Id);
-                var loansResponse = await loansReadClient.GetLoansByPaymentsAsync(new GetLoansByPaymentsRequest { FlowId = flowId, PaymentsIds = { paymentsIds } });
+                var loansResponse = await loansReadClient.GetByPaymentsAsync(new GetLoansRequest { FlowId = flowId, Ids = { paymentsIds } });
                 loans = loansResponse.Loans;
             }));
             parallelTasks.Add(Task.Run(async () =>

@@ -18,10 +18,16 @@ namespace LoansReadMicroservice.Repository
 
         public string[] GetPaymentsIds() => loans.Select(l => l.Value.PaymentId).ToArray();
 
-        public Loan[] GetByPayment(IEnumerable<string> paymentIds)
+        public Loan[] GetByPayments(IEnumerable<string> paymentIds)
         {
             var payments = paymentIds.ToHashSet();
             return loans.Values.Where(l => payments.Contains(l.PaymentId)).ToArray();
+        }
+
+        public Loan[] GetByAccounts(IEnumerable<string> accountsIds)
+        {
+            var accounts = accountsIds.ToHashSet();
+            return loans.Values.Where(l => accounts.Contains(l.AccountId)).ToArray();
         }
 
         public void Upsert(Loan[] update)

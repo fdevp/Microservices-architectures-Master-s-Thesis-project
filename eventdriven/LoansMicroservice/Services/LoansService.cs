@@ -4,8 +4,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using LoansMicroservice.Repository;
 using Microsoft.Extensions.Logging;
+using SharedClasses.Events;
 using SharedClasses.Events.Loans;
 using SharedClasses.Events.Payments;
+using SharedClasses.Events.Transactions;
 using SharedClasses.Messaging;
 
 namespace LoansMicroservice
@@ -38,6 +40,15 @@ namespace LoansMicroservice
         {
             var loans = loansRepository.GetByPayment(inputEvent.PaymentsIds);
             publishingRouter.Publish(context.ReplyTo, new SelectedLoansEvent { Loans = loans }, context.FlowId);
+            return Task.CompletedTask;
+        }
+
+        [EventHandlingMethod(typeof(GetTransactionsEvent))]
+        public Task GetTransactions(MessageContext context, GetTransactionsEvent inputEvent)
+        {
+            var paymentsIds = inputEvent.Ids != null && inputEvent.Ids.Length > 0 ? inputEvent.Ids : loansRepository.GetPaymentsIds();
+            var getTransactionsEvent = new FilterTransactionsEvent { Payments = paymentsIds, TimestampFrom = inputEvent.TimestampFrom, TimestampTo = inputEvent.TimestampTo };
+            publishingRouter.Publish(Queues.Transactions, getTransactionsEvent, context.FlowId, context.ReplyTo);
             return Task.CompletedTask;
         }
 

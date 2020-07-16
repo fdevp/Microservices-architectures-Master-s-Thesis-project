@@ -40,9 +40,9 @@ namespace PaymentsMicroservice
             return Task.FromResult(new GetPaymentsResult { Payments = { payments } });
         }
 
-        public override Task<GetPaymentsWithLoansResult> GetByAccount(GetByAccountRequest request, ServerCallContext context)
+        public override Task<GetPaymentsWithLoansResult> GetByAccounts(GetPaymentsRequest request, ServerCallContext context)
         {
-            var payments = paymentsRepository.GetByAccounts(request.AccountIds);
+            var payments = paymentsRepository.GetByAccounts(request.Ids);
             return WithLoans(payments, request.FlowId);
         }
 
@@ -87,8 +87,8 @@ namespace PaymentsMicroservice
                             .ToArray();
 
             var paymentsIds = payments.Select(p => p.Id);
-            var loansRequest = new GetLoansByPaymentsRequest { FlowId = flowId, PaymentsIds = { paymentsIds } };
-            var loansResult = await loansClient.GetLoansByPaymentsAsync(loansRequest);
+            var loansRequest = new GetLoansRequest { FlowId = flowId, Ids = { paymentsIds } };
+            var loansResult = await loansClient.GetByPaymentsAsync(loansRequest);
 
             return new GetPaymentsWithLoansResult { Payments = { mapped }, Loans = { loansResult.Loans } };
         }
