@@ -1,7 +1,9 @@
-﻿using RandomNameGeneratorLibrary;
+﻿using DataGenerator.Rnd;
+using RandomNameGeneratorLibrary;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace DataGenerator
 {
@@ -72,14 +74,15 @@ namespace DataGenerator
             }
         }
 
-        public static IEnumerable<(LoanDTO, PaymentDTO)> CreateLoans(AccountDTO[] loansAccounts, IRnd<float> totalRnd, IRnd<int> instalmentsRnd, IRnd<int> paidInstalmentsRnd, IRnd<TimeSpan> intervalRnd, IRnd<string> recipientRnd)
+        public static IEnumerable<(LoanDTO, PaymentDTO)> CreateLoans(AccountDTO[] loansAccounts, IRnd<float> totalRnd, IRnd<int> instalmentsRnd, Rnd<int> paidInstalmentsRnd, IRnd<TimeSpan> intervalRnd, IRnd<string> recipientRnd)
         {
             foreach (var account in loansAccounts)
             {
                 var totalAmount = totalRnd.Next();
                 var instalments = instalmentsRnd.Next();
-                var paidInstalments = (paidInstalmentsRnd.Next() * instalments);
-                var paidAmount = (paidInstalments / instalments) * totalAmount;
+                paidInstalmentsRnd.Max = instalments;
+                var paidInstalments = paidInstalmentsRnd.Next();
+                var paidAmount = (float)paidInstalments / instalments * totalAmount;
 
                 var loan = new LoanDTO
                 {
@@ -105,6 +108,7 @@ namespace DataGenerator
                     Recipient = recipient
                 };
 
+                loan.PaymentId = payment.Id;
                 yield return (loan, payment);
             }
         }
@@ -116,7 +120,7 @@ namespace DataGenerator
             {
                 var payment = payments[loan.PaymentId];
                 var date = payment.StartTimestamp;
-                var paidInstalments = loan.PaidAmount / loan.TotalAmount;
+                var paidInstalments = (loan.PaidAmount / loan.TotalAmount) * loan.Instalments;
 
                 for (int i = 0; i < paidInstalments; i++)
                 {
@@ -142,7 +146,7 @@ namespace DataGenerator
             foreach (var payment in payments)
             {
                 var end = maxDate ?? DateTime.UtcNow;
-                for (var date = payment.StartTimestamp; date < end; date+= payment.Interval)
+                for (var date = payment.StartTimestamp; date < end; date += payment.Interval)
                 {
                     yield return new TransactionDTO
                     {

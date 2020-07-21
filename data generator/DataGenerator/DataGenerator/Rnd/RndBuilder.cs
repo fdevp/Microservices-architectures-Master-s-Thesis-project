@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DataGenerator.Rnd;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,7 +12,7 @@ namespace DataGenerator
 
         public RndBuilder(Rnd<T> rnd = null)
         {
-            rnd = rnd ?? new Rnd<T>();
+            this.rnd = rnd ?? CreateRnd();
         }
 
         public IRnd<T> Build()
@@ -42,34 +43,23 @@ namespace DataGenerator
             rnd.Min = min;
             return this;
         }
-    }
 
-    public abstract class Rnd<T> : IRnd<T>
-    {
-        protected Random rand = new Random();
-
-        public T Min { get; set; }
-        public T Max { get; set; }
-
-        public T[] DistributionValues { get; set; }
-
-        public int[] DistributionValuesProbabilities { get; set; }
-
-        public Func<int> DistributionFormula { get; set; }
-
-        public abstract T Next();
-
-        public virtual T Next(params T[] except)
+        private Rnd<T> CreateRnd()
         {
-            T value;
-            do
+            var typeName = typeof(T).Name;
+            switch (typeName)
             {
-                value = Next();
-            } while (except.Contains(value));
-
-            return value;
+                case "Int32":
+                    return new IntRnd() as Rnd<T>;
+                case "DateTime":
+                    return new DateTimeRnd() as Rnd<T>;
+                case "String":
+                    return new StringRnd() as Rnd<T>;
+                case "TimeSpan":
+                    return new TimeSpanRnd() as Rnd<T>;
+                default:
+                    throw new InvalidOperationException("Unknown type.");
+            }
         }
     }
-
-    
 }

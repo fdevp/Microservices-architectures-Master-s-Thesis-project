@@ -1,24 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace DataGenerator.Rnd
 {
-    public class CurrencyRnd : Rnd<float>
+    public class IntRnd : Rnd<int>
     {
-        private readonly bool cents;
-
-        public CurrencyRnd(bool cents = true)
+        public override int Next()
         {
-            this.cents = cents;
-        }
-
-        public override float Next()
-        {
-            var cent = cents ? (float)rand.NextDouble() : 0;
             if (DistributionFormula != null && DistributionValuesProbabilities != null)
             {
-                return TakeDrawn(DistributionFormula.Invoke()) + cent;
+                return TakeDrawn(DistributionFormula.Invoke());
             }
 
             if (DistributionFormula != null && MinSet && MaxSet)
@@ -38,7 +31,7 @@ namespace DataGenerator.Rnd
 
             if (MinSet && MaxSet)
             {
-                return rand.Next((int)Min, (int)Max) + cent;
+                return rand.Next(Min, Max);
             }
 
             throw new InvalidOperationException("Unknown calculations");

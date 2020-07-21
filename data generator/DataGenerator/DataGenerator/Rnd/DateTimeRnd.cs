@@ -4,26 +4,19 @@ using System.Text;
 
 namespace DataGenerator.Rnd
 {
-    public class CurrencyRnd : Rnd<float>
+    class DateTimeRnd : Rnd<DateTime>
     {
-        private readonly bool cents;
-
-        public CurrencyRnd(bool cents = true)
+        public override DateTime Next()
         {
-            this.cents = cents;
-        }
-
-        public override float Next()
-        {
-            var cent = cents ? (float)rand.NextDouble() : 0;
             if (DistributionFormula != null && DistributionValuesProbabilities != null)
             {
-                return TakeDrawn(DistributionFormula.Invoke()) + cent;
+                return TakeDrawn(DistributionFormula.Invoke());
             }
 
             if (DistributionFormula != null && MinSet && MaxSet)
             {
-                return DistributionFormula.Invoke() * Max + Min;
+                var rnd = (int)(Max - Min).TotalMinutes;
+                return Min + TimeSpan.FromMinutes(DistributionFormula.Invoke() * rnd);
             }
 
             if (DistributionValuesProbabilities != null)
@@ -38,7 +31,7 @@ namespace DataGenerator.Rnd
 
             if (MinSet && MaxSet)
             {
-                return rand.Next((int)Min, (int)Max) + cent;
+                return Min + TimeSpan.FromMinutes(rand.Next(0, (int)(Max - Min).TotalMinutes));
             }
 
             throw new InvalidOperationException("Unknown calculations");
