@@ -52,12 +52,20 @@ namespace DataGenerator.Rnd
 
         protected T TakeDrawn(int drawn)
         {
+            return TakeDrawn(drawn, out var index);
+        }
+
+        protected T TakeDrawn(int drawn, out int index)
+        {
             int sum = 0;
             for (int i = 0; i < DistributionValuesProbabilities.Length; i++)
             {
                 sum += DistributionValuesProbabilities[i];
                 if (sum > drawn)
+                {
+                    index = i;
                     return DistributionValues[i];
+                }
             }
 
             throw new InvalidOperationException("Invalid probabilities.");

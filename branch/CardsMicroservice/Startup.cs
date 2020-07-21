@@ -11,6 +11,7 @@ using SharedClasses;
 using Microsoft.Extensions.Logging;
 using CardsMicroservice.Repository;
 using Microsoft.Extensions.Configuration;
+using static TransactionsMicroservice.Transactions;
 
 namespace CardsMicroservice
 {
@@ -84,7 +85,7 @@ namespace CardsMicroservice
             services.AddSingleton(new AccountsClient(accountsChannel));
 
             var transactionsChannel = GrpcChannel.ForAddress(addresses.Transactions, new GrpcChannelOptions { HttpClient = httpClient });
-            services.AddSingleton(new AccountsClient(transactionsChannel));
+            services.AddSingleton(new TransactionsClient(transactionsChannel));
         }
     }
 }

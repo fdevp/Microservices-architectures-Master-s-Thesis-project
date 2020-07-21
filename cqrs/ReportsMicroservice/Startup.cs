@@ -1,4 +1,4 @@
-﻿using System.Net.Http;
+using System.Net.Http;
 using Grpc.Net.Client;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -33,6 +33,8 @@ namespace ReportsMicroservice
             {
                 options.Interceptors.Add<LoggingInterceptor>("Reports");
             });
+            CreateClients(services);
+            services.AddSingleton<DataFetcher>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -68,19 +70,19 @@ namespace ReportsMicroservice
                 HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
             var httpClient = new HttpClient(httpClientHandler);
 
-            var transactionsChannel = GrpcChannel.ForAddress("", new GrpcChannelOptions { HttpClient = httpClient });
+            var transactionsChannel = GrpcChannel.ForAddress(addresses.Transactions, new GrpcChannelOptions { HttpClient = httpClient });
             services.AddSingleton(new TransactionsReadClient(transactionsChannel));
 
-            var accountsChannel = GrpcChannel.ForAddress("", new GrpcChannelOptions { HttpClient = httpClient });
+            var accountsChannel = GrpcChannel.ForAddress(addresses.Accounts, new GrpcChannelOptions { HttpClient = httpClient });
             services.AddSingleton(new AccountsReadClient(accountsChannel));
 
-            var paymentsChannel = GrpcChannel.ForAddress("", new GrpcChannelOptions { HttpClient = httpClient });
+            var paymentsChannel = GrpcChannel.ForAddress(addresses.Payments, new GrpcChannelOptions { HttpClient = httpClient });
             services.AddSingleton(new PaymentsReadClient(paymentsChannel));
 
-            var loansChannel = GrpcChannel.ForAddress("", new GrpcChannelOptions { HttpClient = httpClient });
+            var loansChannel = GrpcChannel.ForAddress(addresses.Loans, new GrpcChannelOptions { HttpClient = httpClient });
             services.AddSingleton(new LoansReadClient(loansChannel));
 
-            var cardsChannel = GrpcChannel.ForAddress("", new GrpcChannelOptions { HttpClient = httpClient });
+            var cardsChannel = GrpcChannel.ForAddress(addresses.Cards, new GrpcChannelOptions { HttpClient = httpClient });
             services.AddSingleton(new CardsReadClient(loansChannel));
         }
     }

@@ -22,7 +22,3 @@ enum ReportSubject {
   CARDS = 2;
   TRANSACTIONS = 3;
 }
-
-message Report {
-  bytes data = 1;
-}

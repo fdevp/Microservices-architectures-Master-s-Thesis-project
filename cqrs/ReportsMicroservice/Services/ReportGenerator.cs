@@ -15,9 +15,11 @@ namespace ReportsMicroservice
             sb.AppendLine($"Granularność; {granularity}");
 
             var groupedPortions = portions.GroupBy(p => p.Period);
+            var ordered = groupedPortions.OrderBy(p => p.Key);
 
-            foreach (var portion in groupedPortions)
+            foreach (var portion in ordered)
             {
+                sb.AppendLine(portion.Key);
                 foreach (var aggregation in portion)
                     sb.WriteAggragation(portion.Key, aggregation.Value, aggregation.Aggregation);
             }

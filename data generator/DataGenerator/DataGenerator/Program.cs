@@ -11,7 +11,7 @@ namespace DataGenerator
     {
         static void Main(string[] args)
         {
-            var users = Generator.CreateUsers(1000).ToArray();
+            var users = Generator.CreateUsers(100).ToArray();
             var accounts = Accounts(users);
             var recipientRnd = new RndBuilder<string>().DistributionValues(accounts.Select(a => a.Id)).Build();
             var timestampRnd = new RndBuilder<DateTime>().Min(new DateTime(2015, 1, 1)).Max(new DateTime(2020, 8, 1)).Build();
@@ -83,8 +83,8 @@ namespace DataGenerator
             var startDateRnd = timestampRnd;
 
             var intervalRnd = new RndBuilder<TimeSpan>()
-              .DistributionValues(new[] { TimeSpan.FromDays(1), TimeSpan.FromDays(7), TimeSpan.FromDays(30), TimeSpan.FromDays(90), TimeSpan.FromDays(180), TimeSpan.FromDays(365), })
-              .DistributionProbabilities(new[] { 5, 10, 60, 10, 10, 5 })
+              .DistributionValues(new[] { TimeSpan.FromDays(30), TimeSpan.FromDays(90), TimeSpan.FromDays(180), TimeSpan.FromDays(365), })
+              .DistributionProbabilities(new[] { 75, 10, 10, 5 })
               .Build();
 
             return Generator.CreatePayments(accounts, PaymentStatus.ACTIVE, recipientRnd, countRnd, amountRnd, startDateRnd, intervalRnd).ToArray();
@@ -99,8 +99,8 @@ namespace DataGenerator
 
             var totalRnd = new RndBuilder<float>(new CurrencyRnd(false)).Min(100).Max(1000000).Build(); //dystrybuanta
 
-            var instalmentsRnd = new RndBuilder<int>().DistributionValues(new[] { 3, 6, 12, 24, 36, 48, 60, 120, 180, 240, 360 }).Build(); //todo w zaleznosci od totalRnd
-            var paidInstalmentsRnd = (Rnd<int>)new RndBuilder<int>().Min(0).Build(); //todo w zaleznosci od instalmentsRnd
+            var instalmentsRnd = new RndBuilder<int>().DistributionValues(new[] { 3, 6, 12, 24, 36}).Build(); //todo w zaleznosci od totalRnd
+            var paidInstalmentsRnd = (Rnd<int>)new RndBuilder<int>().Min(0).Build();
 
             var intervalRnd = new RndBuilder<TimeSpan>()
               .DistributionValues(new[] { TimeSpan.FromDays(30), TimeSpan.FromDays(60), TimeSpan.FromDays(180), TimeSpan.FromDays(90), TimeSpan.FromDays(180), TimeSpan.FromDays(365), })

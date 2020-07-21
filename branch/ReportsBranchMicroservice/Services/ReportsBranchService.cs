@@ -51,8 +51,7 @@ namespace ReportsBranchMicroservice
                 Transactions = transactions
             };
             var csv = ReportGenerator.CreateOverallCsvReport(data);
-            var report = new Report { Data = ByteString.CopyFromUtf8(csv) };
-            return new GenerateReportResponse { FlowId = request.FlowId, Report = report };
+            return new GenerateReportResponse { FlowId = request.FlowId, Report = csv };
         }
 
         public override async Task<GenerateReportResponse> GenerateUserActivityReport(GenerateUserActivityReportRequest request, ServerCallContext context)
@@ -79,8 +78,7 @@ namespace ReportsBranchMicroservice
             await Task.WhenAll(parallelTasks);
 
             var csv = ReportGenerator.CreateUserActivityCsvReport(data);
-            var report = new Report { Data = ByteString.CopyFromUtf8(csv) };
-            return new GenerateReportResponse { FlowId = request.FlowId, Report = report };
+            return new GenerateReportResponse { FlowId = request.FlowId, Report = csv };
         }
 
         private DateTime? GetDateTime(long ticks) => ticks > 0 ? new DateTime(ticks) : null as DateTime?;

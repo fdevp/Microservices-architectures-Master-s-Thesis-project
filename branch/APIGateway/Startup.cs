@@ -84,7 +84,10 @@ namespace APIGateway
                 cfg.CreateMap<TimeSpan, long>().ConvertUsing(new TimeSpanTypeConverter());
                 cfg.CreateMap<long, TimeSpan>().ConvertUsing(new TimeSpanTypeConverterReverse());
 
-                cfg.CreateMap<Transaction, TransactionDTO>().ReverseMap();
+                cfg.CreateMap<Transaction, TransactionDTO>().ReverseMap()
+                    .ForMember(dest => dest.PaymentId, opt => opt.MapFrom(src => src.PaymentId == null ? "" : src.PaymentId))
+                    .ForMember(dest => dest.CardId, opt => opt.MapFrom(src => src.CardId == null ? "" : src.CardId));
+
                 cfg.CreateMap<Account, AccountDTO>().ReverseMap();
                 cfg.CreateMap<Card, CardDTO>().ReverseMap();
                 cfg.CreateMap<Payment, PaymentDTO>().ReverseMap();

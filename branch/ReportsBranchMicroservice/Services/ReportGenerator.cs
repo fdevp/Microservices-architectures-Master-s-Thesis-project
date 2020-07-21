@@ -13,6 +13,7 @@ namespace ReportsBranchMicroservice
         {
             var withTimestamps = data.Transactions.Select(t => new TransactionWithTimestamp { Timestamp = new DateTime(t.Timestamp), Transaction = t });
             var periods = GroupByPeriods(data.Granularity, withTimestamps);
+            var ordered = periods.OrderBy(p => p.Key);
 
             var sb = new StringBuilder();
             sb.AppendLine($"Raport całościowy dla; {data.Subject}");
@@ -20,19 +21,21 @@ namespace ReportsBranchMicroservice
             sb.AppendLine($"Zakres do; {data.To}");
             sb.AppendLine($"Granularność; {data.Granularity}");
 
-            foreach (var period in periods)
+            foreach (var period in ordered)
             {
+                sb.AppendLine(period.Key);
                 foreach (var aggregation in data.Aggregations)
                     sb.WriteAggragation(period, aggregation);
             }
 
-            return string.Empty;
+            return sb.ToString();
         }
 
         public static string CreateUserActivityCsvReport(UserActivityRaportData data)
         {
             var withTimestamps = data.Transactions.Select(t => new TransactionWithTimestamp { Timestamp = new DateTime(t.Timestamp), Transaction = t });
             var periods = GroupByPeriods(data.Granularity, withTimestamps);
+            var ordered = periods.OrderBy(p => p.Key);
 
             var sb = new StringBuilder();
             sb.AppendLine($"Raport aktywności użytkownika; {data.UserId}");
@@ -40,10 +43,10 @@ namespace ReportsBranchMicroservice
             sb.AppendLine($"Zakres do; {data.To}");
             sb.AppendLine($"Granularność; {data.Granularity}");
 
-            sb.WriteAccountsData(periods, data.Accounts);
-            sb.WriteCardsData(periods, data.Cards);
-            sb.WritePaymentsData(periods, data.Payments);
-            sb.WriteLoansData(periods, data.Loans);
+            sb.WriteAccountsData(ordered, data.Accounts);
+            sb.WriteCardsData(ordered, data.Cards);
+            sb.WritePaymentsData(ordered, data.Payments);
+            sb.WriteLoansData(ordered, data.Loans);
 
             return sb.ToString();
         }

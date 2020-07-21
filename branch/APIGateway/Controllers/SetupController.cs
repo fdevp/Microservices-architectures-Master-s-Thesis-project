@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Threading.Tasks;
 using AccountsMicroservice;
 using APIGateway.Models.Setup;
@@ -60,8 +61,12 @@ namespace APIGateway.Controllers
             var paymentsRequest = mapper.Map<PaymentsMicroservice.SetupRequest>(setup.PaymentsSetup);
             await paymentsClient.SetupAsync(paymentsRequest);
 
-            var transactionsRequest = mapper.Map<TransactionsMicroservice.SetupRequest>(setup.TransactionsSetup);
-            await transactionsClient.SetupAsync(transactionsRequest);
+            for (int i = 0; i < setup.TransactionsSetup.transactions.Length; i += 10000)
+            {
+                var portion = setup.TransactionsSetup.transactions.Skip(i).Take(10000).ToArray();
+                var request = mapper.Map<TransactionsMicroservice.SetupRequest>(new TransactionsSetup { transactions = portion });
+                await transactionsClient.SetupAppendAsync(request);
+            }
         }
     }
 }

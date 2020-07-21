@@ -26,6 +26,14 @@ namespace DataGenerator.Rnd
                 return DistributionFormula.Invoke() * Max + Min;
             }
 
+            if (DistributionValues != null && MinSet && MaxSet)
+            {
+                var drawn = TakeDrawn(rand.Next(ProbabilitiesSum), out var index);
+                var min = index == 0 ? Min : DistributionValues[index - 1];
+                var max = index == DistributionValues.Length - 1 ? Max : DistributionValues[index + 1];
+                return rand.Next((int)min, (int)max) + cent;
+            }
+
             if (DistributionValuesProbabilities != null)
             {
                 return TakeDrawn(rand.Next(ProbabilitiesSum));

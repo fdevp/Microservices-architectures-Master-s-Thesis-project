@@ -23,10 +23,13 @@ namespace TransactionsMicroservice.Repository
                 return transactions[id];
             return null;
         }
-        
+
         public Transaction[] GetMany(Filters filters, int top)
         {
             var selected = transactions.Values.Where(t => SelectTransaction(t, filters));
+            var cnt1 = transactions.Values.Count(t => !string.IsNullOrEmpty(t.PaymentId));
+            var cnt2 = transactions.Values.Count(t => !string.IsNullOrEmpty(t.CardId));
+
             if (top > 0)
                 selected = selected.Take(top);
             return selected.ToArray();
@@ -37,15 +40,28 @@ namespace TransactionsMicroservice.Repository
             this.transactions = transactions.ToDictionary(t => t.Id, t => t);
         }
 
+        public void SetupAppend(IEnumerable<Repository.Transaction> transactions)
+        {
+            if (this.transactions == null)
+            {
+                this.transactions = new Dictionary<string, Transaction>();
+            }
+
+            foreach (var transaction in transactions)
+            {
+                this.transactions.Add(transaction.Id, transaction);
+            }
+        }
+
         private bool SelectTransaction(Transaction transaction, Filters filters)
         {
-            if (filters.Payments.Any() && transaction.PaymentId != null && filters.Payments.Contains(transaction.PaymentId))
+            if (filters.Payments.Any() && !string.IsNullOrEmpty(transaction.PaymentId) && filters.Payments.Contains(transaction.PaymentId))
                 return true;
-            if (filters.Cards.Any() && transaction.CardId != null && filters.Cards.Contains(transaction.CardId))
+            if (filters.Cards.Any() && !string.IsNullOrEmpty(transaction.CardId) && filters.Cards.Contains(transaction.CardId))
                 return true;
-            if (filters.Recipients.Any() && transaction.Recipient != null && filters.Recipients.Contains(transaction.Recipient))
+            if (filters.Recipients.Any() && filters.Recipients.Contains(transaction.Recipient))
                 return true;
-            if (filters.Senders.Any() && transaction.Sender != null && filters.Senders.Contains(transaction.Sender))
+            if (filters.Senders.Any() && filters.Senders.Contains(transaction.Sender))
                 return true;
             if (filters.TimestampFrom > 0 && transaction.Timestamp >= filters.TimestampFrom)
                 return true;

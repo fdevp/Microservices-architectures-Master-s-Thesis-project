@@ -33,6 +33,7 @@ namespace ReportsBranchMicroservice
                 options.Interceptors.Add<LoggingInterceptor>("Reports_branch");
             });
             CreateClients(services);
+            services.AddSingleton<DataFetcher>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory)
@@ -67,7 +68,7 @@ namespace ReportsBranchMicroservice
                 HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
             var httpClient = new HttpClient(httpClientHandler);
 
-            var transactionsChannel = GrpcChannel.ForAddress(addresses.Accounts, new GrpcChannelOptions { HttpClient = httpClient });
+            var transactionsChannel = GrpcChannel.ForAddress(addresses.Transactions, new GrpcChannelOptions { HttpClient = httpClient });
             services.AddSingleton(new TransactionsClient(transactionsChannel));
 
             var accountsChannel = GrpcChannel.ForAddress(addresses.Accounts, new GrpcChannelOptions { HttpClient = httpClient });
@@ -80,7 +81,7 @@ namespace ReportsBranchMicroservice
             services.AddSingleton(new LoansClient(loansChannel));
 
             var cardsChannel = GrpcChannel.ForAddress(addresses.Cards, new GrpcChannelOptions { HttpClient = httpClient });
-            services.AddSingleton(new CardsClient(loansChannel));
+            services.AddSingleton(new CardsClient(cardsChannel));
         }
     }
 }
