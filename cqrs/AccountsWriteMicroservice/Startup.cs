@@ -25,7 +25,7 @@ namespace AccountsWriteMicroservice
         {
             this.configuration = configuration;
         }
-        
+
         // This method gets called by the runtime. Use this method to add services to the container.
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
@@ -74,11 +74,14 @@ namespace AccountsWriteMicroservice
 
         private TransactionsWriteClient CreateTransactionsClient()
         {
+            var addresses = new EndpointsAddresses();
+            configuration.GetSection("Addresses").Bind(addresses);
+
             var httpClientHandler = new HttpClientHandler();
             httpClientHandler.ServerCertificateCustomValidationCallback =
                 HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
             var httpClient = new HttpClient(httpClientHandler);
-            var channel = GrpcChannel.ForAddress("https://localhost:5011", new GrpcChannelOptions { HttpClient = httpClient });
+            var channel = GrpcChannel.ForAddress(addresses.TransactionsWrite, new GrpcChannelOptions { HttpClient = httpClient });
 
             return new TransactionsWriteClient(channel);
         }

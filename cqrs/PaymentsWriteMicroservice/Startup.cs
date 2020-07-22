@@ -78,15 +78,18 @@ namespace PaymentsWriteMicroservice
 
         private void CreateClients(IServiceCollection services)
         {
+            var addresses = new EndpointsAddresses();
+            configuration.GetSection("Addresses").Bind(addresses);
+
             var httpClientHandler = new HttpClientHandler();
             httpClientHandler.ServerCertificateCustomValidationCallback =
                 HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
             var httpClient = new HttpClient(httpClientHandler);
 
-            var transactionsChannel = GrpcChannel.ForAddress("https://localhost:5011", new GrpcChannelOptions { HttpClient = httpClient });
+            var transactionsChannel = GrpcChannel.ForAddress(addresses.TransactionsWrite, new GrpcChannelOptions { HttpClient = httpClient });
             services.AddSingleton(new TransactionsWriteClient(transactionsChannel));
 
-            var loansChannel = GrpcChannel.ForAddress("https://localhost:5051", new GrpcChannelOptions { HttpClient = httpClient });
+            var loansChannel = GrpcChannel.ForAddress(addresses.LoansWrite, new GrpcChannelOptions { HttpClient = httpClient });
             services.AddSingleton(new LoansWriteClient(loansChannel));
         }
     }

@@ -13,6 +13,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Serilog;
+using SharedClasses;
 using UsersMicroservice;
 using static AccountsReadMicroservice.AccountsRead;
 using static AccountsWriteMicroservice.AccountsWrite;
@@ -81,9 +82,9 @@ namespace APIGateway
                 cfg.CreateMap<TimeSpan, long>().ConvertUsing(new TimeSpanTypeConverter());
                 cfg.CreateMap<long, TimeSpan>().ConvertUsing(new TimeSpanTypeConverterReverse());
 
-                 cfg.CreateMap<Transaction, TransactionDTO>().ReverseMap()
-                    .ForMember(dest => dest.PaymentId, opt => opt.MapFrom(src => src.PaymentId == null ? "" : src.PaymentId))
-                    .ForMember(dest => dest.CardId, opt => opt.MapFrom(src => src.CardId == null ? "" : src.CardId));
+                cfg.CreateMap<Transaction, TransactionDTO>().ReverseMap()
+                   .ForMember(dest => dest.PaymentId, opt => opt.MapFrom(src => src.PaymentId == null ? "" : src.PaymentId))
+                   .ForMember(dest => dest.CardId, opt => opt.MapFrom(src => src.CardId == null ? "" : src.CardId));
                 cfg.CreateMap<Account, AccountDTO>().ReverseMap();
                 cfg.CreateMap<Card, CardDTO>().ReverseMap();
                 cfg.CreateMap<Payment, PaymentDTO>().ReverseMap();
@@ -108,35 +109,31 @@ namespace APIGateway
 
         private void ConfigureGrpcConnections(IServiceCollection services)
         {
+            var addresses = new EndpointsAddresses();
+            Configuration.GetSection("Addresses").Bind(addresses);
+
             var httpClientHandler = new HttpClientHandler();
             httpClientHandler.ServerCertificateCustomValidationCallback =
                 HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
             var httpClient = new HttpClient(httpClientHandler);
 
-            services.AddSingleton(new TransactionsWriteClient(CreateChannel(httpClient, "localhost", "5011")));
-            services.AddSingleton(new TransactionsReadClient(CreateChannel(httpClient, "localhost", "5012")));
+            services.AddSingleton(new TransactionsWriteClient(GrpcChannel.ForAddress(addresses.TransactionsWrite, new GrpcChannelOptions { HttpClient = httpClient })));
+            services.AddSingleton(new TransactionsReadClient(GrpcChannel.ForAddress(addresses.TransactionsRead, new GrpcChannelOptions { HttpClient = httpClient })));
 
-            services.AddSingleton(new AccountsWriteClient(CreateChannel(httpClient, "localhost", "5021")));
-            services.AddSingleton(new AccountsReadClient(CreateChannel(httpClient, "localhost", "5022")));
+            services.AddSingleton(new AccountsWriteClient(GrpcChannel.ForAddress(addresses.AccountsWrite, new GrpcChannelOptions { HttpClient = httpClient })));
+            services.AddSingleton(new AccountsReadClient(GrpcChannel.ForAddress(addresses.AccountsRead, new GrpcChannelOptions { HttpClient = httpClient })));
 
-            services.AddSingleton(new PaymentsWriteClient(CreateChannel(httpClient, "localhost", "5031")));
-            services.AddSingleton(new PaymentsReadClient(CreateChannel(httpClient, "localhost", "5032")));
+            services.AddSingleton(new PaymentsWriteClient(GrpcChannel.ForAddress(addresses.PaymentsWrite, new GrpcChannelOptions { HttpClient = httpClient })));
+            services.AddSingleton(new PaymentsReadClient(GrpcChannel.ForAddress(addresses.PaymentsRead, new GrpcChannelOptions { HttpClient = httpClient })));
 
-            services.AddSingleton(new CardsWriteClient(CreateChannel(httpClient, "localhost", "5041")));
-            services.AddSingleton(new CardsReadClient(CreateChannel(httpClient, "localhost", "5042")));
+            services.AddSingleton(new CardsWriteClient(GrpcChannel.ForAddress(addresses.CardsWrite, new GrpcChannelOptions { HttpClient = httpClient })));
+            services.AddSingleton(new CardsReadClient(GrpcChannel.ForAddress(addresses.CardsRead, new GrpcChannelOptions { HttpClient = httpClient })));
 
-            services.AddSingleton(new LoansWriteClient(CreateChannel(httpClient, "localhost", "5051")));
-            services.AddSingleton(new LoansReadClient(CreateChannel(httpClient, "localhost", "5052")));
+            services.AddSingleton(new LoansWriteClient(GrpcChannel.ForAddress(addresses.LoansWrite, new GrpcChannelOptions { HttpClient = httpClient })));
+            services.AddSingleton(new LoansReadClient(GrpcChannel.ForAddress(addresses.LoansRead, new GrpcChannelOptions { HttpClient = httpClient })));
 
-            services.AddSingleton(new UsersClient(CreateChannel(httpClient, "localhost", "5061")));
-            services.AddSingleton(new ReportsClient(CreateChannel(httpClient, "localhost", "5071")));
-        }
-
-        private GrpcChannel CreateChannel(HttpClient httpClient, string host, string port)
-        {
-            var address = $"https://{host}:{port}";
-            var channel = GrpcChannel.ForAddress(address, new GrpcChannelOptions { HttpClient = httpClient });
-            return channel;
+            services.AddSingleton(new UsersClient(GrpcChannel.ForAddress(addresses.Users, new GrpcChannelOptions { HttpClient = httpClient })));
+            services.AddSingleton(new ReportsClient(GrpcChannel.ForAddress(addresses.Reports, new GrpcChannelOptions { HttpClient = httpClient })));
         }
     }
 }

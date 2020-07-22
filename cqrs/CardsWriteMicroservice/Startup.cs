@@ -77,11 +77,14 @@ namespace CardsWriteMicroservice
 
         private AccountsWriteClient CreateAccountsClient()
         {
+            var addresses = new EndpointsAddresses();
+            configuration.GetSection("Addresses").Bind(addresses);
+
             var httpClientHandler = new HttpClientHandler();
             httpClientHandler.ServerCertificateCustomValidationCallback =
                 HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
             var httpClient = new HttpClient(httpClientHandler);
-            var channel = GrpcChannel.ForAddress("https://localhost:5021", new GrpcChannelOptions { HttpClient = httpClient });
+            var channel = GrpcChannel.ForAddress(addresses.AccountsWrite, new GrpcChannelOptions { HttpClient = httpClient });
             return new AccountsWriteClient(channel);
         }
     }

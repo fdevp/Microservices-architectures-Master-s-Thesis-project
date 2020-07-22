@@ -70,20 +70,20 @@ namespace ReportsMicroservice
                 HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
             var httpClient = new HttpClient(httpClientHandler);
 
-            var transactionsChannel = GrpcChannel.ForAddress(addresses.Transactions, new GrpcChannelOptions { HttpClient = httpClient });
+            var transactionsChannel = GrpcChannel.ForAddress(addresses.TransactionsRead, new GrpcChannelOptions { HttpClient = httpClient });
             services.AddSingleton(new TransactionsReadClient(transactionsChannel));
 
-            var accountsChannel = GrpcChannel.ForAddress(addresses.Accounts, new GrpcChannelOptions { HttpClient = httpClient });
+            var accountsChannel = GrpcChannel.ForAddress(addresses.AccountsRead, new GrpcChannelOptions { HttpClient = httpClient });
             services.AddSingleton(new AccountsReadClient(accountsChannel));
 
-            var paymentsChannel = GrpcChannel.ForAddress(addresses.Payments, new GrpcChannelOptions { HttpClient = httpClient });
+            var paymentsChannel = GrpcChannel.ForAddress(addresses.PaymentsRead, new GrpcChannelOptions { HttpClient = httpClient });
             services.AddSingleton(new PaymentsReadClient(paymentsChannel));
 
-            var loansChannel = GrpcChannel.ForAddress(addresses.Loans, new GrpcChannelOptions { HttpClient = httpClient });
+            var loansChannel = GrpcChannel.ForAddress(addresses.LoansRead, new GrpcChannelOptions { HttpClient = httpClient });
             services.AddSingleton(new LoansReadClient(loansChannel));
 
-            var cardsChannel = GrpcChannel.ForAddress(addresses.Cards, new GrpcChannelOptions { HttpClient = httpClient });
-            services.AddSingleton(new CardsReadClient(loansChannel));
+            var cardsChannel = GrpcChannel.ForAddress(addresses.CardsRead, new GrpcChannelOptions { HttpClient = httpClient });
+            services.AddSingleton(new CardsReadClient(cardsChannel));
         }
     }
 }

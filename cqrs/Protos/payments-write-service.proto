@@ -1,6 +1,4 @@
 syntax = "proto3";
-import "common/transaction.proto";
-import "common/loan.proto";
 import "common/payment.proto";
 import "common/empty.proto";
 

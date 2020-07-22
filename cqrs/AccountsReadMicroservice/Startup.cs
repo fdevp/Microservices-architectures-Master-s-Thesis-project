@@ -88,11 +88,14 @@ namespace AccountsReadMicroservice
 
         private TransactionsReadClient CreateTransactionsClient()
         {
+            var addresses = new EndpointsAddresses();
+            configuration.GetSection("Addresses").Bind(addresses);
+
             var httpClientHandler = new HttpClientHandler();
             httpClientHandler.ServerCertificateCustomValidationCallback =
                 HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
             var httpClient = new HttpClient(httpClientHandler);
-            var channel = GrpcChannel.ForAddress("https://localhost:5012", new GrpcChannelOptions { HttpClient = httpClient });
+            var channel = GrpcChannel.ForAddress(addresses.TransactionsRead, new GrpcChannelOptions { HttpClient = httpClient });
             return new TransactionsReadClient(channel);
         }
     }

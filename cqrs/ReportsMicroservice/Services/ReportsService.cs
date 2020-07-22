@@ -36,9 +36,8 @@ namespace ReportsMicroservice
               GetDateTime(request.TimestampTo),
               request.Granularity,
               data);
-            var report = new Report { Data = ByteString.CopyFromUtf8(csv) };
 
-            return new GenerateReportResponse { FlowId = request.FlowId, Report = report };
+            return new GenerateReportResponse { FlowId = request.FlowId, Report = csv };
         }
 
         public override async Task<GenerateReportResponse> GenerateUserActivityReport(GenerateUserActivityReportRequest request, ServerCallContext context)
@@ -54,8 +53,7 @@ namespace ReportsMicroservice
             data.Portions = await dataFetcher.GetUserActivityPortions(request.FlowId, request.UserId, request.TimestampFrom, request.TimestampTo, request.Granularity);
 
             var csv = ReportGenerator.CreateUserActivityCsvReport(data);
-            var report = new Report { Data = ByteString.CopyFromUtf8(csv) };
-            return new GenerateReportResponse { FlowId = request.FlowId, Report = report };
+            return new GenerateReportResponse { FlowId = request.FlowId, Report = csv };
         }
 
         private DateTime? GetDateTime(long ticks) => ticks > 0 ? new DateTime(ticks) : null as DateTime?;

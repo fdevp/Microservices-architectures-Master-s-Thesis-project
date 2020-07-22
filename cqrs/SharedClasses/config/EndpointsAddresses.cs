@@ -2,13 +2,22 @@ namespace SharedClasses
 {
     public class EndpointsAddresses
     {
-        public string Accounts { get; set; }
-        public string Cards { get; set; }
-        public string Loans { get; set; }
-        public string Payments { get; set; }
-        public string Transactions { get; set; }
+        public string AccountsWrite { get; set; }
+		public string AccountsRead { get; set; }
+		
+        public string CardsWrite { get; set; }
+		public string CardsRead { get; set; }
+		
+        public string LoansWrite { get; set; }
+		public string LoansRead { get; set; }
+		
+        public string PaymentsWrite { get; set; }
+		public string PaymentsRead { get; set; }
+		
+        public string TransactionsWrite { get; set; }
+		public string TransactionsRead { get; set; }
+		
         public string Users { get; set; }
-        public string BatchBranch { get; set; }
-        public string PanelBranch { get; set; }
+		public string Reports { get; set; }
     }
 }

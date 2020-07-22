@@ -29,5 +29,5 @@ message GenerateOverallReportRequest {
 
 message GenerateReportResponse {
   int64 flowId = 1;
-  Report report = 2;
+  string report = 2;
 }

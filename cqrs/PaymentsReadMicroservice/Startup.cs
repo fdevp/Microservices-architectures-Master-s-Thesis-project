@@ -97,15 +97,18 @@ namespace PaymentsReadMicroservice
 
         private void CreateClients(IServiceCollection services)
         {
+            var addresses = new EndpointsAddresses();
+            configuration.GetSection("Addresses").Bind(addresses);
+
             var httpClientHandler = new HttpClientHandler();
             httpClientHandler.ServerCertificateCustomValidationCallback =
                 HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
             var httpClient = new HttpClient(httpClientHandler);
 
-            var transactionsChannel = GrpcChannel.ForAddress("https://localhost:5012", new GrpcChannelOptions { HttpClient = httpClient });
+            var transactionsChannel = GrpcChannel.ForAddress(addresses.TransactionsRead, new GrpcChannelOptions { HttpClient = httpClient });
             services.AddSingleton(new TransactionsReadClient(transactionsChannel));
 
-            var loansChannel = GrpcChannel.ForAddress("https://localhost:5052", new GrpcChannelOptions { HttpClient = httpClient });
+            var loansChannel = GrpcChannel.ForAddress(addresses.LoansRead, new GrpcChannelOptions { HttpClient = httpClient });
             services.AddSingleton(new LoansReadClient(loansChannel));
         }
     }

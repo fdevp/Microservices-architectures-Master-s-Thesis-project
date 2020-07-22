@@ -52,6 +52,7 @@ namespace TransactionsWriteMicroservice
         {
             var transactions = request.Transactions.Select(t => mapper.Map<Repository.Transaction>(t));
             transactionsRepository.SetupAppend(transactions);
+            projectionChannel.Publish(null, new DataProjection<Repository.Transaction, string> { Upsert = transactions.ToArray() });
             return Task.FromResult(new Empty());
         }
     }

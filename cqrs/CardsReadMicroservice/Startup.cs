@@ -92,12 +92,15 @@ namespace CardsReadMicroservice
 
         private void ConfigureGrpcConnections(IServiceCollection services)
         {
+            var addresses = new EndpointsAddresses();
+            configuration.GetSection("Addresses").Bind(addresses);
+
             var httpClientHandler = new HttpClientHandler();
             httpClientHandler.ServerCertificateCustomValidationCallback =
                 HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
 
             var httpClient = new HttpClient(httpClientHandler);
-            var transactionsChannel = GrpcChannel.ForAddress("https://localhost:5012", new GrpcChannelOptions { HttpClient = httpClient });
+            var transactionsChannel = GrpcChannel.ForAddress(addresses.TransactionsRead, new GrpcChannelOptions { HttpClient = httpClient });
             services.AddSingleton(new TransactionsReadClient(transactionsChannel));
         }
     }

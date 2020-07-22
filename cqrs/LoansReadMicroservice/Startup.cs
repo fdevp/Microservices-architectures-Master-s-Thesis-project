@@ -13,6 +13,7 @@ using Serilog;
 using SharedClasses;
 using SharedClasses.Messaging;
 using static PaymentsReadMicroservice.PaymentsRead;
+using static TransactionsReadMicroservice.TransactionsRead;
 
 namespace LoansReadMicroservice
 {
@@ -36,8 +37,8 @@ namespace LoansReadMicroservice
                 options.Interceptors.Add<LoggingInterceptor>("LoansRead");
             });
             services.AddSingleton(CreateMapper());
-            services.AddSingleton(CreatePaymentsClient());
             services.AddSingleton(repository);
+            CreateClients(services);
             SetProjectionListener(repository, services);
         }
 
@@ -85,14 +86,21 @@ namespace LoansReadMicroservice
             return new Mapper(config);
         }
 
-        private PaymentsReadClient CreatePaymentsClient()
+        private void CreateClients(IServiceCollection services)
         {
+            var addresses = new EndpointsAddresses();
+            configuration.GetSection("Addresses").Bind(addresses);
+
             var httpClientHandler = new HttpClientHandler();
             httpClientHandler.ServerCertificateCustomValidationCallback =
                 HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
             var httpClient = new HttpClient(httpClientHandler);
-            var channel = GrpcChannel.ForAddress("https://localhost:5032", new GrpcChannelOptions { HttpClient = httpClient });
-            return new PaymentsReadClient(channel);
+            
+            var paymentsChannel = GrpcChannel.ForAddress(addresses.PaymentsRead, new GrpcChannelOptions { HttpClient = httpClient });
+            services.AddSingleton(new PaymentsReadClient(paymentsChannel));
+
+            var transactionsChannel = GrpcChannel.ForAddress(addresses.TransactionsRead, new GrpcChannelOptions { HttpClient = httpClient });
+            services.AddSingleton(new TransactionsReadClient(transactionsChannel));
         }
     }
 }

@@ -20,7 +20,7 @@ namespace SharedClasses
             }
         }
 
-        public static string GetDate(DateTime date, DayOfWeek day) => date.AddDays(-(int)date.DayOfWeek + (int)day).ToString("yyyy-MM-dd");
+        public static string GetDate(DateTime date, int day) => date.AddDays(-(int)date.DayOfWeek + day).ToString("yyyy-MM-dd");
 
         public static IEnumerable<IGrouping<string, TransactionWithTimestamp>> GroupByPeriods(Granularity granularity, IEnumerable<TransactionWithTimestamp> transactions)
         {
@@ -29,7 +29,7 @@ namespace SharedClasses
                 case Granularity.Day:
                     return transactions.GroupBy(t => t.Timestamp.ToString("yyyy-MM-dd"));
                 case Granularity.Week:
-                    return transactions.GroupBy(t => $"{GetDate(t.Timestamp, DayOfWeek.Monday)} do {GetDate(t.Timestamp, DayOfWeek.Sunday)}");
+                    return transactions.GroupBy(t => $"{GetDate(t.Timestamp, 1)} do {GetDate(t.Timestamp, 7)}");
                 case Granularity.Month:
                     return transactions.GroupBy(t => t.Timestamp.ToString("yyyy-MM"));
                 case Granularity.Year:
@@ -50,7 +50,7 @@ namespace SharedClasses
                 case Aggregation.Avg:
                     return period.Average(t => t.Transaction.Amount);
                 case Aggregation.Median:
-                    return (float)Median(period);
+                    return (float)Median(period.Select(p => p.Transaction.Amount));
                 case Aggregation.Min:
                     return period.Min(t => t.Transaction.Amount);
                 case Aggregation.Max:

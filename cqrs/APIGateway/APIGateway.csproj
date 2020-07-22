@@ -11,7 +11,7 @@
 
     <Protobuf Include="..\Protos\loans-read-service.proto" GrpcServices="Client"/>
     <Protobuf Include="..\Protos\loans-write-service.proto" GrpcServices="Client"/>
-    
+
     <Protobuf Include="..\Protos\payments-read-service.proto" GrpcServices="Client"/>
     <Protobuf Include="..\Protos\payments-write-service.proto" GrpcServices="Client"/>
 
@@ -22,7 +22,6 @@
     <Protobuf Include="..\Protos\reports-service.proto" GrpcServices="Client"/>
 
     <Protobuf Include="..\Protos\common\empty.proto"/>
-    <Protobuf Include="..\Protos\common\transaction.proto"/>
     <Protobuf Include="..\Protos\common\payment.proto"/>
     <Protobuf Include="..\Protos\common\message.proto"/>
     <Protobuf Include="..\Protos\common\transfer.proto"/>
@@ -31,7 +30,6 @@
     <Protobuf Include="..\Protos\common\block.proto"/>
     <Protobuf Include="..\Protos\common\account.proto"/>
     <Protobuf Include="..\Protos\common\card.proto"/>
-    <Protobuf Include="..\Protos\common\report.proto"/>
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Grpc.AspNetCore" Version="2.27.0"/>
@@ -40,5 +38,8 @@
     <PackageReference Include="Serilog.Extensions.Logging.File" Version="2.0.0"/>
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3"/>
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.1.4"/>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../SharedClasses/SharedClasses.csproj" />
   </ItemGroup>
 </Project>

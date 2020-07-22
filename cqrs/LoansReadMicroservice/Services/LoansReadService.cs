@@ -76,7 +76,7 @@ namespace LoansReadMicroservice
             var portions = Aggregations.GroupByPeriods(granularity, withTimestamps);
             foreach (var portion in portions)
             {
-                var debits = portion.Where(p => p.Transaction.PaymentId == portion.Key).Sum(p => (float?)p.Transaction.Amount) ?? 0;
+                var debits = portion.Where(p => p.Transaction.PaymentId == loan.PaymentId).Sum(p => (float?)p.Transaction.Amount) ?? 0;
                 yield return new UserReportPortion { Period = portion.Key, Debits = debits, Element = loan.Id };
             }
         }

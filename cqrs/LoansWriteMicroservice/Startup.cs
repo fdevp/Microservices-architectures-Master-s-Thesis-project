@@ -73,11 +73,14 @@ namespace LoansWriteMicroservice
 
         private PaymentsWriteClient CreatePaymentsClient()
         {
+            var addresses = new EndpointsAddresses();
+            configuration.GetSection("Addresses").Bind(addresses);
+
             var httpClientHandler = new HttpClientHandler();
             httpClientHandler.ServerCertificateCustomValidationCallback =
                 HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
             var httpClient = new HttpClient(httpClientHandler);
-            var channel = GrpcChannel.ForAddress("https://localhost:5031", new GrpcChannelOptions { HttpClient = httpClient });
+            var channel = GrpcChannel.ForAddress(addresses.PaymentsWrite, new GrpcChannelOptions { HttpClient = httpClient });
             return new PaymentsWriteClient(channel);
         }
     }

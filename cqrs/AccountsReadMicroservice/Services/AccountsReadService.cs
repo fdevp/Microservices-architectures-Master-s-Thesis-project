@@ -75,8 +75,8 @@ namespace AccountsReadMicroservice
             var portions = Aggregations.GroupByPeriods(granularity, withTimestamps);
             foreach (var portion in portions)
             {
-                var incomes = portion.Where(p => p.Transaction.Recipient == portion.Key).Sum(p => (float?)p.Transaction.Amount) ?? 0;
-                var debits = portion.Where(p => p.Transaction.Sender == portion.Key).Sum(p => (float?)p.Transaction.Amount) ?? 0;
+                var incomes = portion.Where(p => p.Transaction.Recipient == account.Id).Sum(p => (float?)p.Transaction.Amount) ?? 0;
+                var debits = portion.Where(p => p.Transaction.Sender == account.Id).Sum(p => (float?)p.Transaction.Amount) ?? 0;
                 yield return new UserReportPortion { Period = portion.Key, Debits = debits, Incomes = incomes, Element = account.Number };
             }
         }

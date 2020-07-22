@@ -23,10 +23,6 @@ enum ReportSubject {
   TRANSACTIONS = 3;
 }
 
-message Report {
-  bytes data = 1;
-}
-
 message OverallReportPortion {
   string period = 1;
   Aggregation aggregation = 2;
