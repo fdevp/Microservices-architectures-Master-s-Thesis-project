@@ -20,18 +20,18 @@ namespace SharedClasses
             }
         }
 
-        public static string GetDate(DateTime date, DayOfWeek day) => date.AddDays(-(int)date.DayOfWeek + (int)day).ToString("dd/MM/yyyy");
+        public static string GetDate(DateTime date, DayOfWeek day) => date.AddDays(-(int)date.DayOfWeek + (int)day).ToString("yyyy-MM-dd");
 
         public static IEnumerable<IGrouping<string, TransactionWithTimestamp>> GroupByPeriods(Granularity granularity, IEnumerable<TransactionWithTimestamp> transactions)
         {
             switch (granularity)
             {
                 case Granularity.Day:
-                    return transactions.GroupBy(t => t.Timestamp.ToString("dd/MM/yyyy"));
+                    return transactions.GroupBy(t => t.Timestamp.ToString("yyyy-MM-dd"));
                 case Granularity.Week:
-                    return transactions.GroupBy(t => $"{GetDate(t.Timestamp, DayOfWeek.Monday)} - {GetDate(t.Timestamp, DayOfWeek.Sunday)}");
+                    return transactions.GroupBy(t => $"{GetDate(t.Timestamp, DayOfWeek.Monday)} do {GetDate(t.Timestamp, DayOfWeek.Sunday)}");
                 case Granularity.Month:
-                    return transactions.GroupBy(t => t.Timestamp.ToString("MM/yyyy"));
+                    return transactions.GroupBy(t => t.Timestamp.ToString("yyyy-MM"));
                 case Granularity.Year:
                     return transactions.GroupBy(t => t.Timestamp.ToString("yyyy"));
                 case Granularity.All:

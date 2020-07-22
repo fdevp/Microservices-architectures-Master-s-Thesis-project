@@ -55,11 +55,11 @@ namespace ReportsBranchMicroservice
             switch (granularity)
             {
                 case Granularity.Day:
-                    return transactions.GroupBy(t => t.Timestamp.ToString("dd/MM/yyyy"));
+                    return transactions.GroupBy(t => t.Timestamp.ToString("yyyy-MM-dd"));
                 case Granularity.Week:
-                    return transactions.GroupBy(t => $"{GetDate(t.Timestamp, DayOfWeek.Monday)} - {GetDate(t.Timestamp, DayOfWeek.Sunday)}");
+                    return transactions.GroupBy(t => $"{GetDate(t.Timestamp, 1)} do {GetDate(t.Timestamp, 7)}");
                 case Granularity.Month:
-                    return transactions.GroupBy(t => t.Timestamp.ToString("MM/yyyy"));
+                    return transactions.GroupBy(t => t.Timestamp.ToString("yyyy-MM"));
                 case Granularity.Year:
                     return transactions.GroupBy(t => t.Timestamp.ToString("yyyy"));
                 case Granularity.All:
@@ -69,7 +69,7 @@ namespace ReportsBranchMicroservice
             }
         }
 
-        private static string GetDate(DateTime date, DayOfWeek day) => date.AddDays(-(int)date.DayOfWeek + (int)day).ToString("dd/MM/yyyy");
+        private static string GetDate(DateTime date, int dayOfWeek) => date.AddDays(-(int)date.DayOfWeek + dayOfWeek).ToString("yyyy-MM-dd");
 
 
     }

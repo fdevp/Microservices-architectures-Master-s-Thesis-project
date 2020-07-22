@@ -27,9 +27,6 @@ namespace TransactionsMicroservice.Repository
         public Transaction[] GetMany(Filters filters, int top)
         {
             var selected = transactions.Values.Where(t => SelectTransaction(t, filters));
-            var cnt1 = transactions.Values.Count(t => !string.IsNullOrEmpty(t.PaymentId));
-            var cnt2 = transactions.Values.Count(t => !string.IsNullOrEmpty(t.CardId));
-
             if (top > 0)
                 selected = selected.Take(top);
             return selected.ToArray();
@@ -55,6 +52,11 @@ namespace TransactionsMicroservice.Repository
 
         private bool SelectTransaction(Transaction transaction, Filters filters)
         {
+            if (filters.TimestampFrom > 0 && transaction.Timestamp < filters.TimestampFrom)
+                return false;
+            if (filters.TimestampTo > 0 && transaction.Timestamp > filters.TimestampTo)
+                return false;
+
             if (filters.Payments.Any() && !string.IsNullOrEmpty(transaction.PaymentId) && filters.Payments.Contains(transaction.PaymentId))
                 return true;
             if (filters.Cards.Any() && !string.IsNullOrEmpty(transaction.CardId) && filters.Cards.Contains(transaction.CardId))
@@ -63,9 +65,9 @@ namespace TransactionsMicroservice.Repository
                 return true;
             if (filters.Senders.Any() && filters.Senders.Contains(transaction.Sender))
                 return true;
-            if (filters.TimestampFrom > 0 && transaction.Timestamp >= filters.TimestampFrom)
-                return true;
-            if (filters.TimestampTo > 0 && transaction.Timestamp <= filters.TimestampTo)
+
+            var anyDetailedFilter = filters.Payments.Any() || filters.Cards.Any() || filters.Recipients.Any() || filters.Senders.Any();
+            if (!anyDetailedFilter && filters.TimestampFrom == 0 && filters.TimestampTo == 0)
                 return true;
 
             return false;
