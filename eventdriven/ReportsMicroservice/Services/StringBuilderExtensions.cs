@@ -22,7 +22,7 @@ namespace ReportsMicroservice
                     sb.AppendLine($";Średnia;{value ?? '-'}");
                     break;
                 case Aggregation.Median:
-                    value = (float?)Median(period);
+                    value = (float?)Median(period.Select(p => p.Amount));
                     sb.AppendLine($";Mediana;{value ?? '-'}");
                     break;
                 case Aggregation.Min:

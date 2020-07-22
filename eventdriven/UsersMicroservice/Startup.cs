@@ -57,7 +57,7 @@ namespace UsersMicroservice
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory)
         {
-            
+
         }
     }
 }

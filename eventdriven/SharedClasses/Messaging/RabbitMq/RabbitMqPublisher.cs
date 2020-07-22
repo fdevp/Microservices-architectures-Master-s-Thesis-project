@@ -21,7 +21,7 @@ namespace SharedClasses.Messaging.RabbitMq
         {
             using (var sw = new StringWriter())
             {
-                JSON.Serialize(content, sw);
+                JSON.Serialize(content, sw, Options.ISO8601Utc);
                 var body = Encoding.UTF8.GetBytes(sw.ToString());
                 var properties = channel.CreateBasicProperties();
                 properties.CorrelationId = flowId;

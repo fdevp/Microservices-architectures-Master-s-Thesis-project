@@ -35,7 +35,7 @@ namespace TransactionsMicroservice
         public Task Create(MessageContext context, CreateTransactionEvent inputEvent)
         {
             var transaction = transactionsRepository.Create(inputEvent.Title, inputEvent.Amount, inputEvent.Recipient, inputEvent.Sender, inputEvent.PaymentId, inputEvent.CardId);
-            
+
             if (context.ReplyTo != null)
                 publishingRouter.Publish(context.ReplyTo, new SelectedTransactionsEvent { Transactions = new[] { transaction } }, context.FlowId);
             return Task.CompletedTask;
@@ -61,7 +61,7 @@ namespace TransactionsMicroservice
                 Cards = inputEvent.Cards?.ToHashSet(),
                 Payments = inputEvent.Payments?.ToHashSet(),
                 Recipients = inputEvent.Recipients?.ToHashSet(),
-                Senders = inputEvent.Senders.ToHashSet(),
+                Senders = inputEvent.Senders?.ToHashSet(),
                 TimestampFrom = inputEvent.TimestampFrom,
                 TimestampTo = inputEvent.TimestampTo,
             };
@@ -75,6 +75,13 @@ namespace TransactionsMicroservice
         public Task Setup(MessageContext context, SetupTransactionsEvent inputEvent)
         {
             transactionsRepository.Setup(inputEvent.Transactions);
+            return Task.CompletedTask;
+        }
+
+        [EventHandlingMethod(typeof(SetupAppendTransactionsEvent))]
+        public Task SetupAppend(MessageContext context, SetupAppendTransactionsEvent inputEvent)
+        {
+            transactionsRepository.SetupAppend(inputEvent.Transactions);
             return Task.CompletedTask;
         }
     }

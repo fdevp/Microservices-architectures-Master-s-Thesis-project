@@ -13,36 +13,39 @@ namespace ReportsMicroservice
         public static string CreateOverallCsvReport(OverallReportData data)
         {
             var periods = GroupByPeriods(data.Granularity, data.Transactions);
+            var ordered = periods.OrderBy(p => p.Key);
 
             var sb = new StringBuilder();
             sb.AppendLine($"Raport całościowy dla; {data.Subject}");
-            sb.AppendLine($"Zakres od; {data.From}");
-            sb.AppendLine($"Zakres do; {data.To}");
+            sb.AppendLine($"Zakres od; {data.From?.ToString() ?? "-"}");
+            sb.AppendLine($"Zakres do; {data.To?.ToString() ?? "-"}");
             sb.AppendLine($"Granularność; {data.Granularity}");
 
-            foreach (var period in periods)
+            foreach (var period in ordered)
             {
+                sb.AppendLine(period.Key);
                 foreach (var aggregation in data.Aggregations)
                     sb.WriteAggragation(period, aggregation);
             }
 
-            return string.Empty;
+            return sb.ToString();
         }
 
         public static string CreateUserActivityCsvReport(UserActivityRaportData data)
         {
             var periods = GroupByPeriods(data.Granularity, data.Transactions);
+            var ordered = periods.OrderBy(p => p.Key);
 
             var sb = new StringBuilder();
             sb.AppendLine($"Raport aktywności użytkownika; {data.UserId}");
-            sb.AppendLine($"Zakres od; {data.From}");
-            sb.AppendLine($"Zakres do; {data.To}");
+            sb.AppendLine($"Zakres od; {data.From?.ToString() ?? "-"}");
+            sb.AppendLine($"Zakres do; {data.To?.ToString() ?? "-"}");
             sb.AppendLine($"Granularność; {data.Granularity}");
 
-            sb.WriteAccountsData(periods, data.Accounts);
-            sb.WriteCardsData(periods, data.Cards);
-            sb.WritePaymentsData(periods, data.Payments);
-            sb.WriteLoansData(periods, data.Loans);
+            sb.WriteAccountsData(ordered, data.Accounts);
+            sb.WriteCardsData(ordered, data.Cards);
+            sb.WritePaymentsData(ordered, data.Payments);
+            sb.WriteLoansData(ordered, data.Loans);
 
             return sb.ToString();
         }
@@ -51,11 +54,11 @@ namespace ReportsMicroservice
             switch (granularity)
             {
                 case Granularity.Day:
-                    return transactions.GroupBy(t => t.Timestamp.ToString("dd/MM/yyyy"));
+                    return transactions.GroupBy(t => t.Timestamp.ToString("yyyy-MM-dd"));
                 case Granularity.Week:
-                    return transactions.GroupBy(t => $"{GetDate(t.Timestamp, DayOfWeek.Monday)} - {GetDate(t.Timestamp, DayOfWeek.Sunday)}");
+                    return transactions.GroupBy(t => $"{GetDate(t.Timestamp, 1)} do {GetDate(t.Timestamp, 7)}");
                 case Granularity.Month:
-                    return transactions.GroupBy(t => t.Timestamp.ToString("MM/yyyy"));
+                    return transactions.GroupBy(t => t.Timestamp.ToString("yyyy-MM"));
                 case Granularity.Year:
                     return transactions.GroupBy(t => t.Timestamp.ToString("yyyy"));
                 case Granularity.All:
@@ -65,7 +68,7 @@ namespace ReportsMicroservice
             }
         }
 
-        private static string GetDate(DateTime date, DayOfWeek day) => date.AddDays(-(int)date.DayOfWeek + (int)day).ToString("dd/MM/yyyy");
+        private static string GetDate(DateTime date, int day) => date.AddDays(-(int)date.DayOfWeek + day).ToString("yyyy-MM-dd");
 
 
     }

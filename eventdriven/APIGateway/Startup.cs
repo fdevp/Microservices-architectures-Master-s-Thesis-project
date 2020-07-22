@@ -114,6 +114,7 @@ namespace APIGateway
             publishers.Add(Queues.Loans, factory.CreatePublisher(Queues.Loans));
             publishers.Add(Queues.Payments, factory.CreatePublisher(Queues.Payments));
             publishers.Add(Queues.Users, factory.CreatePublisher(Queues.Users));
+            publishers.Add(Queues.Reports, factory.CreatePublisher(Queues.Reports));
             services.AddSingleton(new PublishingRouter(publishers));
         }
     }

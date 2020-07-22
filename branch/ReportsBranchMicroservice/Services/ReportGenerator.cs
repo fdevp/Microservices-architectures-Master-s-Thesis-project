@@ -17,8 +17,8 @@ namespace ReportsBranchMicroservice
 
             var sb = new StringBuilder();
             sb.AppendLine($"Raport całościowy dla; {data.Subject}");
-            sb.AppendLine($"Zakres od; {data.From}");
-            sb.AppendLine($"Zakres do; {data.To}");
+            sb.AppendLine($"Zakres od; {data.From?.ToString() ?? "-"}");
+            sb.AppendLine($"Zakres do; {data.To?.ToString() ?? "-"}");
             sb.AppendLine($"Granularność; {data.Granularity}");
 
             foreach (var period in ordered)
@@ -39,8 +39,8 @@ namespace ReportsBranchMicroservice
 
             var sb = new StringBuilder();
             sb.AppendLine($"Raport aktywności użytkownika; {data.UserId}");
-            sb.AppendLine($"Zakres od; {data.From}");
-            sb.AppendLine($"Zakres do; {data.To}");
+            sb.AppendLine($"Zakres od; {data.From?.ToString() ?? "-"}");
+            sb.AppendLine($"Zakres do; {data.To?.ToString() ?? "-"}");
             sb.AppendLine($"Granularność; {data.Granularity}");
 
             sb.WriteAccountsData(ordered, data.Accounts);

@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Threading.Tasks;
 using APIGateway.Models.Setup;
 using AutoMapper;
@@ -9,6 +10,7 @@ using SharedClasses.Events.Payments;
 using SharedClasses.Events.Transactions;
 using SharedClasses.Events.Users;
 using SharedClasses.Messaging;
+using SharedClasses.Models;
 
 namespace APIGateway.Controllers
 {
@@ -45,8 +47,12 @@ namespace APIGateway.Controllers
             var paymentsEvent = mapper.Map<SetupPaymentsEvent>(setup.PaymentsSetup);
             this.publishingRouter.Publish(Queues.Payments, paymentsEvent, null);
 
-            var transactionsEvent = mapper.Map<SetupTransactionsEvent>(setup.TransactionsSetup);
-            this.publishingRouter.Publish(Queues.Transactions, transactionsEvent, null);
+            for (int i = 0; i < setup.TransactionsSetup.transactions.Length; i += 10000)
+            {
+                var portion = setup.TransactionsSetup.transactions.Skip(i).Take(10000).ToArray();
+                var transactionsEvent = new SetupAppendTransactionsEvent { Transactions = portion.Select(t => mapper.Map<Transaction>(t)).ToArray() };
+                this.publishingRouter.Publish(Queues.Transactions, transactionsEvent, null);
+            }
 
             return Task.CompletedTask;
         }

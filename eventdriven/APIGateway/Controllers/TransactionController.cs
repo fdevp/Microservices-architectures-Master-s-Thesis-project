@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Threading.Tasks;
 using APIGateway.Models.Setup;
 using AutoMapper;
@@ -5,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using SharedClasses.Events.Transactions;
 using SharedClasses.Messaging;
+using SharedClasses.Models;
 
 namespace APIGateway.Controllers
 {
@@ -27,8 +29,12 @@ namespace APIGateway.Controllers
         [Route("setup")]
         public Task Setup(TransactionsSetup setup)
         {
-            var payload = mapper.Map<SetupTransactionsEvent>(setup);
-            publishingRouter.Publish(Queues.Accounts, payload, null);
+            for (int i = 0; i < setup.transactions.Length; i += 10000)
+            {
+                var portion = setup.transactions.Skip(i).Take(10000).ToArray();
+                var transactionsEvent = new SetupAppendTransactionsEvent { Transactions = portion.Select(t => mapper.Map<Transaction>(t)).ToArray() };
+                this.publishingRouter.Publish(Queues.Transactions, transactionsEvent, null);
+            }
             return Task.CompletedTask;
         }
     }

@@ -40,7 +40,7 @@ namespace SharedClasses.Messaging
         private async void RouteEvent(object sender, MqMessage message)
         {
             if (!routing.ContainsKey(message.Type))
-                throw new InvalidOperationException("Unknown event.");
+                return;
 
             var method = routing[message.Type];
             var data = Parse(message.Type, message.Data);
@@ -61,7 +61,7 @@ namespace SharedClasses.Messaging
         private object Parse(string typeName, string message)
         {
             var type = Type.GetType(typeName);
-            return JSON.Deserialize(message, type);
+            return JSON.Deserialize(message, type, Options.ISO8601Utc);
         }
 
         private static IEnumerable<(string typeName, MethodInfo method)> GetEventHandlersMethods(MethodInfo[] methods)

@@ -39,6 +39,7 @@ namespace TransactionsMicroservice
             var publishers = new Dictionary<string, IPublisher>();
             publishers.Add(Queues.APIGateway, factory.CreatePublisher(Queues.APIGateway));
             publishers.Add(Queues.Accounts, factory.CreatePublisher(Queues.Accounts));
+            publishers.Add(Queues.Reports, factory.CreatePublisher(Queues.Reports));
             services.AddSingleton(new PublishingRouter(publishers));
 
             var servicesProvider = services.BuildServiceProvider();

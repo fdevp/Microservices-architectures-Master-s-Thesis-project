@@ -26,7 +26,7 @@ namespace SharedClasses.Messaging
 
             this.Callbacks.TryAdd(flowId, (message) =>
             {
-                var data = JSON.Deserialize<T>(message);
+                var data = JSON.Deserialize<T>(message, Options.ISO8601Utc);
                 tcs.SetResult(data);
             });
 

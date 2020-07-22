@@ -30,16 +30,16 @@ namespace ReportsMicroservice
             switch (inputEvent.Subject)
             {
                 case ReportSubject.Cards:
-                    transactions = await dataFetcher.GetTransactions(context.FlowId, Queues.Cards, inputEvent.TimestampFrom, inputEvent.TimestampTo);
+                    transactions = await dataFetcher.GetTransactions(context.FlowId + "_c", Queues.Cards, inputEvent.TimestampFrom, inputEvent.TimestampTo);
                     break;
                 case ReportSubject.Loans:
-                    transactions = await dataFetcher.GetTransactions(context.FlowId, Queues.Loans, inputEvent.TimestampFrom, inputEvent.TimestampTo);
+                    transactions = await dataFetcher.GetTransactions(context.FlowId + "_l", Queues.Loans, inputEvent.TimestampFrom, inputEvent.TimestampTo);
                     break;
                 case ReportSubject.Payments:
-                    transactions = await dataFetcher.GetTransactions(context.FlowId, Queues.Payments, inputEvent.TimestampFrom, inputEvent.TimestampTo);
+                    transactions = await dataFetcher.GetTransactions(context.FlowId + "_p", Queues.Payments, inputEvent.TimestampFrom, inputEvent.TimestampTo);
                     break;
                 case ReportSubject.Transactions:
-                    transactions = await dataFetcher.GetTransactions(context.FlowId, new FilterTransactionsEvent { TimestampFrom = inputEvent.TimestampFrom, TimestampTo = inputEvent.TimestampTo });
+                    transactions = await dataFetcher.GetTransactions(context.FlowId + "_t", new FilterTransactionsEvent { TimestampFrom = inputEvent.TimestampFrom, TimestampTo = inputEvent.TimestampTo });
                     break;
                 default:
                     throw new InvalidOperationException("Unknown subject of report.");
@@ -83,10 +83,10 @@ namespace ReportsMicroservice
             };
 
             var parallelTasks = new List<Task>();
-            parallelTasks.Add(Task.Run(async () => data.Transactions = await dataFetcher.GetTransactions(context.FlowId, filters)));
-            parallelTasks.Add(Task.Run(async () => data.Payments = await dataFetcher.GetPayments(context.FlowId, accountsIds)));
-            parallelTasks.Add(Task.Run(async () => data.Loans = await dataFetcher.GetLoans(context.FlowId, accountsIds)));
-            parallelTasks.Add(Task.Run(async () => data.Cards = await dataFetcher.GetCards(context.FlowId, accountsIds)));
+            parallelTasks.Add(Task.Run(async () => data.Transactions = await dataFetcher.GetTransactions(context.FlowId + "_t", filters)));
+            parallelTasks.Add(Task.Run(async () => data.Payments = await dataFetcher.GetPayments(context.FlowId + "_p", accountsIds)));
+            parallelTasks.Add(Task.Run(async () => data.Loans = await dataFetcher.GetLoans(context.FlowId + "_l", accountsIds)));
+            parallelTasks.Add(Task.Run(async () => data.Cards = await dataFetcher.GetCards(context.FlowId + "_c", accountsIds)));
             await Task.WhenAll(parallelTasks);
 
             var csv = ReportGenerator.CreateUserActivityCsvReport(data);
