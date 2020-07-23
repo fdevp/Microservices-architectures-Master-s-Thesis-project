@@ -64,6 +64,7 @@ namespace ReportsBranchMicroservice
                 To = GetDateTime(request.TimestampTo),
                 Granularity = request.Granularity,
                 Accounts = accounts,
+                UserId = request.UserId
             };
 
             var parallelTasks = new List<Task>();

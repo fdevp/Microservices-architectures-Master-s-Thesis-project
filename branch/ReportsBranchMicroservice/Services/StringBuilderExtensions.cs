@@ -42,9 +42,12 @@ namespace ReportsBranchMicroservice
                 sb.AppendLine($"Kredyt {loan.Id}:");
                 foreach (var period in periods)
                 {
-                    var debits = period.Where(t => t.Transaction.PaymentId == loan.PaymentId).Sum(t => (float?)t.Transaction.Amount);
-                    sb.AppendLine($";{period.Key}");
-                    sb.AppendLine($";;spłacono;{debits ?? '-'}");
+                    var transactions = period.Where(t => t.Transaction.PaymentId == loan.PaymentId).ToArray();
+                    if (transactions.Any())
+                    {
+                        sb.AppendLine($";{period.Key}");
+                        sb.AppendLine($";;spłacono;{transactions.Sum(t => t.Transaction.Amount)}");
+                    }
                 }
             }
         }
@@ -56,9 +59,12 @@ namespace ReportsBranchMicroservice
                 sb.AppendLine($"Karta {card.Number}:");
                 foreach (var period in periods)
                 {
-                    var debits = period.Where(t => t.Transaction.CardId == card.Id).Sum(t => (float?)t.Transaction.Amount);
-                    sb.AppendLine($";{period.Key}");
-                    sb.AppendLine($";;obciążenia;{debits ?? '-'}");
+                    var transactions = period.Where(t => t.Transaction.CardId == card.Id).ToArray();
+                    if (transactions.Any())
+                    {
+                        sb.AppendLine($";{period.Key}");
+                        sb.AppendLine($";;obciążenia;{transactions.Sum(t => t.Transaction.Amount)}");
+                    }
                 }
             }
         }
@@ -67,12 +73,15 @@ namespace ReportsBranchMicroservice
         {
             foreach (var payment in payments)
             {
-                sb.AppendLine($"Płatność {payment}:");
+                sb.AppendLine($"Płatność {payment.Id}:");
                 foreach (var period in periods)
                 {
-                    var debits = period.Where(t => t.Transaction.PaymentId == payment.Id).Sum(t => (float?)t.Transaction.Amount);
-                    sb.AppendLine($";{period.Key}");
-                    sb.AppendLine($";;obciążenia;{debits ?? '-'}");
+                    var transactions = period.Where(t => t.Transaction.PaymentId == payment.Id).ToArray();
+                    if (transactions.Any())
+                    {
+                        sb.AppendLine($";{period.Key}");
+                        sb.AppendLine($";;obciążenia;{transactions.Sum(t => t.Transaction.Amount)}");
+                    }
                 }
             }
         }

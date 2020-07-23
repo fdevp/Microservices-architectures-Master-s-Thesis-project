@@ -1,3 +1,4 @@
+start powershell -noexit -command "cd APIGateway; dotnet run"
 start powershell -noexit -command "cd ReportsMicroservice; dotnet run"
 start powershell -noexit -command "cd UsersMicroservice; dotnet run"
 start powershell -noexit -command "cd CardsReadMicroservice; dotnet run"

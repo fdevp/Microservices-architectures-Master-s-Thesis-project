@@ -72,6 +72,7 @@ namespace ReportsMicroservice
                 To = inputEvent.TimestampTo,
                 Granularity = inputEvent.Granularity,
                 Accounts = accounts,
+                UserId = inputEvent.UserId
             };
 
             var filters = new FilterTransactionsEvent

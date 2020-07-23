@@ -37,9 +37,9 @@ namespace ReportsMicroservice
             return response.Payments;
         }
 
-        public async Task<Loan[]> GetLoans(string flowId, string[] paymnetsIds)
+        public async Task<Loan[]> GetLoans(string flowId, string[] accountsIds)
         {
-            var payload = new GetLoansByPaymentsEvent { PaymentsIds = paymnetsIds };
+            var payload = new GetLoansByAccountsEvent { AccountsIds = accountsIds };
             var response = await eventsAwaiter.AwaitResponse<SelectedLoansEvent>(flowId, () => publishingRouter.Publish(Queues.Loans, payload, flowId, Queues.Reports));
             return response.Loans;
         }

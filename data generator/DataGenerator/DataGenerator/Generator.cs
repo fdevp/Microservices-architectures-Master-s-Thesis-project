@@ -89,7 +89,8 @@ namespace DataGenerator
                     Id = Guid.NewGuid().ToString(),
                     Instalments = instalments,
                     TotalAmount = totalAmount,
-                    PaidAmount = paidAmount
+                    PaidAmount = paidAmount,
+                    AccountId = account.Id
                 };
 
 

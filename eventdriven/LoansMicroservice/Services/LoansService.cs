@@ -38,7 +38,15 @@ namespace LoansMicroservice
         [EventHandlingMethod(typeof(GetLoansByPaymentsEvent))]
         public Task GetLoansByPayments(MessageContext context, GetLoansByPaymentsEvent inputEvent)
         {
-            var loans = loansRepository.GetByPayment(inputEvent.PaymentsIds);
+            var loans = loansRepository.GetByPayments(inputEvent.PaymentsIds);
+            publishingRouter.Publish(context.ReplyTo, new SelectedLoansEvent { Loans = loans }, context.FlowId);
+            return Task.CompletedTask;
+        }
+
+        [EventHandlingMethod(typeof(GetLoansByAccountsEvent))]
+        public Task GetLoansByAccounts(MessageContext context, GetLoansByAccountsEvent inputEvent)
+        {
+            var loans = loansRepository.GetByAccounts(inputEvent.AccountsIds);
             publishingRouter.Publish(context.ReplyTo, new SelectedLoansEvent { Loans = loans }, context.FlowId);
             return Task.CompletedTask;
         }

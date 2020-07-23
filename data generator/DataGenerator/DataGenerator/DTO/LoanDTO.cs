@@ -7,5 +7,6 @@ namespace DataGenerator
         public float TotalAmount { get; set; }
         public int Instalments { get; set; }
         public string PaymentId { get; set; }
+        public string AccountId { get; set; }
     }
 }
