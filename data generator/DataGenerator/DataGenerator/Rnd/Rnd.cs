@@ -36,7 +36,7 @@ namespace DataGenerator.Rnd
         private int[] probabilities;
 
         public int ProbabilitiesSum { get; private set; }
-        
+
         public abstract T Next();
 
         public virtual T Next(params T[] except)
@@ -61,7 +61,8 @@ namespace DataGenerator.Rnd
             for (int i = 0; i < DistributionValuesProbabilities.Length; i++)
             {
                 sum += DistributionValuesProbabilities[i];
-                if (sum > drawn)
+
+                if (sum >= drawn || i == DistributionValues.Length - 1)
                 {
                     index = i;
                     return DistributionValues[i];

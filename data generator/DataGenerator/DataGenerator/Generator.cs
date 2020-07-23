@@ -74,12 +74,12 @@ namespace DataGenerator
             }
         }
 
-        public static IEnumerable<(LoanDTO, PaymentDTO)> CreateLoans(AccountDTO[] loansAccounts, IRnd<float> totalRnd, IRnd<int> instalmentsRnd, Rnd<int> paidInstalmentsRnd, IRnd<TimeSpan> intervalRnd, IRnd<string> recipientRnd)
+        public static IEnumerable<(LoanDTO, PaymentDTO)> CreateLoans(AccountDTO[] loansAccounts, IRnd<float> totalRnd, LoanInstalmentsRnd instalmentsRnd, Rnd<int> paidInstalmentsRnd, IRnd<TimeSpan> intervalRnd, IRnd<string> recipientRnd)
         {
             foreach (var account in loansAccounts)
             {
                 var totalAmount = totalRnd.Next();
-                var instalments = instalmentsRnd.Next();
+                var instalments = instalmentsRnd.Next(totalAmount);
                 paidInstalmentsRnd.Max = instalments;
                 var paidInstalments = paidInstalmentsRnd.Next();
                 var paidAmount = (float)paidInstalments / instalments * totalAmount;
@@ -195,13 +195,16 @@ namespace DataGenerator
                 int count = countRnd.Next();
                 for (int i = 0; i < count; i++)
                 {
+                    var debit = random.Next(0, 1) == 1;
+                    var sender = debit ? account.Id : recipientRnd.Next(account.Id);
+                    var recipient = !debit ? recipientRnd.Next(account.Id) : account.Id;
                     yield return new TransactionDTO
                     {
                         Id = Guid.NewGuid().ToString(),
                         Amount = amountRnd.Next(),
-                        Sender = account.Id,
+                        Sender = sender,
                         Timestamp = timestampRnd.Next(),
-                        Recipient = recipientRnd.Next(account.Id),
+                        Recipient = recipient,
                         Title = titleRnd.Next()
                     };
                 }

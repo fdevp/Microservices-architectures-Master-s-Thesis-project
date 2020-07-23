@@ -79,7 +79,10 @@ namespace DataGenerator
               .DistributionProbabilities(new[] { 50, 40, 10 })
               .Build();
 
-            var amountRnd = new RndBuilder<float>(new CurrencyRnd()).Min(20).Max(10000).Build(); //dystrybuanta / stan konta
+            var amountRnd = new RndBuilder<float>(new CurrencyRnd()).Min(20).Max(20000)
+                .DistributionValues(new float[] { 500, 1000, 3000, 8000, 15000 })
+                .DistributionProbabilities(new[] { 30, 20, 30, 10, 7, 3 })
+                .Build(); //dystrybuanta
             var startDateRnd = timestampRnd;
 
             var intervalRnd = new RndBuilder<TimeSpan>()
@@ -97,22 +100,28 @@ namespace DataGenerator
               .DistributionProbabilities(new[] { 50, 40, 10 })
               .Build();
 
-            var totalRnd = new RndBuilder<float>(new CurrencyRnd(false)).Min(100).Max(1000000).Build(); //dystrybuanta
+            var totalRnd = new RndBuilder<float>(new CurrencyRnd(false)).Min(100).Max(1000000)
+                .DistributionValues(new float[] { 3000, 10000, 30000, 50000, 100000, 300000, 500000 })
+                .DistributionProbabilities(new[] { 30, 10, 10, 10, 8, 20, 10, 2 })
+                .Build(); //dystrybuanta
 
-            var instalmentsRnd = new RndBuilder<int>().DistributionValues(new[] { 3, 6, 12, 24, 36}).Build(); //todo w zaleznosci od totalRnd
+            var instalmentsRnd = new LoanInstalmentsRnd(); //todo w zaleznosci od totalRnd
             var paidInstalmentsRnd = (Rnd<int>)new RndBuilder<int>().Min(0).Build();
 
             var intervalRnd = new RndBuilder<TimeSpan>()
-              .DistributionValues(new[] { TimeSpan.FromDays(30), TimeSpan.FromDays(60), TimeSpan.FromDays(180), TimeSpan.FromDays(90), TimeSpan.FromDays(180), TimeSpan.FromDays(365), })
-              .DistributionProbabilities(new[] { 85, 7, 3, 2, 2, 1 })
-              .Build(); ;
+              .DistributionValues(new[] { TimeSpan.FromDays(14), TimeSpan.FromDays(30), TimeSpan.FromDays(60) })
+              .DistributionProbabilities(new[] { 20, 70, 10 })
+              .Build();
             return Generator.CreateLoans(accounts, totalRnd, instalmentsRnd, paidInstalmentsRnd, intervalRnd, recipientRnd).ToArray();
         }
 
         static TransactionDTO[] AccountsTransactions(AccountDTO[] accounts, IRnd<string> recipientRnd, IRnd<DateTime> timestampRnd)
         {
             var countRnd = new RndBuilder<int>().Min(0).Max(100).Build(); //przykladowo   init: 0-3000
-            var amountRnd = new RndBuilder<float>(new CurrencyRnd()).Min(10).Max(70000).Build();//dystrybuanta - max bardzo rzadko, min bardzo często
+            var amountRnd = new RndBuilder<float>(new CurrencyRnd()).Min(10).Max(70000)
+                .DistributionValues(new float[] { 200, 500, 1000, 3000, 5000, 10000, 30000, 50000 })
+                .DistributionProbabilities(new[] { 30, 20, 10, 15, 10, 5, 5, 3, 2 })
+                .Build();//dystrybuanta - max bardzo rzadko, min bardzo często
             var titleRnd = new RndBuilder<string>(new TitleRnd()).Build();
 
             return Generator.CreateTransactions(accounts, recipientRnd, countRnd, timestampRnd, amountRnd, titleRnd).ToArray();
@@ -132,7 +141,10 @@ namespace DataGenerator
         static TransactionDTO[] CardsTransactions(CardDTO[] cards, IRnd<string> recipientRnd, IRnd<DateTime> timestampRnd)
         {
             var countRnd = new RndBuilder<int>().Min(50).Max(100).Build(); //przykladowo  50-20000
-            var amountRnd = new RndBuilder<float>(new CurrencyRnd()).Min(2).Max(15000).Build(); //dystrybuanta - max bardzo rzadko, min bardzo często
+            var amountRnd = new RndBuilder<float>(new CurrencyRnd()).Min(5).Max(20000)
+                .DistributionValues(new float[] { 20, 100, 300, 500, 1000, 2000, 5000, 10000 })
+                .DistributionProbabilities(new[] { 35, 30, 20, 5, 5, 2, 1, 1, 1 })
+                .Build(); //dystrybuanta - max bardzo rzadko, min bardzo często
             return Generator.CreateTransactions(cards, recipientRnd, countRnd, timestampRnd, amountRnd).ToArray();
         }
     }
