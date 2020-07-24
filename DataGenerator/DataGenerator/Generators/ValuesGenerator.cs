@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace DataGenerator
 {
-    public static class Generator
+    public static class ValuesGenerator
     {
         private static PersonNameGenerator personGenerator = new PersonNameGenerator();
         private static Random random = new Random();
