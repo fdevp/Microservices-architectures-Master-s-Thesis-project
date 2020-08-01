@@ -9,25 +9,50 @@ namespace Requester
 {
     public class Runner
     {
-        private readonly IConfigurationRoot configuration;
+        private Settings settings;
+        public SetupMode setupMode;
+        private readonly BusinessClientMode businessClientMode;
+        private readonly IndividualClientMode individualClientMode;
+        private readonly ReportsMode reportsMode;
+        private readonly AutomatMode automatMode;
 
-        public Runner(IConfigurationRoot configuration)
+        public Runner(Settings settings,
+            SetupMode setupMode,
+            BusinessClientMode businessClientMode,
+            IndividualClientMode individualClientMode,
+            ReportsMode reportsMode,
+            AutomatMode automatMode)
         {
-            this.configuration = configuration;
+            this.settings = settings;
+            this.setupMode = setupMode;
+            this.businessClientMode = businessClientMode;
+            this.individualClientMode = individualClientMode;
+            this.reportsMode = reportsMode;
+            this.automatMode = automatMode;
         }
-
+        
         public async Task Run()
         {
-            var settings = new Settings();
-            configuration.GetSection("Settings").Bind(settings);
-
+            Task action;
             switch (settings.Mode)
             {
                 case "setup":
-                    new SetupMode(,);
+                    await setupMode.Perform();
+                    break;
+                case "individual":
+                    await individualClientMode.Perform();
+                    break;
+                case "business":
+                    await businessClientMode.Perform();
+                    break;
+                case "report":
+                    await reportsMode.Perform();
+                    break;
+                case "automat":
+                    await automatMode.Perform();
                     break;
                 default:
-                    throw InvalidOperationException("Unknown working mode.");
+                    throw new InvalidOperationException("Unknown working mode.");
             }
         }
     }

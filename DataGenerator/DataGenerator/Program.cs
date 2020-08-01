@@ -11,17 +11,24 @@ namespace DataGenerator
     {
         static void Main(string[] args)
         {
-            var setupall = DataGenerator.Generate(10000, new DateTime(2015, 1, 1), new DateTime(2020, 8, 1));
+            var setupall = DataGenerator.Generate(1000, new DateTime(2015, 1, 1), new DateTime(2020, 8, 1));
             var transactionsSetup = setupall.TransactionsSetup;
             setupall.TransactionsSetup = new TransactionsSetup { Transactions = new TransactionDTO[0] };
 
-            //File.WriteAllText("setup.json", JSON.Serialize(setupall));
-            //File.WriteAllText("transactions.json", JSON.Serialize(transactionsSetup));
+            File.WriteAllText("setup.json", JSON.Serialize(setupall));
+            File.WriteAllText("transactions.json", JSON.Serialize(transactionsSetup));
 
-            //var scenario = ScenarioGenerator.IndividualUserScenario(setupall, 16, 50);
-            //var scenario = ScenarioGenerator.BusinessUserScenario(setupall, 16, 1, 5);
-            //var scenario = ScenarioGenerator.UserActivityReportsScenario(setupall, 0, 1, new DateTime(2015, 1, 1), new DateTime(2020, 8, 1));
-            var scenario = ScenarioGenerator.OverallActivityReportScenario(10, 100, new DateTime(2015, 1, 1), new DateTime(2020, 8, 1));
+            var individualScenario = ScenarioGenerator.IndividualUserScenario(setupall, 16, 50);
+            File.WriteAllText("individual.json", individualScenario);
+
+            var businessScenario = ScenarioGenerator.BusinessUserScenario(setupall, 16, 1, 5);
+            File.WriteAllText("business.json", businessScenario);
+
+            var userActivityReportScenario = ScenarioGenerator.UserActivityReportsScenario(setupall, 1, 5, new DateTime(2015, 1, 1), new DateTime(2020, 8, 1));
+            File.WriteAllText("userActivityReportScenario.json", userActivityReportScenario);
+
+            var overallReportScenario = ScenarioGenerator.OverallReportScenario(10, 100, new DateTime(2015, 1, 1), new DateTime(2020, 8, 1));
+            File.WriteAllText("overallReportScenario.json", overallReportScenario);
         }
     }
 }

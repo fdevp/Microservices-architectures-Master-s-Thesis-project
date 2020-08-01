@@ -31,8 +31,7 @@ namespace DataGenerator
                 .DistributionProbabilities(new[] { 35, 30, 20, 5, 5, 2, 1, 1 })
                 .Build(); //dystrybuanta - max bardzo rzadko, min bardzo często
 
-            var actions = new List<string>(actionsPerGroup * clients);
-            int groupIndex = 0;
+            var actions = new List<IndividualUserScenarioElement>(actionsPerGroup * clients);
             foreach (var group in groups)
             {
                 var groupAccounts = group.Where(g => accounts.ContainsKey(g.user.Id)).SelectMany(g => accounts[g.user.Id]).ToArray();
@@ -45,17 +44,14 @@ namespace DataGenerator
                     var card = cardsAccounts[sender.Id];
                     var user = usersDict[sender.UserId].Login;
                     var recipient = groupAccounts.ElementAt(rand.Next(0, groupAccounts.Length));
-                    var obj = "{" + $"'group':{groupIndex},'user':'{user}','amount':{amount.ToString(CultureInfo.InvariantCulture)},'cardId':'{card.Id}','recipient':'{recipient.Id}'" + "}";
-                    actions.Add(obj);
+                    actions.Add(new IndividualUserScenarioElement { Group = group.Key, User = user, Amount = amount, CardId = card.Id, Recipient = recipient.Id });
 
                     sender.Balance -= amount;
                     recipient.Balance += amount;
                 }
-
-                groupIndex++;
             }
 
-            return $"[{string.Join(",", actions)}]";
+            return JSON.Serialize(actions);
         }
 
         public static string BusinessUserScenario(SetupAll setup, int clients, int minUserActions, int maxUserActions)
@@ -77,9 +73,7 @@ namespace DataGenerator
             var titelRnd = new TitleRnd();
             var userActionsRnd = new RndBuilder<int>().Min(minUserActions).Max(maxUserActions).Build();
 
-            var sb = new StringBuilder();
-            var groupActions = new List<string>();
-            int groupIndex = 0;
+            var groupActions = new List<BusinessUserScenarioElement>();
             foreach (var group in groups)
             {
                 var groupAccounts = group.Where(g => accounts.ContainsKey(g.user.Id)).SelectMany(g => accounts[g.user.Id]).ToArray();
@@ -90,9 +84,8 @@ namespace DataGenerator
                 {
                     var userAccounts = usersAccounts[user.user.Id];
                     var userActionsCount = userActionsRnd.Next();
-                    var userActions = new List<string>();
+                    var userActions = new List<BusinessUserTransaction>();
 
-                    sb.Append("{" + $"'group':{groupIndex},'user':'{user.user.Login}', 'userId':'{user.user.Id}', 'transactions':");
                     for (int i = 0; i < userActionsCount; i++)
                     {
                         if (userAccounts.All(a => a.Balance < minAmount))
@@ -101,23 +94,17 @@ namespace DataGenerator
                         var sender = GetSender(amount, userAccounts);
                         var recipient = groupAccounts.ElementAt(rand.Next(0, groupAccounts.Length));
 
-                        var obj = "{" + $"'amount':{amount.ToString(CultureInfo.InvariantCulture)},'sender':'{sender.Id}','recipient':'{recipient.Id}', 'title':'{titelRnd.Next()}'" + "}";
-                        userActions.Add(obj);
+                        userActions.Add(new BusinessUserTransaction { Amount = amount, Sender = sender.Id, Recipient = recipient.Id, Title = titelRnd.Next() });
 
                         sender.Balance -= amount;
                         recipient.Balance += amount;
                     }
-                    sb.Append($"[{string.Join(",", userActions)}]");
-                    sb.Append("}");
-
-                    groupActions.Add(sb.ToString());
-                    sb.Clear();
+                   
+                    groupActions.Add(new BusinessUserScenarioElement { Group = group.Key, UserId = user.user.Id, User = user.user.Login, Transactions = userActions.ToArray() });
                 }
-
-                groupIndex++;
             }
 
-            return $"[{string.Join(",", groupActions)}]";
+            return JSON.Serialize(groupActions);
         }
 
         public static string UserActivityReportsScenario(SetupAll setup, int minUserReports, int maxUserReports, DateTime minDate, DateTime maxDate)
@@ -126,7 +113,7 @@ namespace DataGenerator
             var countRnd = new RndBuilder<int>().Min(minUserReports).Max(maxUserReports).Build();
             var granularityRnd = new RndBuilder<ReportGranularity>(new EnumRnd<ReportGranularity>()).Build();
 
-            var actions = new List<string>();
+            var actions = new List<UserActivityReportScenarioElement>();
             foreach (var user in setup.UsersSetup.Users)
             {
                 var reportsCount = countRnd.Next();
@@ -139,16 +126,15 @@ namespace DataGenerator
                     var to = firstDate > secondDate ? firstDate : secondDate;
                     var from = secondDate > firstDate ? firstDate : secondDate;
 
-                    var obj = "{" + $"'userId':{user.Id},'granularity':'{granularity}','TimestampFrom':'{from.ToShortDateString()}', 'TimestampTo':'{to.ToShortDateString()}'" + "}";
-                    actions.Add(obj);
+                    actions.Add(new UserActivityReportScenarioElement { UserId = user.Id, Granularity = granularity, TimestampFrom = from, TimestampTo = to});
                 }
             }
 
             var shuffled = actions.OrderBy(elem => Guid.NewGuid());
-            return $"[{string.Join(",", shuffled)}]";
+            return JSON.Serialize(shuffled);
         }
 
-        public static string OverallActivityReportScenario(int min, int max, DateTime minDate, DateTime maxDate)
+        public static string OverallReportScenario(int min, int max, DateTime minDate, DateTime maxDate)
         {
             var timestampRnd = new RndBuilder<DateTime>(new DateTimeRnd()).Min(minDate).Max(maxDate).Build();
             var countRnd = new RndBuilder<int>().Min(min).Max(max).Build();
@@ -157,7 +143,7 @@ namespace DataGenerator
             var aggregationsCountRnd = new RndBuilder<int>().Min(1).Max(6).Build();
 
             var reportsCount = countRnd.Next();
-            var actions = new List<string>();
+            var actions = new List<OverallReportScenarioElement>();
 
             for (int i = 0; i < reportsCount; i++)
             {
@@ -171,19 +157,17 @@ namespace DataGenerator
                 var to = firstDate > secondDate ? firstDate : secondDate;
                 var from = secondDate > firstDate ? firstDate : secondDate;
 
-                var obj = "{" + $"'aggregations':{aggregations},'subject':{subject},'granularity':{granularity},'TimestampFrom':'{from.ToShortDateString()}', 'TimestampTo':'{to.ToShortDateString()}'" + "}";
-                actions.Add(obj);
+                actions.Add(new OverallReportScenarioElement { Aggregations = aggregations, Subject = subject, Granularity = granularity, TimestampFrom = from, TimestampTo = to });
             }
 
-
             var shuffled = actions.OrderBy(elem => Guid.NewGuid());
-            return $"[{string.Join(",", shuffled)}]";
+            return JSON.Serialize(shuffled);
         }
 
-        private static string GetAggregations(int aggregationsCount)
+        private static int[] GetAggregations(int aggregationsCount)
         {
             var aggregations = ReportAggregationValues.OrderBy(v => Guid.NewGuid()).Take(aggregationsCount).Select(v=> (int)v);
-            return JSON.Serialize(aggregations);
+            return aggregations.ToArray();
         }
 
         private static float GetAmount(AccountDTO[] accounts, IRnd<float> rnd)

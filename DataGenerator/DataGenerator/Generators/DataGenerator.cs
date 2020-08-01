@@ -20,17 +20,17 @@ namespace DataGenerator
             var activePayments = ActivePayments(accounts, recipientRnd, timestampRnd);
             var loansAndPayments = ActiveLoans(accounts, recipientRnd);
             
-            /*
+            
             var accountsTransactions = AccountsTransactions(accounts, recipientRnd, timestampRnd);
             var loansTransactions = LoansTransactions(loansAndPayments.Select(lp => lp.loan).ToArray(), loansAndPayments.Select(lp => lp.payment).ToArray());
             var cardsTransactions = CardsTransactions(cards, recipientRnd, timestampRnd);
-            var paymentsTransactions = PaymentsTransactions(activePayments);*/
-            /*
+            var paymentsTransactions = PaymentsTransactions(activePayments);
+            
             var allTransactions = accountsTransactions
                 .Concat(loansTransactions)
                 .Concat(cardsTransactions)
                 .Concat(paymentsTransactions)
-                .ToArray();*/
+                .ToArray();
 
             var setupall = new SetupAll
             {
@@ -39,7 +39,7 @@ namespace DataGenerator
                 LoansSetup = new LoansSetup { Loans = loansAndPayments.Select(x => x.loan).ToArray() },
                 PaymentsSetup = new PaymentsSetup { Payments = loansAndPayments.Select(x => x.payment).ToArray() },
                 UsersSetup = new UsersSetup { Users = users },
-                TransactionsSetup = new TransactionsSetup { Transactions = new TransactionDTO[0] },
+                TransactionsSetup = new TransactionsSetup { Transactions = allTransactions },
             };
 
             return setupall;

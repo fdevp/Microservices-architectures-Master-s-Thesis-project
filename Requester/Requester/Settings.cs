@@ -7,5 +7,6 @@ namespace Requester
     public class Settings
     {
         public string Mode { get; set; }
+        public string Address { get; set; }
     }
 }
