@@ -15,10 +15,11 @@ namespace DataGenerator
             var transactionsSetup = setupall.TransactionsSetup;
             setupall.TransactionsSetup = new TransactionsSetup { Transactions = new TransactionDTO[0] };
 
-            File.WriteAllText("setup.json", JSON.Serialize(setupall));
-            File.WriteAllText("transactions.json", JSON.Serialize(transactionsSetup));
+            //File.WriteAllText("setup.json", JSON.Serialize(setupall));
+            //File.WriteAllText("transactions.json", JSON.Serialize(transactionsSetup));
 
-            var scenario = ScenarioGenerator.GenerateIndividualUser(setupall);
+            //var scenario = ScenarioGenerator.IndividualUserScenario(setupall, 16, 50);
+            //var scenario = ScenarioGenerator.BusinessUserScenario(setupall, 16, 1, 5);
         }
     }
 }
