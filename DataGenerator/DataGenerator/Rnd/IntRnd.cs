@@ -31,7 +31,7 @@ namespace DataGenerator.Rnd
 
             if (MinSet && MaxSet)
             {
-                return rand.Next(Min, Max);
+                return rand.Next(Min, Max + 1);
             }
 
             throw new InvalidOperationException("Unknown calculations");

@@ -7,21 +7,19 @@ using System.Text;
 
 namespace DataGenerator
 {
-    public static class Generator
+    public static class DataGenerator
     {
-        public static SetupAll Generate()
+        public static SetupAll Generate(int usersCount, DateTime minDate, DateTime maxDate)
         {
-            var users = ValuesGenerator.CreateUsers(10000).ToArray();
+            var users = ValuesGenerator.CreateUsers(usersCount).ToArray();
             var accounts = Accounts(users);
             var recipientRnd = new RndBuilder<string>().DistributionValues(accounts.Select(a => a.Id)).Build();
-            var timestampRnd = new RndBuilder<DateTime>().Min(new DateTime(2015, 1, 1)).Max(new DateTime(2020, 8, 1)).Build();
+            var timestampRnd = new RndBuilder<DateTime>().Min(minDate).Max(maxDate).Build();
 
             var cards = Cards(accounts);
             var activePayments = ActivePayments(accounts, recipientRnd, timestampRnd);
             var loansAndPayments = ActiveLoans(accounts, recipientRnd);
-
-            var lnsct = loansAndPayments.Count(l => l.payment.StartTimestamp < new DateTime(1950, 1, 1));
-
+            
             /*
             var accountsTransactions = AccountsTransactions(accounts, recipientRnd, timestampRnd);
             var loansTransactions = LoansTransactions(loansAndPayments.Select(lp => lp.loan).ToArray(), loansAndPayments.Select(lp => lp.payment).ToArray());

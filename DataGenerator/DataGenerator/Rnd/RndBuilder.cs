@@ -50,6 +50,7 @@ namespace DataGenerator
             switch (typeName)
             {
                 case "Int32":
+                case "ReportGranularity":
                     return new IntRnd() as Rnd<T>;
                 case "DateTime":
                     return new DateTimeRnd() as Rnd<T>;
