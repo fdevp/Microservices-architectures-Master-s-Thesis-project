@@ -7,7 +7,7 @@ namespace Requester.RunningModes
 {
     public class BusinessClientMode
     {
-        public async Task Perform()
+        public void Perform()
         {
 
         }

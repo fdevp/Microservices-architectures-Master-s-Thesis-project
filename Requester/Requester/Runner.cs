@@ -37,19 +37,19 @@ namespace Requester
             switch (settings.Mode)
             {
                 case "setup":
-                    await setupMode.Perform();
+                    setupMode.Perform();
                     break;
                 case "individual":
-                    await individualClientMode.Perform();
+                    individualClientMode.Perform();
                     break;
                 case "business":
-                    await businessClientMode.Perform();
+                    businessClientMode.Perform();
                     break;
                 case "report":
-                    await reportsMode.Perform();
+                    reportsMode.Perform();
                     break;
                 case "automat":
-                    await automatMode.Perform();
+                    automatMode.Perform();
                     break;
                 default:
                     throw new InvalidOperationException("Unknown working mode.");

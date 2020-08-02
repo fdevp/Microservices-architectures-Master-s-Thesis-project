@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using SharedClasses.Models;
@@ -7,7 +8,7 @@ namespace TransactionsMicroservice.Repository
 {
     public class TransactionsRepository
     {
-        private Dictionary<string, Transaction> transactions = new Dictionary<string, Transaction>();
+        private ConcurrentDictionary<string, Transaction> transactions = new ConcurrentDictionary<string, Transaction>();
 
         public Transaction Create(string title, float amount, string recipient, string sender, string paymentId, string cardId)
         {
@@ -24,7 +25,7 @@ namespace TransactionsMicroservice.Repository
                 PaymentId = paymentId,
                 CardId = cardId
             };
-            transactions.Add(id, transaction);
+            transactions.TryAdd(id, transaction);
             return transaction;
         }
 
@@ -45,19 +46,19 @@ namespace TransactionsMicroservice.Repository
 
         public void Setup(IEnumerable<Transaction> transactions)
         {
-            this.transactions = transactions.ToDictionary(t => t.Id, t => t);
+            this.transactions = new ConcurrentDictionary<string, Transaction>(transactions.ToDictionary(t => t.Id, t => t));
         }
 
         public void SetupAppend(IEnumerable<Transaction> transactions)
         {
             if (this.transactions == null)
             {
-                this.transactions = new Dictionary<string, Transaction>();
+                this.transactions = new ConcurrentDictionary<string, Transaction>();
             }
 
             foreach (var transaction in transactions)
             {
-                this.transactions.Add(transaction.Id, transaction);
+                this.transactions.TryAdd(transaction.Id, transaction);
             }
         }
 

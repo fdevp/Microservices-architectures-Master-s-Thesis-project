@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Linq;
 
 namespace CardsMicroservice.Repository
@@ -7,7 +8,7 @@ namespace CardsMicroservice.Repository
     public class CardsRepository
     {
         private Dictionary<string, Card> cards = new Dictionary<string, Card>();
-        private Dictionary<string, Block> blocks = new Dictionary<string, Block>();
+        private ConcurrentDictionary<string, Block> blocks = new ConcurrentDictionary<string, Block>();
 
         public Card GetCard(string id)
         {
@@ -32,14 +33,14 @@ namespace CardsMicroservice.Repository
         public Block CreateBlock(string cardId, string transactionId, DateTime timestamp)
         {
             var block = new Block(Guid.NewGuid().ToString(), cardId, transactionId, timestamp.Ticks);
-            blocks.Add(block.Id, block);
+            blocks.TryAdd(block.Id, block);
             return block;
         }
 
         public void Setup(IEnumerable<Repository.Card> cards, IEnumerable<Repository.Block> blocks)
         {
             this.cards = cards.ToDictionary(c => c.Id, c => c);
-            this.blocks = blocks.ToDictionary(b => b.Id, b => b);
+            this.blocks = new ConcurrentDictionary<string, Block>(blocks.ToDictionary(b => b.Id, b => b));
         }
     }
 }

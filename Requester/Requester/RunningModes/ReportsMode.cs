@@ -7,7 +7,7 @@ namespace Requester.RunningModes
 {
     public class ReportsMode
     {
-        public async Task Perform()
+        public void Perform()
         {
 
         }

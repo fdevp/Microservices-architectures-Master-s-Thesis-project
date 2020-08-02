@@ -18,7 +18,7 @@ namespace DataGenerator
             File.WriteAllText("setup.json", JSON.Serialize(setupall));
             File.WriteAllText("transactions.json", JSON.Serialize(transactionsSetup));
 
-            var individualScenario = ScenarioGenerator.IndividualUserScenario(setupall, 16, 50);
+            var individualScenario = ScenarioGenerator.IndividualUserScenario(setupall, 16, 5000);
             File.WriteAllText("individual.json", individualScenario);
 
             var businessScenario = ScenarioGenerator.BusinessUserScenario(setupall, 16, 1, 5);

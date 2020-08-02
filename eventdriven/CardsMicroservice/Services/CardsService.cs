@@ -88,7 +88,7 @@ namespace CardsMicroservice
             var transaction = reply.Transactions.Single();
             cardsRepository.CreateBlock(card.Id, transaction.Id, blockRequestTime);
             if (context.ReplyTo != null)
-                publishingRouter.Publish(context.ReplyTo, transaction, context.FlowId);
+                publishingRouter.Publish(context.ReplyTo, reply, context.FlowId);
         }
 
         [EventHandlingMethod(typeof(SetupCardsEvent))]

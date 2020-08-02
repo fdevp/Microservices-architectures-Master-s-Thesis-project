@@ -2,6 +2,7 @@
 using Serilog;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -21,7 +22,7 @@ namespace Requester.RunningModes
             this.logger = logger;
         }
 
-        public async Task Perform()
+        public void Perform()
         {
             var scenarioFileContent = File.ReadAllText("individual.json");
             var scenarios = JSON.Deserialize<IndividualUserScenarioElement[]>(scenarioFileContent);
@@ -29,17 +30,31 @@ namespace Requester.RunningModes
             var groupsCount = groups.Count();
             var options = new ParallelOptions { MaxDegreeOfParallelism = groupsCount };
 
+            var overallTimer = Stopwatch.StartNew();
             Parallel.ForEach(groups, options, async group =>
             {
                 foreach (var element in group)
                 {
+                    var scenarioTimer = Stopwatch.StartNew();
+                    var scenarioId = Guid.NewGuid().ToString();
 
+                    var scenarioPartTimer = Stopwatch.StartNew();
                     var token = GetToken(element.User);
+                    logger.Information($"Service='Requester' ScenarioId='{scenarioId}' Method='individual token' Processing='{scenarioPartTimer.ElapsedMilliseconds}'");
+                    
                     //todo check account balance
+
+                    scenarioPartTimer.Restart();
                     Transfer(element);
+                    logger.Information($"Service='Requester' ScenarioId='{scenarioId}' Method='individual transfer' Processing='{scenarioPartTimer.ElapsedMilliseconds}'");
+                    scenarioPartTimer.Restart();
                     Logout(token);
+                    logger.Information($"Service='Requester' ScenarioId='{scenarioId}' Method='individual logout' Processing='{scenarioPartTimer.ElapsedMilliseconds}'");
+                    logger.Information($"Service='Requester' ScenarioId='{scenarioId}' Method='individual scenario' Processing='{scenarioTimer.ElapsedMilliseconds}'");
                 }
             });
+
+            logger.Information($"Service='Requester' Method='individual overall' Processing='{overallTimer.ElapsedMilliseconds}'");
         }
 
         public string GetToken(string username)

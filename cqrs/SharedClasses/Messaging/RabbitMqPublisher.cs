@@ -33,10 +33,13 @@ namespace SharedClasses.Messaging
                 JSON.Serialize(content, sw);
                 var body = Encoding.UTF8.GetBytes(sw.ToString());
 
-                channel.BasicPublish(exchange: "",
-                routingKey: queueName,
-                basicProperties: properties,
-                body: body);
+                lock (channel)
+                {
+                    channel.BasicPublish(exchange: "",
+                                    routingKey: queueName,
+                                    basicProperties: properties,
+                                    body: body);
+                }
             }
         }
 

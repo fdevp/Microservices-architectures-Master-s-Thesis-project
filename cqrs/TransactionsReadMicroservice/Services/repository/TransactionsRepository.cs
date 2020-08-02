@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -6,7 +7,7 @@ namespace TransactionsReadMicroservice.Repository
 {
     public class TransactionsRepository
     {
-        private Dictionary<string, Transaction> transactions = new Dictionary<string, Transaction>();
+        private ConcurrentDictionary<string, Transaction> transactions = new ConcurrentDictionary<string, Transaction>();
 
         public Transaction Get(string id)
         {
@@ -35,7 +36,7 @@ namespace TransactionsReadMicroservice.Repository
         {
             foreach (var id in ids)
             {
-                transactions.Remove(id);
+                transactions.Remove(id, out var transaction);
             }
         }
 

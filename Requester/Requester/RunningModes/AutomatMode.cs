@@ -7,7 +7,7 @@ namespace Requester.RunningModes
 {
     public class AutomatMode
     {
-        public async Task Perform()
+        public void Perform()
         {
             
         }

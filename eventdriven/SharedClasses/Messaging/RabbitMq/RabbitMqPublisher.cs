@@ -27,11 +27,13 @@ namespace SharedClasses.Messaging.RabbitMq
                 properties.CorrelationId = flowId;
                 properties.Type = type;
                 properties.ReplyTo = replyTo;
-
-                channel.BasicPublish(exchange: "",
-                routingKey: queueName,
-                basicProperties: properties,
-                body: body);
+                lock (channel)
+                {
+                    channel.BasicPublish(exchange: "",
+                                    routingKey: queueName,
+                                    basicProperties: properties,
+                                    body: body);
+                }
             }
         }
 
