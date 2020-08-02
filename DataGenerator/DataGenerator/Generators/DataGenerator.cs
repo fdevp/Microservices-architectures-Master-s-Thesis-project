@@ -53,7 +53,7 @@ namespace DataGenerator
               .Build();
 
             var amountRnd = new RndBuilder<float>(new CurrencyRnd())
-                .Min(10)
+                .Min(500)
                 .Max(30000)
                 .Build();
 

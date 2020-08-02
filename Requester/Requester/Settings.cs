@@ -8,5 +8,7 @@ namespace Requester
     {
         public string Mode { get; set; }
         public string Address { get; set; }
+        public int Delay { get; set; }
+        public int Threads { get; set; }
     }
 }

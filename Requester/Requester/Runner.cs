@@ -13,27 +13,29 @@ namespace Requester
         public SetupMode setupMode;
         private readonly BusinessClientMode businessClientMode;
         private readonly IndividualClientMode individualClientMode;
-        private readonly ReportsMode reportsMode;
+        private readonly UserActivityReportsMode userActivityReportsMode;
+        private readonly OverallReportsMode overallReportsMode;
         private readonly AutomatMode automatMode;
 
         public Runner(Settings settings,
             SetupMode setupMode,
             BusinessClientMode businessClientMode,
             IndividualClientMode individualClientMode,
-            ReportsMode reportsMode,
+            UserActivityReportsMode userActivityReportsMode,
+            OverallReportsMode overallReportsMode,
             AutomatMode automatMode)
         {
             this.settings = settings;
             this.setupMode = setupMode;
             this.businessClientMode = businessClientMode;
             this.individualClientMode = individualClientMode;
-            this.reportsMode = reportsMode;
+            this.userActivityReportsMode = userActivityReportsMode;
+            this.overallReportsMode = overallReportsMode;
             this.automatMode = automatMode;
         }
         
         public async Task Run()
         {
-            Task action;
             switch (settings.Mode)
             {
                 case "setup":
@@ -45,8 +47,11 @@ namespace Requester
                 case "business":
                     businessClientMode.Perform();
                     break;
-                case "report":
-                    reportsMode.Perform();
+                case "userActivityReport":
+                    userActivityReportsMode.Perform();
+                    break;
+                case "overallReport":
+                    overallReportsMode.Perform();
                     break;
                 case "automat":
                     automatMode.Perform();

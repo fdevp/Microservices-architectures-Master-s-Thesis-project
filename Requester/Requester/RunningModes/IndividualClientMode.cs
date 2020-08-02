@@ -1,4 +1,5 @@
 ﻿using Jil;
+using Requester.Requests;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -14,11 +15,13 @@ namespace Requester.RunningModes
     public class IndividualClientMode
     {
         private readonly HttpClient httpClient;
+        private readonly SessionRequester sessionRequester;
         private readonly ILogger logger;
 
-        public IndividualClientMode(HttpClient httpClient, ILogger logger)
+        public IndividualClientMode(HttpClient httpClient, SessionRequester sessionRequester, ILogger logger)
         {
             this.httpClient = httpClient;
+            this.sessionRequester = sessionRequester;
             this.logger = logger;
         }
 
@@ -31,7 +34,7 @@ namespace Requester.RunningModes
             var options = new ParallelOptions { MaxDegreeOfParallelism = groupsCount };
 
             var overallTimer = Stopwatch.StartNew();
-            Parallel.ForEach(groups, options, async group =>
+            Parallel.ForEach(groups, options, group =>
             {
                 foreach (var element in group)
                 {
@@ -39,7 +42,7 @@ namespace Requester.RunningModes
                     var scenarioId = Guid.NewGuid().ToString();
 
                     var scenarioPartTimer = Stopwatch.StartNew();
-                    var token = GetToken(element.User);
+                    var token = sessionRequester.GetToken(element.User);
                     logger.Information($"Service='Requester' ScenarioId='{scenarioId}' Method='individual token' Processing='{scenarioPartTimer.ElapsedMilliseconds}'");
                     
                     //todo check account balance
@@ -47,9 +50,11 @@ namespace Requester.RunningModes
                     scenarioPartTimer.Restart();
                     Transfer(element);
                     logger.Information($"Service='Requester' ScenarioId='{scenarioId}' Method='individual transfer' Processing='{scenarioPartTimer.ElapsedMilliseconds}'");
+
                     scenarioPartTimer.Restart();
-                    Logout(token);
+                    sessionRequester.Logout(token);
                     logger.Information($"Service='Requester' ScenarioId='{scenarioId}' Method='individual logout' Processing='{scenarioPartTimer.ElapsedMilliseconds}'");
+
                     logger.Information($"Service='Requester' ScenarioId='{scenarioId}' Method='individual scenario' Processing='{scenarioTimer.ElapsedMilliseconds}'");
                 }
             });
@@ -57,23 +62,11 @@ namespace Requester.RunningModes
             logger.Information($"Service='Requester' Method='individual overall' Processing='{overallTimer.ElapsedMilliseconds}'");
         }
 
-        public string GetToken(string username)
-        {
-            var body = JSON.Serialize(new TokenRequest { Login = username, Password = "password" });
-            var result = httpClient.PostAsync("user/token", new StringContent(body, Encoding.UTF8, "application/json")).Result;
-            return result.Content.ReadAsStringAsync().Result;
-        }
-
         public void Transfer(IndividualUserScenarioElement element)
         {
             var body = JSON.Serialize(element);
             var result = httpClient.PostAsync("card/transfer", new StringContent(body, Encoding.UTF8, "application/json")).Result;
         }
-
-        public void Logout(string token)
-        {
-            var body = JSON.Serialize(new LogoutRequest { Token = token });
-            var result = httpClient.PostAsync("user/logout", new StringContent(body, Encoding.UTF8, "application/json")).Result;
-        }
+        
     }
 }

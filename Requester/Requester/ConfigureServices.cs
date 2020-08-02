@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Requester.Requests;
 using Requester.RunningModes;
 using Serilog;
 using System;
@@ -34,13 +35,14 @@ namespace Requester
             var httpClient = new HttpClient { BaseAddress = new Uri(settings.Address)};
             serviceCollection.AddSingleton(httpClient);
 
+            serviceCollection.AddSingleton<SessionRequester>();
             serviceCollection.AddSingleton<SetupMode>();
             serviceCollection.AddSingleton<BusinessClientMode>();
             serviceCollection.AddSingleton<IndividualClientMode>();
-            serviceCollection.AddSingleton<ReportsMode>();
+            serviceCollection.AddSingleton<UserActivityReportsMode>();
+            serviceCollection.AddSingleton<OverallReportsMode>();
             serviceCollection.AddSingleton<AutomatMode>();
             serviceCollection.AddTransient<Runner>();
-
         }
     }
 }

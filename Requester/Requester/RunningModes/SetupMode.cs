@@ -21,10 +21,10 @@ namespace Requester.RunningModes
             this.logger = logger;
         }
 
-        public async Task Perform()
+        public void Perform()
         {
             var setup = File.ReadAllText("setup.json");
-            var response = await httpClient.PostAsync($"setup/setup", new StringContent(setup, Encoding.UTF8, "application/json"));
+            var response = httpClient.PostAsync($"setup/setup", new StringContent(setup, Encoding.UTF8, "application/json")).Result;
             if (!response.IsSuccessStatusCode)
             {
                 logger.Information("Cannot setup system.");
@@ -38,7 +38,7 @@ namespace Requester.RunningModes
             {
                 var portion = transactions.Skip(i).Take(10000);
                 var transactionsSetp = new TransactionsSetup { Transactions = portion.ToArray() };
-                await httpClient.PostAsync("http://localhost:5000/transaction/setup", new StringContent(JSON.Serialize(transactionsSetp), Encoding.UTF8, "application/json"));
+                httpClient.PostAsync("http://localhost:5000/transaction/setup", new StringContent(JSON.Serialize(transactionsSetp), Encoding.UTF8, "application/json")).RunSynchronously();
                 logger.Information("Transactions portion setup done.");
             }
 

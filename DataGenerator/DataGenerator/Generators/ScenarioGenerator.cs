@@ -130,8 +130,8 @@ namespace DataGenerator
                 }
             }
 
-            var shuffled = actions.OrderBy(elem => Guid.NewGuid());
-            return JSON.Serialize(shuffled);
+            var shuffled = actions.OrderBy(elem => Guid.NewGuid()).Select(a=> JSON.Serialize(a));
+            return string.Join("|", shuffled);
         }
 
         public static string OverallReportScenario(int min, int max, DateTime minDate, DateTime maxDate)
@@ -160,8 +160,8 @@ namespace DataGenerator
                 actions.Add(new OverallReportScenarioElement { Aggregations = aggregations, Subject = subject, Granularity = granularity, TimestampFrom = from, TimestampTo = to });
             }
 
-            var shuffled = actions.OrderBy(elem => Guid.NewGuid());
-            return JSON.Serialize(shuffled);
+            var shuffled = actions.OrderBy(elem => Guid.NewGuid()).Select(a => JSON.Serialize(a));
+            return string.Join("|", shuffled);
         }
 
         private static int[] GetAggregations(int aggregationsCount)
@@ -200,14 +200,5 @@ namespace DataGenerator
             }
         }
 
-
-
-        private class RandomComparer<T> : IComparer<T>
-        {
-            public int Compare(T x, T y)
-            {
-                return rand.Next(-1, 2);
-            }
-        }
     }
 }
