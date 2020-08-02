@@ -59,7 +59,7 @@ namespace APIGateway.Controllers
         [Route("{userId}/panel")]
         public async Task<Panel> Panel(string userId)
         {
-            var flowId = (long)HttpContext.Items["flowId"];
+            var flowId = HttpContext.Items["flowId"].ToString();
 
             RepeatedField<Loan> loans = new RepeatedField<Loan>();
             RepeatedField<Payment> payments = new RepeatedField<Payment>();
@@ -114,7 +114,7 @@ namespace APIGateway.Controllers
         public async Task<string> Token(TokenRequest data)
         {
             var request = mapper.Map<SignInRequest>(data);
-            request.FlowId = (long)HttpContext.Items["flowId"];
+            request.FlowId = HttpContext.Items["flowId"].ToString();
             var response = await usersClient.TokenAsync(request);
             return response.Token;
         }
@@ -123,7 +123,7 @@ namespace APIGateway.Controllers
         [Route("logout")]
         public async Task Logout(Models.LogoutRequest data)
         {
-            var request = new UsersMicroservice.LogoutRequest { FlowId = (long)HttpContext.Items["flowId"], Token = data.Token };
+            var request = new UsersMicroservice.LogoutRequest { FlowId = HttpContext.Items["flowId"].ToString(), Token = data.Token };
             await usersClient.LogoutAsync(request);
         }
 

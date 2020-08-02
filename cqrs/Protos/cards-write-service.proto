@@ -14,7 +14,7 @@ service CardsWrite {
 }
 
 message TransferRequest {
-  int64 flowId = 1;
+  string flowId = 1;
   string cardId = 2;
   string recipient = 3;
   float amount = 4;

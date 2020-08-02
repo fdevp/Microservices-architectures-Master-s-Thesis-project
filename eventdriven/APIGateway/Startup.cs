@@ -53,6 +53,8 @@ namespace APIGateway
             app.UseHttpsRedirection();
             app.UseRouting();
             app.UseAuthorization();
+			
+			app.UseMiddleware<FlowIdMiddleware>();
             app.UseMiddleware<LoggingMiddleware>();
 
             app.UseEndpoints(endpoints =>

@@ -55,7 +55,7 @@ namespace APIGateway.Controllers
         [HttpGet]
         public async Task<BatchData> Get([FromQuery(Name = "part")] int part, [FromQuery(Name = "total")] int total)
         {
-            var flowId = (long)HttpContext.Items["flowId"];
+            var flowId = HttpContext.Items["flowId"].ToString();
 
             RepeatedField<Loan> loans = new RepeatedField<Loan>();
             RepeatedField<Payment> payments = new RepeatedField<Payment>();
@@ -91,7 +91,7 @@ namespace APIGateway.Controllers
         [HttpPost]
         public async Task Process(BatchProcess data)
         {
-            var flowId = (long)HttpContext.Items["flowId"];
+            var flowId = HttpContext.Items["flowId"].ToString();
             var messages = data.Messages.Select(m => mapper.Map<Message>(m)).ToArray();
             var transfers = data.Transfers.Select(t => mapper.Map<Transfer>(t)).ToArray(); ;
             var instalments = data.RepaidInstalmentsIds;

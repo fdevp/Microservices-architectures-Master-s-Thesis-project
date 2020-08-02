@@ -16,7 +16,7 @@ service CardsRead {
 }
 
 message GetCardsRequest {
-  int64 flowId = 1;
+  string flowId = 1;
   repeated string ids = 2;
 }
 
@@ -25,7 +25,7 @@ message GetCardsResponse {
 }
 
 message GetBlocksRequest {
-  int64 flowId = 1;
+  string flowId = 1;
   string cardId = 2;
 }
 
@@ -34,7 +34,7 @@ message GetBlocksResponse {
 }
 
 message AggregateUserActivityRequest {
-  int64 flowId = 1;
+  string flowId = 1;
   repeated string accountsIds = 2;
   int64 timestampFrom = 3;
   int64 timestampTo = 4;

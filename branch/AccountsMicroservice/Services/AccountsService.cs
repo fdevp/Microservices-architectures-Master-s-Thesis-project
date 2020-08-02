@@ -91,7 +91,7 @@ namespace AccountsMicroservice
             return Task.FromResult(new Empty());
         }
 
-        private CreateTransactionRequest CreateRequest(long flowId, Transfer request)
+        private CreateTransactionRequest CreateRequest(string flowId, Transfer request)
         {
             var account = accountsRepository.Get(request.AccountId);
             var recipient = accountsRepository.Get(request.Recipient);

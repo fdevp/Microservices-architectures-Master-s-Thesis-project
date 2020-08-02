@@ -15,12 +15,12 @@ service Transactions {
 }
 
 message GetTransactionsRequest {
-  int64 flowId = 1;
+  string flowId = 1;
   repeated string ids = 2;
 }
 
 message FilterTransactionsRequest {
-  int64 flowId = 1;
+  string flowId = 1;
   repeated string recipients = 2;
   repeated string senders = 3;
   repeated string payments = 4;
@@ -35,7 +35,7 @@ message GetTransactionsResult {
 }
 
 message CreateTransactionRequest {
-  int64 flowId = 1;
+  string flowId = 1;
   string title = 2;
   float amount = 3;
   string recipient = 4;
@@ -49,7 +49,7 @@ message CreateTransactionResult {
 }
 
 message BatchCreateTransactionRequest {
-  int64 flowId = 1;
+  string flowId = 1;
   repeated CreateTransactionRequest requests = 2;
 }
 

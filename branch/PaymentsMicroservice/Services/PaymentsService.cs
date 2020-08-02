@@ -80,7 +80,7 @@ namespace PaymentsMicroservice
             return Task.FromResult(new Empty());
         }
 
-        private async Task<GetPaymentsWithLoansResult> WithLoans(Repository.Payment[] payments, long flowId)
+        private async Task<GetPaymentsWithLoansResult> WithLoans(Repository.Payment[] payments, string flowId)
         {
             var mapped = payments.Where(payment => payment != null)
                             .Select(p => mapper.Map<Payment>(p))

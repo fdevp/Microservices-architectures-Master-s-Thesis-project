@@ -15,7 +15,7 @@ service LoansRead {
 }
 
 message GetLoansRequest {
-  int64 flowId = 1;
+  string flowId = 1;
   repeated string ids = 2;
 }
 
@@ -24,7 +24,7 @@ message GetLoansResponse {
 }
 
 message AggregateUserActivityRequest {
-  int64 flowId = 1;
+  string flowId = 1;
   repeated string accountsIds = 2;
   int64 timestampFrom = 3;
   int64 timestampTo = 4;

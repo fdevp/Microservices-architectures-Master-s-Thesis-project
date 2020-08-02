@@ -13,7 +13,7 @@ service TransactionsWrite {
 }
 
 message CreateTransactionRequest {
-  int64 flowId = 1;
+  string flowId = 1;
   string title = 2;
   float amount = 3;
   string recipient = 4;
@@ -27,7 +27,7 @@ message CreateTransactionResult {
 }
 
 message BatchCreateTransactionRequest {
-  int64 flowId = 1;
+  string flowId = 1;
   repeated CreateTransactionRequest requests = 2;
 }
 

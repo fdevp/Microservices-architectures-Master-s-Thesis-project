@@ -31,7 +31,7 @@ namespace APIGateway.Controllers
         public async Task<IEnumerable<AccountDTO>> Get(string userId)
         {
             var request = new GetUserAccountsRequest { UserId = userId };
-            request.FlowId = (long)HttpContext.Items["flowId"];
+            request.FlowId = HttpContext.Items["flowId"].ToString();
             var response = await accountClient.GetUserAccountsAsync(request);
             var accounts = response.Accounts.Select(a => mapper.Map<AccountDTO>(a));
             return accounts;
@@ -42,7 +42,7 @@ namespace APIGateway.Controllers
         public async Task<float> Balance(string accountId)
         {
             var request = new GetBalancesRequest { Ids = { accountId } };
-            request.FlowId = (long)HttpContext.Items["flowId"];
+            request.FlowId = HttpContext.Items["flowId"].ToString();
             var repsonse = await accountClient.GetBalancesAsync(request);
             var balance = repsonse.Balances.Single();
             return balance.Balance;
@@ -54,7 +54,7 @@ namespace APIGateway.Controllers
         {
             var transfer = mapper.Map<Transfer>(data);
             var request = new TransferRequest { Transfer = transfer };
-            request.FlowId = (long)HttpContext.Items["flowId"];
+            request.FlowId = HttpContext.Items["flowId"].ToString();
             var response = await accountClient.TransferAsync(request);
             var transcation = mapper.Map<TransactionDTO>(response.Transaction);
             return transcation;

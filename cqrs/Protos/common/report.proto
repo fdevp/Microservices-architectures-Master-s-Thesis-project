@@ -41,7 +41,7 @@ message AggregateUserActivityResponse {
 }
 
 message AggregateOverallRequest {
-  int64 flowId = 1;
+  string flowId = 1;
   repeated Aggregation aggregations = 2;
   int64 timestampFrom = 3;
   int64 timestampTo = 4;

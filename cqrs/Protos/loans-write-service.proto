@@ -12,7 +12,7 @@ service LoansWrite {
 }
 
 message BatchRepayInstalmentsRequest {
-  int64 flowId = 1;
+  string flowId = 1;
   repeated string ids = 2;
 }
 

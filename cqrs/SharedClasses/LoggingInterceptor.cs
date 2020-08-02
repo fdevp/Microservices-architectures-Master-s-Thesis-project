@@ -35,11 +35,11 @@ namespace SharedClasses
             }
         }
 
-        private long? GetFlowId<TRequest>(TRequest request)
+        private string GetFlowId<TRequest>(TRequest request)
         {
             Type t = request.GetType();
             PropertyInfo prop = t.GetProperty("FlowId");
-            return prop?.GetValue(request) as long?;
+            return prop?.GetValue(request) as string;
         }
     }
 }

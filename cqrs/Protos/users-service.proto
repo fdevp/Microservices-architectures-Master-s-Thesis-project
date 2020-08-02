@@ -21,7 +21,7 @@ message User {
 }
 
 message SignInRequest {
-  int64 flowId = 1;
+  string flowId = 1;
   string login = 2;
   string password = 3;
 }
@@ -31,12 +31,12 @@ message TokenReply {
 }
 
 message LogoutRequest {
-  int64 flowId = 1;
+  string flowId = 1;
   string Token = 2;
 }
 
 message BatchAddMessagesRequest {
-  int64 flowId = 1;
+  string flowId = 1;
   repeated Message messages = 2;
 }
 

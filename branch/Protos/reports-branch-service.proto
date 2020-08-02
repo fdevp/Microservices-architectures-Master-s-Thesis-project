@@ -11,7 +11,7 @@ service ReportsBranch {
 }
 
 message GenerateUserActivityReportRequest {
-  int64 flowId = 1;
+  string flowId = 1;
   string userId = 2;
   int64 timestampFrom = 3;
   int64 timestampTo = 4;
@@ -19,7 +19,7 @@ message GenerateUserActivityReportRequest {
 }
 
 message GenerateOverallReportRequest {
-  int64 flowId = 1;
+  string flowId = 1;
   repeated Aggregation aggregations = 2;
   int64 timestampFrom = 3;
   int64 timestampTo = 4;
@@ -28,6 +28,6 @@ message GenerateOverallReportRequest {
 }
 
 message GenerateReportResponse {
-  int64 flowId = 1;
+  string flowId = 1;
   string report = 2;
 }

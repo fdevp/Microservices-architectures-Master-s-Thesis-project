@@ -32,7 +32,7 @@ namespace APIGateway.Controllers
         [Route("{userId}/panel")]
         public async Task<Panel> Panel(string userId)
         {
-            var flowId = (long)HttpContext.Items["flowId"];
+            var flowId = HttpContext.Items["flowId"].ToString();
             var response = await panelBranchClient.GetAsync(new GetPanelRequest { FlowId = flowId, UserId = userId });
             return mapper.Map<Panel>(response);
         }
@@ -42,7 +42,7 @@ namespace APIGateway.Controllers
         public async Task<string> Token(TokenRequest data)
         {
             var request = mapper.Map<SignInRequest>(data);
-            request.FlowId = (long)HttpContext.Items["flowId"];
+            request.FlowId = HttpContext.Items["flowId"].ToString();
             var response = await usersClient.TokenAsync(request);
             return response.Token;
         }
@@ -52,7 +52,7 @@ namespace APIGateway.Controllers
         public async Task Logout(Models.LogoutRequest data)
         {
             var request = new UsersMicroservice.LogoutRequest { Token = data.Token };
-            request.FlowId = (long)HttpContext.Items["flowId"];
+            request.FlowId = HttpContext.Items["flowId"].ToString();
             await usersClient.LogoutAsync(request);
         }
 

@@ -58,7 +58,7 @@ namespace ReportsMicroservice
             return response.Portions.ToArray();
         }
 
-        public async Task<UserActivityReportPortions> GetUserActivityPortions(long flowId, string userId, long from, long to, Granularity granularity)
+        public async Task<UserActivityReportPortions> GetUserActivityPortions(string flowId, string userId, long from, long to, Granularity granularity)
         {
             var portions = new UserActivityReportPortions();
 

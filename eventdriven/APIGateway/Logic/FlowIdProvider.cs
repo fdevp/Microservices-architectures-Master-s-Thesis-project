@@ -4,6 +4,6 @@ namespace APIGateway
     {
         private static long _latestFlowId = 1;
 
-        public static long Create() => _latestFlowId++;
+        public static string Create() => (_latestFlowId++).ToString();
     }
 }

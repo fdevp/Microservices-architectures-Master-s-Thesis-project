@@ -62,6 +62,7 @@ namespace APIGateway
 
             app.UseAuthorization();
 
+            app.UseMiddleware<FlowIdMiddleware>();
             app.UseMiddleware<LoggingMiddleware>();
 
             app.UseEndpoints(endpoints =>

@@ -15,7 +15,7 @@ service PaymentsRead {
 }
 
 message GetPaymentsRequest {
-  int64 flowId = 1;
+  string flowId = 1;
   repeated string ids = 2;
 }
 
@@ -24,13 +24,13 @@ message GetPaymentsResult {
 }
 
 message GetPartRequest {
-  int64 flowId = 1;
+  string flowId = 1;
   int32 part = 2;
   int32 totalParts = 3;
 }
 
 message AggregateUserActivityRequest {
-  int64 flowId = 1;
+  string flowId = 1;
   repeated string accountsIds = 2;
   int64 timestampFrom = 3;
   int64 timestampTo = 4;

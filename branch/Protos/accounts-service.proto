@@ -20,12 +20,12 @@ service Accounts {
 }
 
 message GetAccountsRequest {
-  int64 flowId = 1;
+  string flowId = 1;
   repeated string ids = 2;
 }
 
 message GetUserAccountsRequest {
-  int64 flowId = 1;
+  string flowId = 1;
   string userId = 2;
 }
 
@@ -34,7 +34,7 @@ message GetAccountsResponse {
 }
 
 message GetBalancesRequest {
-  int64 flowId = 1;
+  string flowId = 1;
   repeated string ids = 2;
 }
 
@@ -43,7 +43,7 @@ message GetBalancesResponse {
 }
 
 message GetTransactionsRequest {
-  int64 flowId = 1;
+  string flowId = 1;
   repeated string ids = 2;
   int64 timestampFrom = 3;
   int64 timestampTo = 4;
@@ -54,7 +54,7 @@ message GetTransactionsResponse {
 }
 
 message TransferRequest {
-  int64 flowId = 1;
+  string flowId = 1;
   Transfer transfer = 2;
 }
 
@@ -63,7 +63,7 @@ message TransferResponse {
 }
 
 message BatchTransferRequest {
-  int64 flowId = 1;
+  string flowId = 1;
   repeated Transfer transfers = 2;
 }
 

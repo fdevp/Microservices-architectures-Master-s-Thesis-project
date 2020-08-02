@@ -18,9 +18,7 @@ namespace APIGateway.Middlewares
 
         public async Task Invoke(HttpContext httpContext)
         {
-            var flowId = FlowIdProvider.Create();
-            httpContext.Items.Add("flowId", flowId);
-
+            var flowId = httpContext.Items["flowId"].ToString();
             logger.LogInformation($"Service='APIGateway' FlowId='{flowId}' Method='{httpContext.Request.Path}' Type='Start'");
             var stopwatch = Stopwatch.StartNew();
             try

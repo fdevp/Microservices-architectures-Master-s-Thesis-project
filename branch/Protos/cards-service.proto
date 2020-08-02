@@ -24,7 +24,7 @@ message Block {
 }
 
 message GetCardsRequest {
-  int64 flowId = 1;
+  string flowId = 1;
   repeated string ids = 2;
 }
 
@@ -33,7 +33,7 @@ message GetCardsResponse {
 }
 
 message GetBlocksRequest {
-  int64 flowId = 1;
+  string flowId = 1;
   string cardId = 2;
 }
 
@@ -42,7 +42,7 @@ message GetBlocksResponse {
 }
 
 message GetTransactionsRequest {
-  int64 flowId = 1;
+  string flowId = 1;
   repeated string ids = 2;
   int64 timestampFrom = 3;
   int64 timestampTo = 4;
@@ -53,7 +53,7 @@ message GetTransactionsResponse {
 }
 
 message TransferRequest {
-  int64 flowId = 1;
+  string flowId = 1;
   string cardId = 2;
   string recipient = 3;
   float amount = 4;

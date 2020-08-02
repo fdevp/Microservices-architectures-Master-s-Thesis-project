@@ -19,7 +19,7 @@ service Payments {
 }
 
 message GetPaymentsRequest {
-  int64 flowId = 1;
+  string flowId = 1;
   repeated string ids = 2;
 }
 
@@ -28,7 +28,7 @@ message GetPaymentsResult {
 }
 
 message GetPartRequest {
-  int64 flowId = 1;
+  string flowId = 1;
   int32 part = 2;
   int32 totalParts = 3;
 }
@@ -40,7 +40,7 @@ message GetPaymentsWithLoansResult
 }
 
 message GetTransactionsRequest {
-  int64 flowId = 1;
+  string flowId = 1;
   repeated string ids = 2;
   int64 timestampFrom = 3;
   int64 timestampTo = 4;
@@ -51,7 +51,7 @@ message GetTransactionsResult {
 }
 
 message CreatePaymentRequest {
-  int64 flowId = 1;
+  string flowId = 1;
   float amount = 2;
   int64 startTimestamp = 3;
   int64 interval = 4;
@@ -64,7 +64,7 @@ message CreatePaymentResult {
 }
 
 message CancelPaymentsRequest {
-  int64 flowId = 1;
+  string flowId = 1;
   repeated string ids = 2;
 }
 

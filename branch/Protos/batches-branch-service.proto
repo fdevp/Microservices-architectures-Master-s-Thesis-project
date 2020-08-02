@@ -16,7 +16,7 @@ service BatchesBranch {
 }
 
 message GetDataToProcessRequest {
-  int64 flowId = 1;
+  string flowId = 1;
   int32 part = 2;
   int32 totalParts = 3;
 }
@@ -28,7 +28,7 @@ message GetDataToProcessResponse {
 }
 
 message ProcessBatchRequest {
-  int64 flowId = 1;
+  string flowId = 1;
   repeated Message messages = 2;
   repeated Transfer transfers = 3;
   repeated string repaidInstalmentsIds = 4;

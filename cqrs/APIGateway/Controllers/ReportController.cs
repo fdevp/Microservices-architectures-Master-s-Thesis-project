@@ -35,7 +35,7 @@ namespace APIGateway.Controllers
                 TimestampTo = data.TimestampTo.HasValue ? data.TimestampTo.Value.Ticks : 0,
                 UserId = data.UserId,
             };
-            request.FlowId = (long)HttpContext.Items["flowId"];
+            request.FlowId = HttpContext.Items["flowId"].ToString();
             var response = await reportsClient.GenerateUserActivityReportAsync(request);
             return response.Report;
         }
@@ -52,7 +52,7 @@ namespace APIGateway.Controllers
                 Aggregations = { data.Aggregations.Select(a => mapper.Map<Aggregation>(a)) },
                 Subject = mapper.Map<ReportSubject>(data.Subject),
             };
-            request.FlowId = (long)HttpContext.Items["flowId"];
+            request.FlowId = HttpContext.Items["flowId"].ToString();
 
             var response = await reportsClient.GenerateOverallReportAsync(request);
             return response.Report;

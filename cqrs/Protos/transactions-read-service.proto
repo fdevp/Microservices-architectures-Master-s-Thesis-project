@@ -12,12 +12,12 @@ service TransactionsRead {
 }
 
 message GetTransactionsRequest {
-  int64 flowId = 1;
+  string flowId = 1;
   repeated string ids = 2;
 }
 
 message FilterTransactionsRequest {
-  int64 flowId = 1;
+  string flowId = 1;
   repeated string recipients = 2;
   repeated string senders = 3;
   repeated string payments = 4;
