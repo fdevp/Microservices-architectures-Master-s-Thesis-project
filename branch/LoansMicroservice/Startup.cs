@@ -57,7 +57,7 @@ namespace LoansMicroservice
                 });
             });
 
-            loggerFactory.AddFile("log.txt");
+            loggerFactory.AddFile("log-loans.txt");
         }
 
         private Mapper CreateMapper()

@@ -71,34 +71,37 @@ namespace APIGateway.Controllers
             var accountsIds = accountsResponse.Accounts.Select(a => a.Id).ToArray();
             accounts = accountsResponse.Accounts;
 
-
-            var parallelTasks = new List<Task>();
-            parallelTasks.Add(Task.Run(async () =>
+            if (accounts.Any())
             {
-                var transactionsResponse = await transactionsReadClient.FilterAsync(new FilterTransactionsRequest { FlowId = flowId, Senders = { accountsIds }, Top = PanelTransactionsCount });
-                transactions = transactionsResponse.Transactions;
-            }));
+                var parallelTasks = new List<Task>();
+                parallelTasks.Add(Task.Run(async () =>
+                {
+                    var transactionsResponse = await transactionsReadClient.FilterAsync(new FilterTransactionsRequest { FlowId = flowId, Senders = { accountsIds }, Top = PanelTransactionsCount });
+                    transactions = transactionsResponse.Transactions;
+                }));
 
-            parallelTasks.Add(Task.Run(async () =>
-            {
-                var paymentsResponse = await paymentsReadClient.GetByAccountsAsync(new GetPaymentsRequest { FlowId = flowId, Ids = { accountsIds } });
-                payments = paymentsResponse.Payments;
-            }));
+                parallelTasks.Add(Task.Run(async () =>
+                {
+                    var paymentsResponse = await paymentsReadClient.GetByAccountsAsync(new GetPaymentsRequest { FlowId = flowId, Ids = { accountsIds } });
+                    payments = paymentsResponse.Payments;
+                }));
 
-            parallelTasks.Add(Task.Run(async () =>
-            {
-                var loansResponse = await loansReadClient.GetByAccountsAsync(new GetLoansRequest { FlowId = flowId, Ids = { accountsIds } });
-                loans = loansResponse.Loans;
-            }));
+                parallelTasks.Add(Task.Run(async () =>
+                {
+                    var loansResponse = await loansReadClient.GetByAccountsAsync(new GetLoansRequest { FlowId = flowId, Ids = { accountsIds } });
+                    loans = loansResponse.Loans;
+                }));
 
-            parallelTasks.Add(Task.Run(async () =>
-            {
-                var cardsResponse = await cardsReadClient.GetByAccountsAsync(new GetCardsRequest { FlowId = flowId, Ids = { accountsIds } });
-                cards = cardsResponse.Cards;
-            }));
+                parallelTasks.Add(Task.Run(async () =>
+                {
+                    var cardsResponse = await cardsReadClient.GetByAccountsAsync(new GetCardsRequest { FlowId = flowId, Ids = { accountsIds } });
+                    cards = cardsResponse.Cards;
+                }));
 
 
-            await Task.WhenAll(parallelTasks);
+                await Task.WhenAll(parallelTasks);
+            }
+
             return new Panel
             {
                 Accounts = mapper.Map<AccountDTO[]>(accounts),

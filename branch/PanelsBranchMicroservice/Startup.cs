@@ -56,7 +56,7 @@ namespace PanelsBranchMicroservice
                 });
             });
 
-            loggerFactory.AddFile("log.txt");
+            loggerFactory.AddFile("log-panels.txt");
         }
 
         private void ConfigureGrpcConnections(IServiceCollection services)

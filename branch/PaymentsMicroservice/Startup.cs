@@ -61,7 +61,7 @@ namespace PaymentsMicroservice
                 });
             });
 
-            loggerFactory.AddFile("log.txt");
+            loggerFactory.AddFile("log-payments.txt");
         }
 
         private Mapper CreateMapper()

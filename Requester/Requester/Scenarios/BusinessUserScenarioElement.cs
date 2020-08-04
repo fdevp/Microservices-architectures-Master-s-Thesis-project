@@ -15,7 +15,7 @@ namespace Requester
     public class BusinessUserTransaction
     {
         public float Amount { get; set; }
-        public string Sender { get; set; }
+        public string AccountId { get; set; }
         public string Recipient { get; set; }
         public string Title { get; set; }
     }

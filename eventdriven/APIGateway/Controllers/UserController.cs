@@ -44,7 +44,7 @@ namespace APIGateway.Controllers
         {
             var mainFlowId = HttpContext.Items["flowId"].ToString();
 
-            var panel = new Panel();
+            var panel = new Panel { Accounts = new AccountDTO[0], Cards = new CardDTO[0], Payments = new PaymentDTO[0], Transactions = new TransactionDTO[0], Loans = new LoanDTO[0] };
 
             var accountsFlowId = mainFlowId + "_a";
             var accountsEvent = new GetUserAccountsEvent { UserId = userId };
@@ -52,39 +52,42 @@ namespace APIGateway.Controllers
             panel.Accounts = mapper.Map<AccountDTO[]>(accountsResponse.Accounts);
             var accountsIds = accountsResponse.Accounts.Select(a => a.Id).ToArray();
 
-            var parallelTasks = new List<Task>();
-            parallelTasks.Add(Task.Run(async () =>
+            if (accountsIds.Any())
             {
-                var transactionsFlowId = mainFlowId + "_t";
-                var transactionsEvent = new FilterTransactionsEvent { Senders = accountsIds, Top = PanelTransactionsCount };
-                var transactionsResponse = await eventsAwaiter.AwaitResponse<SelectedTransactionsEvent>(transactionsFlowId, () => publishingRouter.Publish(Queues.Transactions, transactionsEvent, transactionsFlowId, Queues.APIGateway));
-                panel.Transactions = mapper.Map<TransactionDTO[]>(transactionsResponse.Transactions);
-            }));
+                var parallelTasks = new List<Task>();
+                parallelTasks.Add(Task.Run(async () =>
+                {
+                    var transactionsFlowId = mainFlowId + "_t";
+                    var transactionsEvent = new FilterTransactionsEvent { Senders = accountsIds, Top = PanelTransactionsCount };
+                    var transactionsResponse = await eventsAwaiter.AwaitResponse<SelectedTransactionsEvent>(transactionsFlowId, () => publishingRouter.Publish(Queues.Transactions, transactionsEvent, transactionsFlowId, Queues.APIGateway));
+                    panel.Transactions = mapper.Map<TransactionDTO[]>(transactionsResponse.Transactions);
+                }));
 
-            parallelTasks.Add(Task.Run(async () =>
-            {
-                var paymentsFlowId = mainFlowId + "_p";
-                var paymentsEvent = new GetPaymentsByAccountsEvent { AccountsIds = accountsIds };
-                var paymentsResponse = await eventsAwaiter.AwaitResponse<SelectedPaymentsEvent>(paymentsFlowId, () => publishingRouter.Publish(Queues.Payments, paymentsEvent, paymentsFlowId, Queues.APIGateway));
-                panel.Payments = mapper.Map<PaymentDTO[]>(paymentsResponse.Payments);
+                parallelTasks.Add(Task.Run(async () =>
+                {
+                    var paymentsFlowId = mainFlowId + "_p";
+                    var paymentsEvent = new GetPaymentsByAccountsEvent { AccountsIds = accountsIds };
+                    var paymentsResponse = await eventsAwaiter.AwaitResponse<SelectedPaymentsEvent>(paymentsFlowId, () => publishingRouter.Publish(Queues.Payments, paymentsEvent, paymentsFlowId, Queues.APIGateway));
+                    panel.Payments = mapper.Map<PaymentDTO[]>(paymentsResponse.Payments);
 
-                var loansFlowId = mainFlowId + "_l";
-                var paymentsIds = paymentsResponse.Payments.Select(p => p.Id).ToArray();
-                var loansEvent = new GetLoansByPaymentsEvent { PaymentsIds = paymentsIds };
-                var loansResponse = await eventsAwaiter.AwaitResponse<SelectedLoansEvent>(loansFlowId, () => publishingRouter.Publish(Queues.Loans, loansEvent, loansFlowId, Queues.APIGateway));
-                panel.Loans = mapper.Map<LoanDTO[]>(loansResponse.Loans);
-            }));
+                    var loansFlowId = mainFlowId + "_l";
+                    var paymentsIds = paymentsResponse.Payments.Select(p => p.Id).ToArray();
+                    var loansEvent = new GetLoansByPaymentsEvent { PaymentsIds = paymentsIds };
+                    var loansResponse = await eventsAwaiter.AwaitResponse<SelectedLoansEvent>(loansFlowId, () => publishingRouter.Publish(Queues.Loans, loansEvent, loansFlowId, Queues.APIGateway));
+                    panel.Loans = mapper.Map<LoanDTO[]>(loansResponse.Loans);
+                }));
 
-            parallelTasks.Add(Task.Run(async () =>
-            {
-                var cardsFlowId = mainFlowId + "_c";
-                var cardsEvent = new GetCardsByAccountsEvent { AccountsIds = accountsIds };
-                var cardsResponse = await eventsAwaiter.AwaitResponse<SelectedCardsEvent>(cardsFlowId, () => publishingRouter.Publish(Queues.Cards, cardsEvent, cardsFlowId, Queues.APIGateway));
-                panel.Cards = mapper.Map<CardDTO[]>(cardsResponse.Cards);
-            }));
+                parallelTasks.Add(Task.Run(async () =>
+                {
+                    var cardsFlowId = mainFlowId + "_c";
+                    var cardsEvent = new GetCardsByAccountsEvent { AccountsIds = accountsIds };
+                    var cardsResponse = await eventsAwaiter.AwaitResponse<SelectedCardsEvent>(cardsFlowId, () => publishingRouter.Publish(Queues.Cards, cardsEvent, cardsFlowId, Queues.APIGateway));
+                    panel.Cards = mapper.Map<CardDTO[]>(cardsResponse.Cards);
+                }));
+                
+                await Task.WhenAll(parallelTasks);
+            }
 
-
-            await Task.WhenAll(parallelTasks);
             return panel;
         }
 

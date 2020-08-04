@@ -44,7 +44,7 @@ namespace TransactionsMicroservice
                 });
             });
 
-            loggerFactory.AddFile("log.txt");
+            loggerFactory.AddFile("log-transactions.txt");
         }
 
         private Mapper CreateMapper()

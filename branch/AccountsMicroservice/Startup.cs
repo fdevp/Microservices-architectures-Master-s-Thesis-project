@@ -56,7 +56,7 @@ namespace AccountsMicroservice
                 });
             });
 
-            loggerFactory.AddFile("log.txt");
+            loggerFactory.AddFile("log-accounts.txt");
         }
 
         private Mapper CreateMapper()

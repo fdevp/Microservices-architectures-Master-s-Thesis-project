@@ -7,7 +7,7 @@ using System.Text;
 
 namespace DataGenerator
 {
-    public static class DataGenerator
+    public static class IndividualUserDataGenerator
     {
         public static SetupAll Generate(int usersCount, DateTime minDate, DateTime maxDate)
         {
@@ -19,13 +19,12 @@ namespace DataGenerator
             var cards = Cards(accounts);
             var activePayments = ActivePayments(accounts, recipientRnd, timestampRnd);
             var loansAndPayments = ActiveLoans(accounts, recipientRnd);
-            
-            
+
             var accountsTransactions = AccountsTransactions(accounts, recipientRnd, timestampRnd);
             var loansTransactions = LoansTransactions(loansAndPayments.Select(lp => lp.loan).ToArray(), loansAndPayments.Select(lp => lp.payment).ToArray());
             var cardsTransactions = CardsTransactions(cards, recipientRnd, timestampRnd);
             var paymentsTransactions = PaymentsTransactions(activePayments);
-            
+
             var allTransactions = accountsTransactions
                 .Concat(loansTransactions)
                 .Concat(cardsTransactions)
@@ -59,7 +58,7 @@ namespace DataGenerator
 
             return ValuesGenerator.CreateAccounts(users, countRnd, amountRnd).ToArray();
         }
-
+        
         static CardDTO[] Cards(AccountDTO[] accounts)
         {
             var countRnd = new RndBuilder<int>()

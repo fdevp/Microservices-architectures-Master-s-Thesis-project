@@ -15,7 +15,7 @@ namespace DataGenerator.Rnd
 
         public override float Next()
         {
-            var cent = cents ? (float)rand.NextDouble() : 0;
+            var cent = cents ? (float)Math.Round((float)rand.NextDouble(), 2) : 0;
             if (DistributionFormula != null && DistributionValuesProbabilities != null)
             {
                 return TakeDrawn(DistributionFormula.Invoke()) + cent;

@@ -55,7 +55,7 @@ namespace BatchesBranchMicroservice
                 });
             });
 
-            loggerFactory.AddFile("log.txt");
+            loggerFactory.AddFile("log-batches.txt");
         }
 
         private void CreateClients(IServiceCollection services)

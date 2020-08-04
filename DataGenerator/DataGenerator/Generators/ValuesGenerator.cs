@@ -24,9 +24,6 @@ namespace DataGenerator
 
                 yield return new UserDTO { Id = Guid.NewGuid().ToString(), Login = name, Password = "password" };
             }
-
-            yield return new UserDTO { Id = Guid.NewGuid().ToString(), Login = "analyst", Password = "password" };
-            yield return new UserDTO { Id = Guid.NewGuid().ToString(), Login = "automat", Password = "password" };
         }
 
         public static IEnumerable<AccountDTO> CreateAccounts(UserDTO[] users, IRnd<int> countRnd, IRnd<float> balanceRnd)

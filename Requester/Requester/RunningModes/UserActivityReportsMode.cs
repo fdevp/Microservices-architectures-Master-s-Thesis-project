@@ -37,24 +37,26 @@ namespace Requester
                 var scenarioId = Guid.NewGuid().ToString();
 
                 var scenarioPartTimer = Stopwatch.StartNew();
-                var token = sessionRequester.GetToken("analyst");
+                var token = sessionRequester.GetToken("analyst", scenarioId);
                 logger.Information($"Service='Requester' ScenarioId='{scenarioId}' Method='userActivityReport token' Processing='{scenarioPartTimer.ElapsedMilliseconds}'");
                 
                 scenarioPartTimer.Restart();
-                Report(element);
+                Report(element, scenarioId);
                 logger.Information($"Service='Requester' ScenarioId='{scenarioId}' Method='userActivityReport report' Processing='{scenarioPartTimer.ElapsedMilliseconds}'");
 
                 scenarioPartTimer.Restart();
-                sessionRequester.Logout(token);
+                sessionRequester.Logout(token, scenarioId);
                 logger.Information($"Service='Requester' ScenarioId='{scenarioId}' Method='userActivityReport logout' Processing='{scenarioPartTimer.ElapsedMilliseconds}'");
 
                 logger.Information($"Service='Requester' ScenarioId='{scenarioId}' Method='userActivityReport scenario' Processing='{scenarioTimer.ElapsedMilliseconds}'");
             });
         }
 
-        private void Report(string element)
+        private void Report(string element, string scenarioId)
         {
-            var result = httpClient.PostAsync("report/UserActivity", new StringContent(element, Encoding.UTF8, "application/json")).Result;
+            var content = new StringContent(element, Encoding.UTF8, "application/json");
+            content.Headers.Add("flowId", scenarioId);
+            var result = httpClient.PostAsync("report/UserActivity", content).Result;
         }
     }
 }

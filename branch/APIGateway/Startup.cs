@@ -70,7 +70,7 @@ namespace APIGateway
                 endpoints.MapControllers();
             });
 
-            loggerFactory.AddFile("log.txt");
+            loggerFactory.AddFile("log-apigateway.txt");
         }
 
         private Mapper CreateMapper()

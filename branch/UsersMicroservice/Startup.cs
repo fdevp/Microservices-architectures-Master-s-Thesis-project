@@ -42,7 +42,7 @@ namespace UsersMicroservice
                 });
             });
 
-            loggerFactory.AddFile("log.txt");
+            loggerFactory.AddFile("log-users.txt");
         }
     }
 }

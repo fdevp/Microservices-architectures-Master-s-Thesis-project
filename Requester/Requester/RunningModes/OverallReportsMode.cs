@@ -39,15 +39,15 @@ namespace Requester
                 var scenarioId = Guid.NewGuid().ToString();
 
                 var scenarioPartTimer = Stopwatch.StartNew();
-                var token = sessionRequester.GetToken("analyst");
+                var token = sessionRequester.GetToken("analyst", scenarioId);
                 logger.Information($"Service='Requester' ScenarioId='{scenarioId}' Method='overallReport token' Processing='{scenarioPartTimer.ElapsedMilliseconds}'");
-                
+
                 scenarioPartTimer.Restart();
-                Report(element);
+                Report(element, scenarioId);
                 logger.Information($"Service='Requester' ScenarioId='{scenarioId}' Method='overallReport report' Processing='{scenarioPartTimer.ElapsedMilliseconds}'");
 
                 scenarioPartTimer.Restart();
-                sessionRequester.Logout(token);
+                sessionRequester.Logout(token, scenarioId);
                 logger.Information($"Service='Requester' ScenarioId='{scenarioId}' Method='overallReport logout' Processing='{scenarioPartTimer.ElapsedMilliseconds}'");
 
                 logger.Information($"Service='Requester' ScenarioId='{scenarioId}' Method='overallReport scenario' Processing='{scenarioTimer.ElapsedMilliseconds}'");
@@ -56,9 +56,11 @@ namespace Requester
             logger.Information($"Service='Requester' Method='overallReport overall' Processing='{overallTimer.ElapsedMilliseconds}'");
         }
 
-        private void Report(string element)
+        private void Report(string element, string scenarioId)
         {
-            var result = httpClient.PostAsync("report/Overall", new StringContent(element, Encoding.UTF8, "application/json")).Result;
+            var content = new StringContent(element, Encoding.UTF8, "application/json");
+            content.Headers.Add("flowId", scenarioId);
+            var result = httpClient.PostAsync("report/Overall", content).Result;
         }
     }
 }

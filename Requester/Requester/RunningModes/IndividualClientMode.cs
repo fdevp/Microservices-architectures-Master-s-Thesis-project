@@ -42,17 +42,19 @@ namespace Requester.RunningModes
                     var scenarioId = Guid.NewGuid().ToString();
 
                     var scenarioPartTimer = Stopwatch.StartNew();
-                    var token = sessionRequester.GetToken(element.User);
+                    var token = sessionRequester.GetToken(element.User, scenarioId);
                     logger.Information($"Service='Requester' ScenarioId='{scenarioId}' Method='individual token' Processing='{scenarioPartTimer.ElapsedMilliseconds}'");
-                    
-                    //todo check account balance
 
                     scenarioPartTimer.Restart();
-                    Transfer(element);
+                    Balance(element.AccountId, scenarioId);
+                    logger.Information($"Service='Requester' ScenarioId='{scenarioId}' Method='individual balance' Processing='{scenarioPartTimer.ElapsedMilliseconds}'");
+
+                    scenarioPartTimer.Restart();
+                    Transfer(element, scenarioId);
                     logger.Information($"Service='Requester' ScenarioId='{scenarioId}' Method='individual transfer' Processing='{scenarioPartTimer.ElapsedMilliseconds}'");
 
                     scenarioPartTimer.Restart();
-                    sessionRequester.Logout(token);
+                    sessionRequester.Logout(token, scenarioId);
                     logger.Information($"Service='Requester' ScenarioId='{scenarioId}' Method='individual logout' Processing='{scenarioPartTimer.ElapsedMilliseconds}'");
 
                     logger.Information($"Service='Requester' ScenarioId='{scenarioId}' Method='individual scenario' Processing='{scenarioTimer.ElapsedMilliseconds}'");
@@ -62,10 +64,17 @@ namespace Requester.RunningModes
             logger.Information($"Service='Requester' Method='individual overall' Processing='{overallTimer.ElapsedMilliseconds}'");
         }
 
-        public void Transfer(IndividualUserScenarioElement element)
+        public void Balance(string accountId, string scenarioId)
+        {
+            var result = httpClient.GetAsync($"account/balance/{accountId}").Result;
+        }
+
+        public void Transfer(IndividualUserScenarioElement element, string scenarioId)
         {
             var body = JSON.Serialize(element);
-            var result = httpClient.PostAsync("card/transfer", new StringContent(body, Encoding.UTF8, "application/json")).Result;
+            var content = new StringContent(body, Encoding.UTF8, "application/json");
+            content.Headers.Add("flowId", scenarioId);
+            var result = httpClient.PostAsync("card/transfer", content).Result;
         }
         
     }

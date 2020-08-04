@@ -55,7 +55,7 @@ namespace ReportsBranchMicroservice
                 });
             });
 
-            loggerFactory.AddFile("log.txt");
+            loggerFactory.AddFile("log-reports.txt");
         }
 
         private void CreateClients(IServiceCollection services)

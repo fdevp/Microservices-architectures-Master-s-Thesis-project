@@ -15,17 +15,21 @@ namespace Requester.Requests
             this.httpClient = httpClient;
         }
 
-        public string GetToken(string username)
+        public string GetToken(string username, string scenarioId)
         {
             var body = JSON.Serialize(new TokenRequest { Login = username, Password = "password" });
-            var result = httpClient.PostAsync("user/token", new StringContent(body, Encoding.UTF8, "application/json")).Result;
+            var content = new StringContent(body, Encoding.UTF8, "application/json");
+            content.Headers.Add("flowId", scenarioId);
+            var result = httpClient.PostAsync("user/token", content).Result;
             return result.Content.ReadAsStringAsync().Result;
         }
 
-        public void Logout(string token)
+        public void Logout(string token, string scenarioId)
         {
             var body = JSON.Serialize(new LogoutRequest { Token = token });
-            var result = httpClient.PostAsync("user/logout", new StringContent(body, Encoding.UTF8, "application/json")).Result;
+            var content = new StringContent(body, Encoding.UTF8, "application/json");
+            content.Headers.Add("flowId", scenarioId);
+            var result = httpClient.PostAsync("user/logout", content).Result;
         }
 
         private class LogoutRequest

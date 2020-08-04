@@ -58,7 +58,7 @@ namespace CardsMicroservice
                 });
             });
 
-            loggerFactory.AddFile("log.txt");
+            loggerFactory.AddFile("log-cards.txt");
         }
 
         private Mapper CreateMapper()

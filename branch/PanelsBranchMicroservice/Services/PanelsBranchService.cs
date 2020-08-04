@@ -55,28 +55,30 @@ namespace PanelsBranchMicroservice
             var accountsIds = accountsResponse.Accounts.Select(a => a.Id).ToArray();
             accounts = accountsResponse.Accounts;
 
-
-            var parallelTasks = new List<Task>();
-            parallelTasks.Add(Task.Run(async () =>
+            if (accounts.Any())
             {
-                var transactionsResponse = await transactionsClient.FilterAsync(new FilterTransactionsRequest { FlowId = request.FlowId, Senders = { accountsIds }, Top = PanelTransactionsCount });
-            }));
+                var parallelTasks = new List<Task>();
+                parallelTasks.Add(Task.Run(async () =>
+                {
+                    var transactionsResponse = await transactionsClient.FilterAsync(new FilterTransactionsRequest { FlowId = request.FlowId, Senders = { accountsIds }, Top = PanelTransactionsCount });
+                }));
 
-            parallelTasks.Add(Task.Run(async () =>
-            {
-                var paymentsAndLoans = await paymentsClient.GetByAccountsAsync(new GetPaymentsRequest { FlowId = request.FlowId, Ids = { accountsIds } });
-                loans = paymentsAndLoans.Loans;
-                payments = paymentsAndLoans.Payments;
-            }));
+                parallelTasks.Add(Task.Run(async () =>
+                {
+                    var paymentsAndLoans = await paymentsClient.GetByAccountsAsync(new GetPaymentsRequest { FlowId = request.FlowId, Ids = { accountsIds } });
+                    loans = paymentsAndLoans.Loans;
+                    payments = paymentsAndLoans.Payments;
+                }));
 
-            parallelTasks.Add(Task.Run(async () =>
-            {
-                var cardsResponse = await cardsClient.GetByAccountsAsync(new GetCardsRequest { FlowId = request.FlowId, Ids = { accountsIds } });
-                cards = cardsResponse.Cards;
-            }));
+                parallelTasks.Add(Task.Run(async () =>
+                {
+                    var cardsResponse = await cardsClient.GetByAccountsAsync(new GetCardsRequest { FlowId = request.FlowId, Ids = { accountsIds } });
+                    cards = cardsResponse.Cards;
+                }));
 
 
-            await Task.WhenAll(parallelTasks);
+                await Task.WhenAll(parallelTasks);
+            }
 
             return new GetPanelResponse
             {
