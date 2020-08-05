@@ -1,6 +1,6 @@
 using System;
 
-namespace ReportsMicroservice
+namespace APIGateway.Reports
 {
     public class UserActivityRaportData
     {

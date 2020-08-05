@@ -1,5 +1,4 @@
 dotnet build APIGateway/APIGateway.csproj
-dotnet build ReportsMicroservice/ReportsMicroservice.csproj
 dotnet build CardsReadMicroservice/CardsReadMicroservice.csproj
 dotnet build CardsWriteMicroservice/CardsWriteMicroservice.csproj
 dotnet build LoansReadMicroservice/LoansReadMicroservice.csproj

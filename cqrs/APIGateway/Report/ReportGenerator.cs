@@ -1,12 +1,13 @@
 using System;
 using System.Linq;
 using System.Text;
+using APIGateway.Models;
 
-namespace ReportsMicroservice
+namespace APIGateway.Reports
 {
     public static class ReportGenerator
     {
-        public static string CreateOverallCsvReport(ReportSubject subject, DateTime? from, DateTime? to, Granularity granularity, OverallReportPortion[] portions)
+        public static string CreateOverallCsvReport(Models.ReportSubject subject, DateTime? from, DateTime? to, ReportGranularity granularity, OverallReportPortion[] portions)
         {
             var sb = new StringBuilder();
             sb.AppendLine($"Raport całościowy dla; {subject}");
@@ -27,18 +28,18 @@ namespace ReportsMicroservice
             return sb.ToString();
         }
 
-        public static string CreateUserActivityCsvReport(UserActivityRaportData data)
+        public static string CreateUserActivityCsvReport(string userId, DateTime? from, DateTime? to, ReportGranularity granularity, UserActivityReportPortions portions)
         {
             var sb = new StringBuilder();
-            sb.AppendLine($"Raport aktywności użytkownika; {data.UserId}");
-            sb.AppendLine($"Zakres od; {data.From?.ToString() ?? "-"}");
-            sb.AppendLine($"Zakres do; {data.To?.ToString() ?? "-"}");
-            sb.AppendLine($"Granularność; {data.Granularity}");
+            sb.AppendLine($"Raport aktywności użytkownika; {userId}");
+            sb.AppendLine($"Zakres od; {from?.ToString() ?? "-"}");
+            sb.AppendLine($"Zakres do; {to?.ToString() ?? "-"}");
+            sb.AppendLine($"Granularność; {granularity}");
 
-            sb.WriteAccountsData(data.Portions.Accounts);
-            sb.WriteCardsData(data.Portions.Cards);
-            sb.WritePaymentsData(data.Portions.Payments);
-            sb.WriteLoansData(data.Portions.Loans);
+            sb.WriteAccountsData(portions.Accounts);
+            sb.WriteCardsData(portions.Cards);
+            sb.WritePaymentsData(portions.Payments);
+            sb.WriteLoansData(portions.Loans);
 
             return sb.ToString();
         }

@@ -1,11 +1,10 @@
 using System.Linq;
 using System.Threading.Tasks;
 using APIGateway.Models;
+using APIGateway.Reports;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using ReportsMicroservice;
-using static ReportsMicroservice.Reports;
 
 namespace APIGateway.Controllers
 {
@@ -15,47 +14,45 @@ namespace APIGateway.Controllers
     {
         private readonly ILogger<ReportController> logger;
         private readonly Mapper mapper;
-        private readonly ReportsClient reportsClient;
+        private readonly ReportDataFetcher reportDataFetcher;
 
-        public ReportController(ILogger<ReportController> logger, Mapper mapper, ReportsClient reportsClient)
+        public ReportController(ILogger<ReportController> logger, Mapper mapper, ReportDataFetcher reportDataFetcher)
         {
             this.logger = logger;
             this.mapper = mapper;
-            this.reportsClient = reportsClient;
+            this.reportDataFetcher = reportDataFetcher;
         }
 
         [HttpPost]
         [Route("UserActivity")]
-        public async Task<string> UserActivity(UserActivityReportRequest data)
+        public async Task<string> UserActivity(UserActivityReportRequest request)
         {
-            var request = new GenerateUserActivityReportRequest
-            {
-                Granularity = mapper.Map<Granularity>(data.Granularity),
-                TimestampFrom = data.TimestampFrom.HasValue ? data.TimestampFrom.Value.Ticks : 0,
-                TimestampTo = data.TimestampTo.HasValue ? data.TimestampTo.Value.Ticks : 0,
-                UserId = data.UserId,
-            };
-            request.FlowId = HttpContext.Items["flowId"].ToString();
-            var response = await reportsClient.GenerateUserActivityReportAsync(request);
-            return response.Report;
+            var flowId = HttpContext.Items["flowId"].ToString();
+            var granularity =  mapper.Map<Granularity>(request.Granularity);
+            var portions = await reportDataFetcher.GetUserActivityPortions(flowId, request.UserId, request.TimestampFrom, request.TimestampTo, granularity);
+            var csv = ReportGenerator.CreateUserActivityCsvReport(request.UserId, request.TimestampFrom, request.TimestampTo, request.Granularity, portions);
+            return csv;
         }
 
         [HttpPost]
         [Route("Overall")]
-        public async Task<string> Overall(OverallReportRequest data)
+        public async Task<string> Overall(OverallReportRequest request)
         {
-            var request = new GenerateOverallReportRequest
+            var flowId = HttpContext.Items["flowId"].ToString();
+            var cqrsRequest = new AggregateOverallRequest
             {
-                Granularity = mapper.Map<Granularity>(data.Granularity),
-                TimestampFrom = data.TimestampFrom.HasValue ? data.TimestampFrom.Value.Ticks : 0,
-                TimestampTo = data.TimestampTo.HasValue ? data.TimestampTo.Value.Ticks : 0,
-                Aggregations = { data.Aggregations.Select(a => mapper.Map<Aggregation>(a)) },
-                Subject = mapper.Map<ReportSubject>(data.Subject),
+                Granularity = mapper.Map<Granularity>(request.Granularity),
+                TimestampFrom = request.TimestampFrom.HasValue ? request.TimestampFrom.Value.Ticks : 0,
+                TimestampTo = request.TimestampTo.HasValue ? request.TimestampTo.Value.Ticks : 0,
+                Aggregations = { request.Aggregations.Select(a => mapper.Map<Aggregation>(a)) }
             };
-            request.FlowId = HttpContext.Items["flowId"].ToString();
-
-            var response = await reportsClient.GenerateOverallReportAsync(request);
-            return response.Report;
+            var data = await reportDataFetcher.GetOverallReportPortions(cqrsRequest, request.Subject);
+            var csv = ReportGenerator.CreateOverallCsvReport(request.Subject,
+              request.TimestampFrom,
+              request.TimestampTo,
+              request.Granularity,
+              data);
+            return csv;
         }
     }
 }

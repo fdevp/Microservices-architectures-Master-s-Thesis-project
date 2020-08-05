@@ -19,7 +19,6 @@
     <Protobuf Include="..\Protos\transactions-write-service.proto" GrpcServices="Client"/>
 
     <Protobuf Include="..\Protos\users-service.proto" GrpcServices="Client"/>
-    <Protobuf Include="..\Protos\reports-service.proto" GrpcServices="Client"/>
 
     <Protobuf Include="..\Protos\common\empty.proto"/>
     <Protobuf Include="..\Protos\common\payment.proto"/>

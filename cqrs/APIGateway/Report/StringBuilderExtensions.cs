@@ -1,7 +1,7 @@
 using System.Linq;
 using System.Text;
 
-namespace ReportsMicroservice
+namespace APIGateway.Reports
 {
     public static class StringBuilderExtensions
     {

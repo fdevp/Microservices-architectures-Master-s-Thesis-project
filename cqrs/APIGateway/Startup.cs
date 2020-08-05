@@ -3,6 +3,7 @@ using System.Net.Http;
 using APIGateway.Middlewares;
 using APIGateway.Models;
 using APIGateway.Models.Setup;
+using APIGateway.Reports;
 using AutoMapper;
 using Google.Protobuf.Collections;
 using Grpc.Net.Client;
@@ -23,7 +24,6 @@ using static LoansReadMicroservice.LoansRead;
 using static LoansWriteMicroservice.LoansWrite;
 using static PaymentsReadMicroservice.PaymentsRead;
 using static PaymentsWriteMicroservice.PaymentsWrite;
-using static ReportsMicroservice.Reports;
 using static TransactionsReadMicroservice.TransactionsRead;
 using static TransactionsWriteMicroservice.TransactionsWrite;
 using static UsersMicroservice.Users;
@@ -46,6 +46,7 @@ namespace APIGateway
             services.AddControllers().AddNewtonsoftJson();
             services.AddSingleton(CreateMapper());
             ConfigureGrpcConnections(services);
+            services.AddSingleton<ReportDataFetcher>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -134,7 +135,6 @@ namespace APIGateway
             services.AddSingleton(new LoansReadClient(GrpcChannel.ForAddress(addresses.LoansRead, new GrpcChannelOptions { HttpClient = httpClient })));
 
             services.AddSingleton(new UsersClient(GrpcChannel.ForAddress(addresses.Users, new GrpcChannelOptions { HttpClient = httpClient })));
-            services.AddSingleton(new ReportsClient(GrpcChannel.ForAddress(addresses.Reports, new GrpcChannelOptions { HttpClient = httpClient })));
         }
     }
 }
