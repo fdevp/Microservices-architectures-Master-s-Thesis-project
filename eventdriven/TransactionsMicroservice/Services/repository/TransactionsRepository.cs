@@ -44,6 +44,22 @@ namespace TransactionsMicroservice.Repository
             return selected.ToArray();
         }
 
+        public Transaction[] GetMany(ReportSubject subject, Filters filters)
+        {
+            switch (subject)
+            {
+                case ReportSubject.Cards:
+                    return transactions.Values.Where(t => t.CardId != null && SelectTransaction(t, filters)).ToArray();
+                case ReportSubject.Loans:
+                case ReportSubject.Payments:
+                    return transactions.Values.Where(t => t.PaymentId != null && SelectTransaction(t, filters)).ToArray();
+                case ReportSubject.Transactions:
+                    return transactions.Values.Where(t => SelectTransaction(t, filters)).ToArray();
+                default:
+                    throw new InvalidOperationException("Unknown subject of report.");
+            }
+        }
+
         public void Setup(IEnumerable<Transaction> transactions)
         {
             this.transactions = new ConcurrentDictionary<string, Transaction>(transactions.ToDictionary(t => t.Id, t => t));
@@ -86,8 +102,15 @@ namespace TransactionsMicroservice.Repository
                 return true;
 
             var anyDetailedFilter = anyPayments || anyCards || anyRecipients || anySenders;
-            if (!anyDetailedFilter && !filters.TimestampFrom.HasValue && !filters.TimestampTo.HasValue)
-                return true;
+            if (anyDetailedFilter)
+                return false;
+
+            if (filters.TimestampFrom.HasValue && filters.TimestampTo.HasValue)
+                return transaction.Timestamp >= filters.TimestampFrom && transaction.Timestamp <= filters.TimestampTo;
+            if (filters.TimestampTo.HasValue)
+                return transaction.Timestamp <= filters.TimestampTo;
+            if (filters.TimestampFrom.HasValue)
+                return transaction.Timestamp >= filters.TimestampFrom;
 
             return false;
         }

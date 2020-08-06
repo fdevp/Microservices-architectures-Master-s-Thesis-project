@@ -8,7 +8,6 @@ namespace SharedClasses.Messaging
         public const string Loans = "loans";
         public const string Payments = "payments";
         public const string Cards = "cards";
-        public const string Reports = "reports";
         public const string APIGateway = "apigateway";
     }
 }

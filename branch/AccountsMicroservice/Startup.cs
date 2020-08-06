@@ -30,6 +30,7 @@ namespace AccountsMicroservice
             services.AddGrpc(options =>
             {
                 options.Interceptors.Add<LoggingInterceptor>("Accounts");
+                options.MaxReceiveMessageSize = 8 * 1024 * 1024;
             });
             services.AddSingleton(CreateMapper());
             services.AddSingleton(CreateTransactionsClient());
@@ -74,7 +75,7 @@ namespace AccountsMicroservice
             httpClientHandler.ServerCertificateCustomValidationCallback =
                 HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
             var httpClient = new HttpClient(httpClientHandler);
-            var channel = GrpcChannel.ForAddress(addresses.Transactions, new GrpcChannelOptions { HttpClient = httpClient });
+            var channel = GrpcChannel.ForAddress(addresses.Transactions, new GrpcChannelOptions { HttpClient = httpClient, MaxReceiveMessageSize = 8 * 1024 * 1024 });
 
             return new TransactionsClient(channel);
         }

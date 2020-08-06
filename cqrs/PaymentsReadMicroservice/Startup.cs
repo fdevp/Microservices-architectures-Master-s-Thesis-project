@@ -40,6 +40,7 @@ namespace PaymentsReadMicroservice
             services.AddGrpc(options =>
             {
                 options.Interceptors.Add<LoggingInterceptor>("PaymentsRead");
+                options.MaxReceiveMessageSize = 500 * 1024 * 1024;
             });
             services.AddSingleton(CreateMapper());
             services.AddSingleton(repository);
@@ -105,10 +106,10 @@ namespace PaymentsReadMicroservice
                 HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
             var httpClient = new HttpClient(httpClientHandler);
 
-            var transactionsChannel = GrpcChannel.ForAddress(addresses.TransactionsRead, new GrpcChannelOptions { HttpClient = httpClient });
+            var transactionsChannel = GrpcChannel.ForAddress(addresses.TransactionsRead, new GrpcChannelOptions { HttpClient = httpClient, MaxReceiveMessageSize = 500 * 1024 * 1024 });
             services.AddSingleton(new TransactionsReadClient(transactionsChannel));
 
-            var loansChannel = GrpcChannel.ForAddress(addresses.LoansRead, new GrpcChannelOptions { HttpClient = httpClient });
+            var loansChannel = GrpcChannel.ForAddress(addresses.LoansRead, new GrpcChannelOptions { HttpClient = httpClient, MaxReceiveMessageSize = 500 * 1024 * 1024 });
             services.AddSingleton(new LoansReadClient(loansChannel));
         }
     }

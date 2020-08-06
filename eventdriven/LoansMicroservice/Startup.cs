@@ -40,7 +40,6 @@ namespace LoansMicroservice
             publishers.Add(Queues.APIGateway, factory.CreatePublisher(Queues.APIGateway));
             publishers.Add(Queues.Payments, factory.CreatePublisher(Queues.Payments));
             publishers.Add(Queues.Transactions, factory.CreatePublisher(Queues.Transactions));
-            publishers.Add(Queues.Reports, factory.CreatePublisher(Queues.Reports));
             services.AddSingleton(new PublishingRouter(publishers));
 
             var servicesProvider = services.BuildServiceProvider();

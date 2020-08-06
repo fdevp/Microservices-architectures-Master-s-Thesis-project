@@ -34,7 +34,7 @@ namespace APIGateway.Controllers
                 UserId = data.UserId,
             };
             var flowId = HttpContext.Items["flowId"].ToString();
-            var response = await eventsAwaiter.AwaitResponse<ReportCreatedEvent>(flowId, () => publishingRouter.Publish(Queues.Reports, payload, flowId, Queues.APIGateway));
+            var response = await eventsAwaiter.AwaitResponse<ReportCreatedEvent>(flowId, () => publishingRouter.Publish(Queues.Transactions, payload, flowId, Queues.APIGateway));
             return response.Report;
         }
 
@@ -51,7 +51,7 @@ namespace APIGateway.Controllers
                 Subject = data.Subject,
             };
             var flowId = HttpContext.Items["flowId"].ToString();
-            var response = await eventsAwaiter.AwaitResponse<ReportCreatedEvent>(flowId, () => publishingRouter.Publish(Queues.Reports, payload, flowId, Queues.APIGateway));
+            var response = await eventsAwaiter.AwaitResponse<ReportCreatedEvent>(flowId, () => publishingRouter.Publish(Queues.Transactions, payload, flowId, Queues.APIGateway));
             return response.Report;
         }
     }

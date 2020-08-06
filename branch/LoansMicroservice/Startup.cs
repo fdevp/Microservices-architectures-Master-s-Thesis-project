@@ -31,6 +31,7 @@ namespace LoansMicroservice
             services.AddGrpc(options =>
             {
                 options.Interceptors.Add<LoggingInterceptor>("Loans");
+                options.MaxReceiveMessageSize = 8 * 1024 * 1024;
             });
             services.AddSingleton(CreateMapper());
             services.AddSingleton(new LoansRepository());
@@ -76,10 +77,10 @@ namespace LoansMicroservice
                 HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
             var httpClient = new HttpClient(httpClientHandler);
 
-            var transactionsChannel = GrpcChannel.ForAddress(addresses.Transactions, new GrpcChannelOptions { HttpClient = httpClient });
+            var transactionsChannel = GrpcChannel.ForAddress(addresses.Transactions, new GrpcChannelOptions { HttpClient = httpClient, MaxReceiveMessageSize = 8 * 1024 * 1024 });
             services.AddSingleton(new TransactionsClient(transactionsChannel));
 
-            var paymentsChannel = GrpcChannel.ForAddress(addresses.Payments, new GrpcChannelOptions { HttpClient = httpClient });
+            var paymentsChannel = GrpcChannel.ForAddress(addresses.Payments, new GrpcChannelOptions { HttpClient = httpClient, MaxReceiveMessageSize = 8 * 1024 * 1024 });
             services.AddSingleton(new PaymentsClient(paymentsChannel));
         }
     }

@@ -6,7 +6,7 @@ using System.Text;
 using SharedClasses;
 using SharedClasses.Models;
 
-namespace ReportsMicroservice
+namespace TransactionsMicroservice.Reports
 {
     public static class ReportGenerator
     {

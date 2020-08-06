@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using Serilog;
 using SharedClasses.Messaging;
 using SharedClasses.Messaging.RabbitMq;
+using TransactionsMicroservice.Reports;
 using TransactionsMicroservice.Repository;
 
 namespace TransactionsMicroservice
@@ -27,6 +28,7 @@ namespace TransactionsMicroservice
             services.AddLogging(c => c.AddSerilog().AddFile("log.txt"));
             services.AddSingleton<TransactionsRepository>();
             services.AddSingleton<TransactionsService>();
+            services.AddSingleton<ReportsDataFetcher>();
             ConfigureRabbitMq(services);
         }
 
@@ -39,16 +41,20 @@ namespace TransactionsMicroservice
             var publishers = new Dictionary<string, IPublisher>();
             publishers.Add(Queues.APIGateway, factory.CreatePublisher(Queues.APIGateway));
             publishers.Add(Queues.Accounts, factory.CreatePublisher(Queues.Accounts));
-			publishers.Add(Queues.Cards, factory.CreatePublisher(Queues.Cards));
-            publishers.Add(Queues.Reports, factory.CreatePublisher(Queues.Reports));
+            publishers.Add(Queues.Cards, factory.CreatePublisher(Queues.Cards));
+            publishers.Add(Queues.Loans, factory.CreatePublisher(Queues.Loans));
+            publishers.Add(Queues.Payments, factory.CreatePublisher(Queues.Payments));
             services.AddSingleton(new PublishingRouter(publishers));
+
+            var consumer = factory.CreateConsumer(Queues.Transactions);
+            var eventsAwaiter = new EventsAwaiter("Transactions");
+            eventsAwaiter.BindConsumer(consumer);
+            services.AddSingleton(eventsAwaiter);
 
             var servicesProvider = services.BuildServiceProvider();
             var logger = servicesProvider.GetService<ILogger<IConsumer>>();
             var transactionsService = servicesProvider.GetService<TransactionsService>();
             var consumingRouter = ConsumingRouter<TransactionsService>.Create(transactionsService, "Transactions", logger);
-
-            var consumer = factory.CreateConsumer(Queues.Transactions);
             consumingRouter.LinkConsumer(consumer);
         }
 

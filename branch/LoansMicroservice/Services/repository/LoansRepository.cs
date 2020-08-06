@@ -24,8 +24,8 @@ namespace LoansMicroservice.Repository
 
         public Loan[] GetByAccounts(IEnumerable<string> accountsIds)
         {
-            var acocunts = accountsIds.ToHashSet();
-            return loans.Values.Where(l => acocunts.Contains(l.AccountId)).ToArray();
+            var accounts = accountsIds.ToHashSet();
+            return loans.Values.Where(l => accounts.Contains(l.AccountId)).ToArray();
         }
 
         public bool RepayInstalment(string id)

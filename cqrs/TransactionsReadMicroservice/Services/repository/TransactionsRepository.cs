@@ -42,23 +42,37 @@ namespace TransactionsReadMicroservice.Repository
 
         private bool SelectTransaction(Transaction transaction, Filters filters)
         {
-            if (filters.TimestampFrom > 0 && transaction.Timestamp < filters.TimestampFrom)
+			 if (filters.TimestampFrom != 0 && transaction.Timestamp < filters.TimestampFrom)
                 return false;
-            if (filters.TimestampTo > 0 && transaction.Timestamp > filters.TimestampTo)
+            if (filters.TimestampTo != 0 && transaction.Timestamp > filters.TimestampTo)
                 return false;
-
-            if (filters.Payments.Any() && !string.IsNullOrEmpty(transaction.PaymentId) && filters.Payments.Contains(transaction.PaymentId))
-                return true;
-            if (filters.Cards.Any() && !string.IsNullOrEmpty(transaction.CardId) && filters.Cards.Contains(transaction.CardId))
-                return true;
-            if (filters.Recipients.Any() && filters.Recipients.Contains(transaction.Recipient))
-                return true;
-            if (filters.Senders.Any() && filters.Senders.Contains(transaction.Sender))
+			
+            var anyPayments = filters.Payments?.Any() ?? false;
+            if (anyPayments && !string.IsNullOrEmpty(transaction.PaymentId) && filters.Payments.Contains(transaction.PaymentId))
                 return true;
 
-            var anyDetailedFilter = filters.Payments.Any() || filters.Cards.Any() || filters.Recipients.Any() || filters.Senders.Any();
-            if (!anyDetailedFilter && filters.TimestampFrom == 0 && filters.TimestampTo == 0)
+            var anyCards = filters.Cards?.Any() ?? false;
+            if (anyCards && !string.IsNullOrEmpty(transaction.CardId) && filters.Cards.Contains(transaction.CardId))
                 return true;
+
+            var anyRecipients = filters.Recipients?.Any() ?? false;
+            if (anyRecipients && filters.Recipients.Contains(transaction.Recipient))
+                return true;
+
+            var anySenders = filters.Senders?.Any() ?? false;
+            if (anySenders && filters.Senders.Contains(transaction.Sender))
+                return true;
+
+            var anyDetailedFilter = anyPayments || anyCards || anyRecipients || anySenders;
+            if (anyDetailedFilter)
+                return false;
+
+            if (filters.TimestampFrom != 0 && filters.TimestampTo != 0)
+                return transaction.Timestamp >= filters.TimestampFrom && transaction.Timestamp <= filters.TimestampTo;
+            if (filters.TimestampTo != 0)
+                return transaction.Timestamp <= filters.TimestampTo;
+            if (filters.TimestampFrom != 0)
+                return transaction.Timestamp >= filters.TimestampFrom;
 
             return false;
         }

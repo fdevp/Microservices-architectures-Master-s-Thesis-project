@@ -1,7 +1,7 @@
 using System;
 using SharedClasses.Models;
 
-namespace ReportsMicroservice
+namespace TransactionsMicroservice.Reports
 {
     public class OverallReportData
     {

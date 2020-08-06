@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using SharedClasses.Models;
 
-namespace ReportsMicroservice
+namespace TransactionsMicroservice.Reports
 {
     public static class StringBuilderExtensions
     {

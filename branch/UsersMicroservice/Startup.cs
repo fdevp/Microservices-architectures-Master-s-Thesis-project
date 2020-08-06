@@ -18,6 +18,7 @@ namespace UsersMicroservice
             services.AddGrpc(options =>
             {
                 options.Interceptors.Add<LoggingInterceptor>("Users");
+                options.MaxReceiveMessageSize = 8 * 1024 * 1024;
             });
             services.AddSingleton(new UsersRepository());
         }
