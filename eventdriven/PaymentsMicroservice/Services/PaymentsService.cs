@@ -81,5 +81,12 @@ namespace PaymentsMicroservice
             paymentsRepository.Setup(inputEvent.Payments);
             return Task.CompletedTask;
         }
+
+        [EventHandlingMethod(typeof(SetupAppendPaymentsEvent))]
+        public Task SetupAppend(MessageContext context, SetupPaymentsEvent inputEvent)
+        {
+            paymentsRepository.SetupAppend(inputEvent.Payments);
+            return Task.CompletedTask;
+        }
     }
 }

@@ -1,6 +1,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using AccountsMicroservice;
+using APIGateway.Models;
 using APIGateway.Models.Setup;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
@@ -43,6 +44,17 @@ namespace APIGateway.Controllers
         }
 
         [HttpPost]
+        [Route("clear")]
+        public async Task Clear()
+        {
+            await usersClient.SetupAsync(new UsersMicroservice.SetupRequest());
+            await accountsClient.SetupAsync(new AccountsMicroservice.SetupRequest());
+            await cardsClient.SetupAsync(new CardsMicroservice.SetupRequest());
+            await loansClient.SetupAsync(new LoansMicroservice.SetupRequest());
+            await paymentsClient.SetupAsync(new PaymentsMicroservice.SetupRequest());
+        }
+
+        [HttpPost]
         [Route("setup")]
         public async Task Setup(SetupAll setup)
         {
@@ -55,11 +67,19 @@ namespace APIGateway.Controllers
             var cardsRequest = mapper.Map<CardsMicroservice.SetupRequest>(setup.CardsSetup);
             await cardsClient.SetupAsync(cardsRequest);
 
-            var loansRequest = mapper.Map<LoansMicroservice.SetupRequest>(setup.LoansSetup);
-            await loansClient.SetupAsync(loansRequest);
+            for (int i = 0; i < setup.LoansSetup.loans.Length; i += 10000)
+            {
+                var portion = setup.LoansSetup.loans.Skip(i).Take(10000).ToArray();
+                var request = mapper.Map<LoansMicroservice.SetupRequest>(new LoansSetup { loans = portion });
+                await loansClient.SetupAppendAsync(request);
+            }
 
-            var paymentsRequest = mapper.Map<PaymentsMicroservice.SetupRequest>(setup.PaymentsSetup);
-            await paymentsClient.SetupAsync(paymentsRequest);
+            for (int i = 0; i < setup.PaymentsSetup.payments.Length; i += 10000)
+            {
+                var portion = setup.PaymentsSetup.payments.Skip(i).Take(10000).ToArray();
+                var request = mapper.Map<PaymentsMicroservice.SetupRequest>(new PaymentsSetup { payments = portion });
+                await paymentsClient.SetupAppendAsync(request);
+            }
 
             for (int i = 0; i < setup.TransactionsSetup.transactions.Length; i += 10000)
             {

@@ -16,6 +16,7 @@ service Payments {
   rpc Create (CreatePaymentRequest) returns (CreatePaymentResult);
   rpc Cancel (CancelPaymentsRequest) returns (Empty);
   rpc Setup(SetupRequest) returns (Empty);
+  rpc SetupAppend(SetupRequest) returns (Empty);
 }
 
 message GetPaymentsRequest {

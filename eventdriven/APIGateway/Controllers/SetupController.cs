@@ -29,6 +29,18 @@ namespace APIGateway.Controllers
         }
 
         [HttpPost]
+        [Route("clear")]
+        public Task Clear()
+        {
+            this.publishingRouter.Publish(Queues.Users, new SetupUsersEvent(), null);
+            this.publishingRouter.Publish(Queues.Accounts, new SetupAccountsEvent(), null);
+            this.publishingRouter.Publish(Queues.Cards, new SetupCardsEvent(), null);
+            this.publishingRouter.Publish(Queues.Loans, new SetupLoansEvent(), null);
+            this.publishingRouter.Publish(Queues.Payments, new SetupPaymentsEvent(), null);
+            return Task.CompletedTask;
+        }
+
+        [HttpPost]
         [Route("setup")]
         public Task Setup(SetupAll setup)
         {
@@ -40,12 +52,20 @@ namespace APIGateway.Controllers
 
             var cardsEvent = mapper.Map<SetupCardsEvent>(setup.CardsSetup);
             this.publishingRouter.Publish(Queues.Cards, cardsEvent, null);
+            
+            for (int i = 0; i < setup.LoansSetup.loans.Length; i += 10000)
+            {
+                var portion = setup.LoansSetup.loans.Skip(i).Take(10000).ToArray();
+                var loansEvent = new SetupAppendLoansEvent { Loans = portion.Select(l => mapper.Map<Loan>(l)).ToArray() };
+                this.publishingRouter.Publish(Queues.Loans, loansEvent, null);
+            }
 
-            var loansEvent = mapper.Map<SetupLoansEvent>(setup.LoansSetup);
-            this.publishingRouter.Publish(Queues.Loans, loansEvent, null);
-
-            var paymentsEvent = mapper.Map<SetupPaymentsEvent>(setup.PaymentsSetup);
-            this.publishingRouter.Publish(Queues.Payments, paymentsEvent, null);
+            for (int i = 0; i < setup.PaymentsSetup.payments.Length; i += 10000)
+            {
+                var portion = setup.PaymentsSetup.payments.Skip(i).Take(10000).ToArray();
+                var paymentsEvent = new SetupAppendPaymentsEvent { Payments = portion.Select(p => mapper.Map<Payment>(p)).ToArray() };
+                this.publishingRouter.Publish(Queues.Payments, paymentsEvent, null);
+            }
 
             for (int i = 0; i < setup.TransactionsSetup.transactions.Length; i += 10000)
             {

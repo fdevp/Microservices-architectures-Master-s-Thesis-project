@@ -43,5 +43,18 @@ namespace PaymentsWriteMicroservice.Repository
         {
             this.payments = payments.ToDictionary(p => p.Id, p => p);
         }
+
+        public void SetupAppend(IEnumerable<Repository.Payment> payments)
+        {
+            if (this.payments == null)
+            {
+                this.payments = new Dictionary<string, Payment>();
+            }
+
+            foreach (var payment in payments)
+            {
+                this.payments.TryAdd(payment.Id, payment);
+            }
+        }
     }
 }

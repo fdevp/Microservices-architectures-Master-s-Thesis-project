@@ -80,6 +80,13 @@ namespace PaymentsMicroservice
             return Task.FromResult(new Empty());
         }
 
+        public override Task<Empty> SetupAppend(SetupRequest request, Grpc.Core.ServerCallContext context)
+        {
+            var payments = request.Payments.Select(p => mapper.Map<Repository.Payment>(p));
+            paymentsRepository.SetupAppend(payments);
+            return Task.FromResult(new Empty());
+        }
+
         private async Task<GetPaymentsWithLoansResult> WithLoans(Repository.Payment[] payments, string flowId)
         {
             var mapped = payments.Where(payment => payment != null)

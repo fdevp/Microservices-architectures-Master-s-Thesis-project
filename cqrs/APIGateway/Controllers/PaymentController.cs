@@ -17,14 +17,12 @@ namespace APIGateway.Controllers
     {
         private readonly ILogger<PaymentController> logger;
         private readonly PaymentsWriteClient paymentsWriteClient;
-        private readonly PaymentsReadClient paymentsReadClient;
         private readonly Mapper mapper;
 
-        public PaymentController(ILogger<PaymentController> logger, PaymentsWriteClient paymentsWriteClient, PaymentsReadClient paymentsReadClient, Mapper mapper)
+        public PaymentController(ILogger<PaymentController> logger, PaymentsWriteClient paymentsWriteClient, Mapper mapper)
         {
             this.logger = logger;
             this.paymentsWriteClient = paymentsWriteClient;
-            this.paymentsReadClient = paymentsReadClient;
             this.mapper = mapper;
         }
 
@@ -32,8 +30,12 @@ namespace APIGateway.Controllers
         [Route("setup")]
         public async Task Setup(PaymentsSetup setup)
         {
-            var request = mapper.Map<PaymentsWriteMicroservice.SetupRequest>(setup);
-            await paymentsWriteClient.SetupAsync(request);
+            for (int i = 0; i < setup.payments.Length; i += 10000)
+            {
+                var portion = setup.payments.Skip(i).Take(10000).ToArray();
+                var request = mapper.Map<PaymentsWriteMicroservice.SetupRequest>(new PaymentsSetup { payments = portion });
+                await paymentsWriteClient.SetupAppendAsync(request);
+            }
         }
     }
 }

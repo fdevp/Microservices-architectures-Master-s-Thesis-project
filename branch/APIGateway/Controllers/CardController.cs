@@ -26,13 +26,11 @@ namespace APIGateway.Controllers
 
         [HttpPost]
         [Route("transfer")]
-        public async Task<TransactionDTO> Transfer(CardTransfer data)
+        public async Task Transfer(CardTransfer data)
         {
             var request = mapper.Map<TransferRequest>(data);
             request.FlowId = HttpContext.Items["flowId"].ToString();
-            var response = await cardsClient.TransferAsync(request);
-            var transaction = mapper.Map<TransactionDTO>(response.Transaction);
-            return transaction;
+            await cardsClient.TransferAsync(request);
         }
 
 

@@ -9,6 +9,7 @@ package LoansMicroservice;
 service LoansWrite {
   rpc BatchRepayInstalments (BatchRepayInstalmentsRequest) returns (Empty);
   rpc Setup(SetupRequest) returns (Empty);
+  rpc SetupAppend(SetupRequest) returns (Empty);
 }
 
 message BatchRepayInstalmentsRequest {

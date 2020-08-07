@@ -76,6 +76,13 @@ namespace LoansMicroservice
             return Task.CompletedTask;
         }
 
+        [EventHandlingMethod(typeof(SetupAppendLoansEvent))]
+        public Task SetupAppend(MessageContext context, SetupLoansEvent inputEvent)
+        {
+            loansRepository.SetupAppend(inputEvent.Loans);
+            return Task.CompletedTask;
+        }
+
         private IEnumerable<string> RepayInstalments(BatchRepayInstalmentsEvent inputEvent)
         {
             foreach (var id in inputEvent.Ids)

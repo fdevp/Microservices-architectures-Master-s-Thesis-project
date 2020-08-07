@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Threading.Tasks;
 using APIGateway.Models;
 using APIGateway.Models.Setup;
@@ -28,8 +29,12 @@ namespace APIGateway.Controllers
         [Route("setup")]
         public async Task Setup(LoansSetup setup)
         {
-            var request = mapper.Map<SetupRequest>(setup);
-            await loansWriteClient.SetupAsync(request);
+            for (int i = 0; i < setup.loans.Length; i += 10000)
+            {
+                var portion = setup.loans.Skip(i).Take(10000).ToArray();
+                var request = mapper.Map<LoansWriteMicroservice.SetupRequest>(new LoansSetup { loans = portion });
+                await loansWriteClient.SetupAppendAsync(request);
+            }
         }
     }
 }

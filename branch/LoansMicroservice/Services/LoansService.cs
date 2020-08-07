@@ -85,5 +85,12 @@ namespace LoansMicroservice
             loansRepository.Setup(loans);
             return Task.FromResult(new Empty());
         }
+
+        public override Task<Empty> SetupAppend(SetupRequest request, ServerCallContext context)
+        {
+            var loans = request.Loans.Select(l => mapper.Map<Repository.Loan>(l));
+            loansRepository.SetupAppend(loans);
+            return Task.FromResult(new Empty());
+        }
     }
 }

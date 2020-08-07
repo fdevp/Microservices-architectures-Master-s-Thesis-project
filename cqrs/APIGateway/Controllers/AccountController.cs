@@ -61,13 +61,11 @@ namespace APIGateway.Controllers
 
         [HttpPost]
         [Route("transfer")]
-        public async Task<TransactionDTO> Transfer(AccountTransfer data)
+        public async Task Transfer(AccountTransfer data)
         {
             var transfer = mapper.Map<Transfer>(data);
             var request = new TransferRequest { FlowId = HttpContext.Items["flowId"].ToString(), Transfer = transfer };
-            var response = await accountsWriteClient.TransferAsync(request);
-            var transcation = mapper.Map<TransactionDTO>(response.Transaction);
-            return transcation;
+            await accountsWriteClient.TransferAsync(request);
         }
 
         [HttpPost]

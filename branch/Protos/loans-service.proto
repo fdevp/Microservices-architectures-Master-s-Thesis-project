@@ -14,6 +14,7 @@ service Loans {
   rpc GetByAccounts (GetLoansRequest) returns (GetLoansResponse);
   rpc GetTransactions (GetTransactionsRequest) returns (GetTransactionsResult);
   rpc Setup(SetupRequest) returns (Empty);
+  rpc SetupAppend(SetupRequest) returns (Empty);
 }
 
 message BatchRepayInstalmentsRequest {

@@ -52,5 +52,18 @@ namespace LoansMicroservice.Repository
         {
             this.loans = loans.ToDictionary(l => l.Id, l => l);
         }
+
+        public void SetupAppend(IEnumerable<Loan> loans)
+        {
+            if (this.loans == null)
+            {
+                this.loans = new Dictionary<string, Loan>();
+            }
+
+            foreach (var loan in loans)
+            {
+                this.loans.TryAdd(loan.Id, loan);
+            }
+        }
     }
 }

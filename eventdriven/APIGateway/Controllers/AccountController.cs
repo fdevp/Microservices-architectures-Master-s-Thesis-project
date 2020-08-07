@@ -65,13 +65,12 @@ namespace APIGateway.Controllers
 
         [HttpPost]
         [Route("transfer")]
-        public async Task<TransactionDTO> Transfer(Transfer transfer)
+        public Task Transfer(Transfer transfer)
         {
             var flowId = HttpContext.Items["flowId"].ToString();
             var payload = new TransferEvent { Transfer = transfer };
-            var response = await eventsAwaiter.AwaitResponse<SelectedTransactionsEvent>(flowId, () => publishingRouter.Publish(Queues.Accounts, payload, flowId, Queues.APIGateway));
-            var transcation = response.Transactions.First();
-            return mapper.Map<TransactionDTO>(transcation);
+            publishingRouter.Publish(Queues.Accounts, payload, flowId, Queues.APIGateway);
+            return Task.CompletedTask;
         }
 
         [HttpPost]

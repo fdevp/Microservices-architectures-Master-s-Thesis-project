@@ -58,5 +58,13 @@ namespace LoansWriteMicroservice
             projectionChannel.Publish(null, new DataProjection<Repository.Loan, string> { Upsert = loans.ToArray() });
             return Task.FromResult(new Empty());
         }
+
+        public override Task<Empty> SetupAppend(SetupRequest request, ServerCallContext context)
+        {
+            var loans = request.Loans.Select(l => mapper.Map<Repository.Loan>(l));
+            loansRepository.SetupAppend(loans);
+            projectionChannel.Publish(null, new DataProjection<Repository.Loan, string> { Upsert = loans.ToArray() });
+            return Task.FromResult(new Empty());
+        }
     }
 }

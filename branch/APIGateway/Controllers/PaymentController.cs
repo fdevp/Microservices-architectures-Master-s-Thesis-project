@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Threading.Tasks;
 using APIGateway.Models.Setup;
 using AutoMapper;
@@ -27,8 +28,12 @@ namespace APIGateway.Controllers
         [Route("setup")]
         public async Task Setup(PaymentsSetup setup)
         {
-            var request = mapper.Map<SetupRequest>(setup);
-            await paymentsClient.SetupAsync(request);
+            for (int i = 0; i < setup.payments.Length; i += 10000)
+            {
+                var portion = setup.payments.Skip(i).Take(10000).ToArray();
+                var request = mapper.Map<PaymentsMicroservice.SetupRequest>(new PaymentsSetup { payments = portion });
+                await paymentsClient.SetupAppendAsync(request);
+            }
         }
     }
 }

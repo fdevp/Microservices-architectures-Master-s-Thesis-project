@@ -51,5 +51,13 @@ namespace PaymentsWriteMicroservice
             projectionChannel.Publish(null, new DataProjection<Repository.Payment, string> { Upsert = payments.ToArray() });
             return Task.FromResult(new Empty());
         }
+
+        public override Task<Empty> SetupAppend(SetupRequest request, Grpc.Core.ServerCallContext context)
+        {
+            var payments = request.Payments.Select(p => mapper.Map<Repository.Payment>(p));
+            paymentsRepository.SetupAppend(payments);
+            projectionChannel.Publish(null, new DataProjection<Repository.Payment, string> { Upsert = payments.ToArray() });
+            return Task.FromResult(new Empty());
+        }
     }
 }
