@@ -69,7 +69,7 @@ namespace APIGateway.Controllers
         {
             var flowId = HttpContext.Items["flowId"].ToString();
             var payload = new TransferEvent { Transfer = transfer };
-            publishingRouter.Publish(Queues.Accounts, payload, flowId, Queues.APIGateway);
+            publishingRouter.Publish(Queues.Accounts, payload, flowId);
             return Task.CompletedTask;
         }
 

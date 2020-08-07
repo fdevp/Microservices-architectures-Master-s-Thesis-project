@@ -36,7 +36,7 @@ namespace APIGateway.Controllers
         {
             var transferEvent = new TransferEvent { Transfer = transfer };
             var flowId = HttpContext.Items["flowId"].ToString();
-            publishingRouter.Publish(Queues.Cards, transferEvent, flowId, Queues.APIGateway);
+            publishingRouter.Publish(Queues.Cards, transferEvent, flowId);
             return Task.CompletedTask;
         }
 
