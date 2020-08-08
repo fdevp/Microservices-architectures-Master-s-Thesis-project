@@ -1,6 +1,8 @@
-﻿
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Threading.Tasks;
 using Grpc.Net.Client;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -10,9 +12,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using SharedClasses;
-using static TransactionsMicroservice.Transactions;
+using static AccountsMicroservice.Accounts;
 
-namespace TransactionsLoadBalancer
+namespace AccountsLoadBalancer
 {
     public class Startup
     {
@@ -23,19 +25,17 @@ namespace TransactionsLoadBalancer
 
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
-        // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddGrpc(options =>
             {
-                options.Interceptors.Add<LoggingInterceptor>("TransactionsLoadBalancer");
+                options.Interceptors.Add<LoggingInterceptor>("AccountsLoadBalancer");
                 options.MaxReceiveMessageSize = 8 * 1024 * 1024;
             });
+
             CreateClients(services);
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory)
         {
             if (env.IsDevelopment())
@@ -47,7 +47,7 @@ namespace TransactionsLoadBalancer
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapGrpcService<TransactionsBalancingService>();
+                endpoints.MapGrpcService<AccountsBalancingService>();
 
                 endpoints.MapGet("/", async context =>
                 {
@@ -70,7 +70,7 @@ namespace TransactionsLoadBalancer
             foreach (var address in addresses)
             {
                 var channel = GrpcChannel.ForAddress(address, new GrpcChannelOptions { HttpClient = httpClient, MaxReceiveMessageSize = 8 * 1024 * 1024 });
-                services.AddSingleton(new TransactionsClient(channel));
+                services.AddSingleton(new AccountsClient(channel));
             }
         }
     }

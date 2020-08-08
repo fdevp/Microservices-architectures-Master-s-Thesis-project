@@ -9,12 +9,12 @@ using static TransactionsMicroservice.Transactions;
 
 namespace TransactionsLoadBalancer
 {
-    public class TransactionsService : Transactions.TransactionsBase
+    public class TransactionsBalancingService : Transactions.TransactionsBase
     {
-        private readonly ILogger<TransactionsService> _logger;
+        private readonly ILogger<TransactionsBalancingService> _logger;
         private readonly TransactionsClient[] services;
 
-        public TransactionsService(ILogger<TransactionsService> logger, IEnumerable<TransactionsClient> services)
+        public TransactionsBalancingService(ILogger<TransactionsBalancingService> logger, IEnumerable<TransactionsClient> services)
         {
             _logger = logger;
             this.services = services.ToArray();
@@ -33,8 +33,8 @@ namespace TransactionsLoadBalancer
         public override async Task<CreateTransactionResult> Create(CreateTransactionRequest request, ServerCallContext context)
         {
             var service = services[GetServiceIndex(request.FlowId)];
-            var transaction = await service.CreateAsync(request);
-            return transaction;
+            var result = await service.CreateAsync(request);
+            return result;
         }
 
         public override async Task<BatchCreateTransactionResult> BatchCreate(BatchCreateTransactionRequest request, ServerCallContext context)
@@ -54,16 +54,16 @@ namespace TransactionsLoadBalancer
 
         public override async Task<Empty> Setup(SetupRequest request, ServerCallContext context)
         {
-            var groupedIds = request.Transactions.GroupBy(t => GetServiceIndex(t.Id)).ToArray();
-            var tasks = groupedIds.Select(g => services[g.Key].SetupAsync(new SetupRequest { Transactions = { g } }).ResponseAsync);
+            var grouped = request.Transactions.GroupBy(t => GetServiceIndex(t.Id)).ToArray();
+            var tasks = grouped.Select(g => services[g.Key].SetupAsync(new SetupRequest { Transactions = { g } }).ResponseAsync);
             await Task.WhenAll(tasks);
             return new Empty();
         }
 
         public override async Task<Empty> SetupAppend(SetupRequest request, ServerCallContext context)
         {
-            var groupedIds = request.Transactions.GroupBy(t => GetServiceIndex(t.Id)).ToArray();
-            var tasks = groupedIds.Select(g => services[g.Key].SetupAppendAsync(new SetupRequest { Transactions = { g } }).ResponseAsync);
+            var grouped = request.Transactions.GroupBy(t => GetServiceIndex(t.Id)).ToArray();
+            var tasks = grouped.Select(g => services[g.Key].SetupAppendAsync(new SetupRequest { Transactions = { g } }).ResponseAsync);
             await Task.WhenAll(tasks);
             return new Empty();
         }
