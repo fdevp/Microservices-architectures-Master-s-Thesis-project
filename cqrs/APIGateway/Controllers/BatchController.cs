@@ -73,7 +73,7 @@ namespace APIGateway.Controllers
             }));
             parallelTasks.Add(Task.Run(async () =>
             {
-                var accountsIds = payments.Select(p => p.AccountId);
+                var accountsIds = payments.Select(p => p.AccountId).Distinct();
                 var balancesResponse = await accountsReadClient.GetBalancesAsync(new GetBalancesRequest { FlowId = flowId, Ids = { accountsIds } });
                 balances = balancesResponse.Balances;
             }));
