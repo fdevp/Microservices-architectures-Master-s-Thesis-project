@@ -28,7 +28,7 @@ namespace PaymentsWriteMicroservice.Repository
 
         public Payment Create(float amount, long startTimestamp, long interval, string accountId, string recipient)
         {
-            var payment = new Repository.Payment(Guid.NewGuid().ToString(), amount, startTimestamp, interval, PaymentStatus.ACTIVE, accountId, recipient);
+            var payment = new Repository.Payment(Guid.NewGuid().ToString(), amount, startTimestamp, 0, interval, PaymentStatus.ACTIVE, accountId, recipient);
             payments.Add(payment.Id, payment);
             return payment;
         }

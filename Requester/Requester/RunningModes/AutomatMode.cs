@@ -31,7 +31,7 @@ namespace Requester.RunningModes
         {
             var currentTime = automatSettings.CurrentDate;
             var data = GetData(index);
-            var toPay = data.Payments.Where(p => ShouldBePaid(p));
+            var toPay = data.Payments.Where(p => p.LastRepayTimestamp + p.Interval < currentTime);
 
             var balancesDict = data.Balances.ToDictionary(k => k.Id, v => v);
             var loansDict = data.Loans.ToDictionary(k => k.PaymentId, v => v);
@@ -43,11 +43,6 @@ namespace Requester.RunningModes
             var transfers = withSufficientBalance.Select(p => CreateTransfer(p, loansDict.ContainsKey(p.Id) ? loansDict[p.Id] : null)).ToArray();
             var messages = withInsufficientBalance.Select(p => CreateMessage(p, balancesDict[p.AccountId])).ToArray();
             var repaidInstalments = data.Loans.Where(l => paidIds.Contains(l.PaymentId)).Select(l => l.Id).ToArray();
-        }
-
-        private bool ShouldBePaid(PaymentDTO payment, DateTime currentTime)
-        {
-
         }
 
         private BatchData GetData(int index)
@@ -82,7 +77,7 @@ namespace Requester.RunningModes
         private MessageDTO CreateMessage(PaymentDTO payment, BalanceDTO balance)
         {
             var content = $"There is insufficient balance on account {balance.Id} to repay payment {payment.Id}. Required balance: {payment.Amount}, current balance: {balance.Amount}";
-            return new MessageDTO { UserId = "", Content = content };
+            return new MessageDTO { UserId = , Content = content };
         }
     }
 }

@@ -9,8 +9,9 @@ message Payment {
   string id = 1;
   float amount = 2;
   int64 startTimestamp = 3;
-  PaymentStatus status = 4;
-  int64 interval = 5;
-  string accountId = 6;
-  string recipient = 7;
+  int64 lastRepayTimestamp = 4;
+  PaymentStatus status = 5;
+  int64 interval = 6;
+  string accountId = 7;
+  string recipient = 8;
 }

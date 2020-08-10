@@ -53,7 +53,9 @@ namespace DataGenerator
 
             var amountRnd = new RndBuilder<float>(new CurrencyRnd())
                 .Min(500)
-                .Max(30000)
+                .Max(50000)
+                .DistributionValues(new float[] { 3000, 5000, 10000, 15000, 20000, 35000 })
+                .DistributionProbabilities(new int[] { 20, 25, 20, 15, 10, 5, 5 })
                 .Build();
 
             return ValuesGenerator.CreateAccounts(users, countRnd, amountRnd).ToArray();
