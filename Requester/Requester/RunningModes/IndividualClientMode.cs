@@ -1,4 +1,4 @@
-﻿using Jil;
+﻿using Newtonsoft.Json;
 using Requester.Requests;
 using Serilog;
 using System;
@@ -28,7 +28,7 @@ namespace Requester.RunningModes
         public void Perform()
         {
             var scenarioFileContent = File.ReadAllText("individual.json");
-            var scenarios = JSON.Deserialize<IndividualUserScenarioElement[]>(scenarioFileContent);
+            var scenarios = JsonConvert.DeserializeObject<IndividualUserScenarioElement[]>(scenarioFileContent);
             var groups = scenarios.GroupBy(s => s.Group);
             var groupsCount = groups.Count();
             var options = new ParallelOptions { MaxDegreeOfParallelism = groupsCount };
@@ -71,7 +71,7 @@ namespace Requester.RunningModes
 
         public void Transfer(IndividualUserScenarioElement element, string scenarioId)
         {
-            var body = JSON.Serialize(element);
+            var body = JsonConvert.SerializeObject(element);
             var content = new StringContent(body, Encoding.UTF8, "application/json");
             content.Headers.Add("flowId", scenarioId);
             var result = httpClient.PostAsync("card/transfer", content).Result;

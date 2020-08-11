@@ -1,4 +1,4 @@
-﻿using Jil;
+﻿using Newtonsoft.Json;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -30,17 +30,66 @@ namespace Requester.RunningModes
                 logger.Information("Cannot setup system.");
                 return;
             }
-
             logger.Information("General setup done.");
 
-            var transactions = JSON.Deserialize<TransactionsSetup>(File.ReadAllText("transactions.json")).Transactions;
-            for (int i = 0; i < transactions.Length; i += 10000)
+            if (File.Exists("accounts.json"))
             {
-                var portion = transactions.Skip(i).Take(10000);
-                var transactionsSetp = new TransactionsSetup { Transactions = portion.ToArray() };
-                httpClient.PostAsync("http://localhost:5000/transaction/setup", new StringContent(JSON.Serialize(transactionsSetp), Encoding.UTF8, "application/json")).RunSynchronously();
-                logger.Information("Transactions portion setup done.");
+                var accounts = JsonConvert.DeserializeObject<AccountsSetup>(File.ReadAllText("accounts.json")).Accounts;
+                for (int i = 0; i < accounts.Length; i += 10000)
+                {
+                    var portion = accounts.Skip(i).Take(10000);
+                    var accountsSetup = new AccountsSetup { Accounts = portion.ToArray() };
+                    try
+                    {
+                        var result = httpClient.PostAsync("http://localhost:5000/account/setup", new StringContent(JsonConvert.SerializeObject(accountsSetup), Encoding.UTF8, "application/json")).Result;
+                    }
+                    catch (Exception e)
+                    {
+                        int asd = 5;
+                    }
+
+                    logger.Information("Accounts portion setup done.");
+                }
             }
+
+            if (File.Exists("transactions.json"))
+            {
+                var transactions = JsonConvert.DeserializeObject<TransactionsSetup>(File.ReadAllText("transactions.json")).Transactions;
+                for (int i = 0; i < transactions.Length; i += 10000)
+                {
+                    var portion = transactions.Skip(i).Take(10000);
+                    var transactionsSetp = new TransactionsSetup { Transactions = portion.ToArray() };
+                    var result = httpClient.PostAsync("http://localhost:5000/transaction/setup", new StringContent(JsonConvert.SerializeObject(transactionsSetp), Encoding.UTF8, "application/json")).Result;
+                    logger.Information("Transactions portion setup done.");
+                }
+            }
+
+            if (File.Exists("payments.json"))
+            {
+
+                var payments = JsonConvert.DeserializeObject<PaymentsSetup>(File.ReadAllText("payments.json")).Payments;
+                for (int i = 0; i < payments.Length; i += 10000)
+                {
+                    var portion = payments.Skip(i).Take(10000);
+                    var paymentsSetup = new PaymentsSetup { Payments = portion.ToArray() };
+                    var result = httpClient.PostAsync("http://localhost:5000/payment/setup", new StringContent(JsonConvert.SerializeObject(paymentsSetup), Encoding.UTF8, "application/json")).Result;
+                    logger.Information("Payments portion setup done.");
+                }
+            }
+
+
+            if (File.Exists("loans.json"))
+            {
+                var loans = JsonConvert.DeserializeObject<LoansSetup>(File.ReadAllText("loans.json")).Loans;
+                for (int i = 0; i < loans.Length; i += 10000)
+                {
+                    var portion = loans.Skip(i).Take(10000);
+                    var loansSetup = new LoansSetup { Loans = portion.ToArray() };
+                    var result = httpClient.PostAsync("http://localhost:5000/loan/setup", new StringContent(JsonConvert.SerializeObject(loansSetup), Encoding.UTF8, "application/json")).Result;
+                    logger.Information("Loans portion setup done.");
+                }
+            }
+
 
             logger.Information("Setup all done.");
         }

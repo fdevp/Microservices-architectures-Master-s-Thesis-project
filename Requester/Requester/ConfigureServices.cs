@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Requester.Data;
 using Requester.Requests;
 using Requester.RunningModes;
 using Serilog;
@@ -25,11 +26,15 @@ namespace Requester
                 .SetBasePath(Directory.GetParent(AppContext.BaseDirectory).FullName)
                 .AddJsonFile("appsettings.json", false)
                 .Build();
+            serviceCollection.AddSingleton(configuration);
 
             var settings = new Settings();
             configuration.GetSection("Settings").Bind(settings);
-            serviceCollection.AddSingleton(configuration);
             serviceCollection.AddSingleton(settings);
+
+            var automatSettings = new AutomatSettings();
+            configuration.GetSection("Automat").Bind(automatSettings);
+            serviceCollection.AddSingleton(automatSettings);
 
 
             var httpClient = new HttpClient { BaseAddress = new Uri(settings.Address)};

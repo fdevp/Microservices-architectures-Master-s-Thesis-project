@@ -107,6 +107,13 @@ namespace AccountsMicroservice
             return Task.CompletedTask;
         }
 
+        [EventHandlingMethod(typeof(SetupAppendAccountsEvent))]
+        public Task SetupAppend(MessageContext context, SetupAppendAccountsEvent inputEvent)
+        {
+            accountsRepository.SetupAppend(inputEvent.Accounts);
+            return Task.CompletedTask;
+        }
+
         private CreateTransactionEvent TransferToCreateTransactionEvent(Transfer inputEvent)
         {
             var account = accountsRepository.Get(inputEvent.AccountId);

@@ -1,4 +1,4 @@
-﻿using Jil;
+﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
@@ -17,7 +17,7 @@ namespace Requester.Requests
 
         public string GetToken(string username, string scenarioId)
         {
-            var body = JSON.Serialize(new TokenRequest { Login = username, Password = "password" });
+            var body = JsonConvert.SerializeObject(new TokenRequest { Login = username, Password = "password" });
             var content = new StringContent(body, Encoding.UTF8, "application/json");
             content.Headers.Add("flowId", scenarioId);
             var result = httpClient.PostAsync("user/token", content).Result;
@@ -26,7 +26,7 @@ namespace Requester.Requests
 
         public void Logout(string token, string scenarioId)
         {
-            var body = JSON.Serialize(new LogoutRequest { Token = token });
+            var body = JsonConvert.SerializeObject(new LogoutRequest { Token = token });
             var content = new StringContent(body, Encoding.UTF8, "application/json");
             content.Headers.Add("flowId", scenarioId);
             var result = httpClient.PostAsync("user/logout", content).Result;

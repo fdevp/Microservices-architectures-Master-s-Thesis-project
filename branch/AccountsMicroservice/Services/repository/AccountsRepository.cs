@@ -55,5 +55,18 @@ namespace AccountsMicroservice.Repository
         {
             this.accounts = accounts.ToDictionary(a => a.Id, a => a);
         }
+        
+        public void SetupAppend(IEnumerable<Repository.Account> accounts)
+        {
+            if (this.accounts == null)
+            {
+                this.accounts = new Dictionary<string, Account>();
+            }
+
+            foreach (var account in accounts)
+            {
+                this.accounts.TryAdd(account.Id, account);
+            }
+        }
     }
 }

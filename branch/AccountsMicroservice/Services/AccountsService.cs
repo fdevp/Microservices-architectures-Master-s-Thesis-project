@@ -91,6 +91,13 @@ namespace AccountsMicroservice
             return Task.FromResult(new Empty());
         }
 
+        public override Task<Empty> SetupAppend(SetupRequest request, ServerCallContext context)
+        {
+            var accounts = request.Accounts.Select(a => mapper.Map<Repository.Account>(a));
+            accountsRepository.SetupAppend(accounts);
+            return Task.FromResult(new Empty());
+        }
+
         private CreateTransactionRequest CreateRequest(string flowId, Transfer request)
         {
             var account = accountsRepository.Get(request.AccountId);

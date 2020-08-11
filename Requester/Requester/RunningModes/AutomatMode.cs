@@ -1,4 +1,4 @@
-﻿using Jil;
+﻿using Newtonsoft.Json;
 using Requester.Data;
 using System;
 using System.Collections.Generic;
@@ -30,7 +30,9 @@ namespace Requester.RunningModes
         private void Perform(int index)
         {
             var currentTime = automatSettings.CurrentDate;
-            var data = GetData(index);
+
+            var scenarioId = Guid.NewGuid().ToString();
+            var data = GetData(index, scenarioId);
             var toPay = data.Payments.Where(p => p.LastRepayTimestamp + p.Interval < currentTime);
 
             var balancesDict = data.Balances.ToDictionary(k => k.Id, v => v);
@@ -43,17 +45,27 @@ namespace Requester.RunningModes
             var transfers = withSufficientBalance.Select(p => CreateTransfer(p, loansDict.ContainsKey(p.Id) ? loansDict[p.Id] : null)).ToArray();
             var messages = withInsufficientBalance.Select(p => CreateMessage(p, balancesDict[p.AccountId])).ToArray();
             var repaidInstalments = data.Loans.Where(l => paidIds.Contains(l.PaymentId)).Select(l => l.Id).ToArray();
+
+            var batchProcess = new BatchProcess { Transfers = transfers, Messages = messages, RepaidInstalmentsIds = repaidInstalments };
+            SendData(batchProcess, scenarioId);
         }
 
-        private BatchData GetData(int index)
+        private void SendData(BatchProcess batchProcess, string scenarioId)
         {
-            var url = $"Batch?part={index}&total={automatSettings.TotalCount}";
+            var body = JsonConvert.SerializeObject(batchProcess);
+            var content = new StringContent(body, Encoding.UTF8, "application/json");
+            content.Headers.Add("flowId", scenarioId);
+            var result = httpClient.PostAsync("batch", content).Result;
+        }
+
+        private BatchData GetData(int index, string scenarioId)
+        {
+            var url = $"Batch?part={index + 1}&total={automatSettings.TotalCount}";
             var request = new HttpRequestMessage(HttpMethod.Get, url);
-            var scenarioId = Guid.NewGuid().ToString();
             request.Headers.Add("flowId", scenarioId);
             var result = httpClient.SendAsync(request).Result;
             var response = result.Content.ReadAsStringAsync().Result;
-            return JSON.Deserialize<BatchData>(response);
+            return JsonConvert.DeserializeObject<BatchData>(response);
         }
 
         private AccountTransfer CreateTransfer(PaymentDTO payment, LoanDTO loan)
@@ -62,6 +74,7 @@ namespace Requester.RunningModes
             return new AccountTransfer
             {
                 AccountId = payment.AccountId,
+                PaymentId = payment.Id,
                 Amount = payment.Amount,
                 Recipient = payment.Recipient,
                 Title = title
@@ -77,7 +90,7 @@ namespace Requester.RunningModes
         private MessageDTO CreateMessage(PaymentDTO payment, BalanceDTO balance)
         {
             var content = $"There is insufficient balance on account {balance.Id} to repay payment {payment.Id}. Required balance: {payment.Amount}, current balance: {balance.Amount}";
-            return new MessageDTO { UserId = , Content = content };
+            return new MessageDTO { UserId = balance.UserId, Content = content };
         }
     }
 }

@@ -72,8 +72,12 @@ namespace APIGateway.Controllers
         [Route("setup")]
         public async Task Setup(AccountsSetup setup)
         {
-            var request = mapper.Map<SetupRequest>(setup);
-            await accountsWriteClient.SetupAsync(request);
+            for (int i = 0; i < setup.Accounts.Length; i += 10000)
+            {
+                var portion = setup.Accounts.Skip(i).Take(10000).ToArray();
+                var request = mapper.Map<SetupRequest>(new AccountsSetup { Accounts = portion });
+                await accountsWriteClient.SetupAppendAsync(request);
+            }
         }
     }
 }

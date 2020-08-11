@@ -1,4 +1,5 @@
 ﻿using DataGenerator.DTO;
+using DataGenerator.Generators;
 using DataGenerator.Rnd;
 using Jil;
 using System;
@@ -11,6 +12,16 @@ namespace DataGenerator
     {
         static void Main(string[] args)
         {
+            var automatSetup = AutomatDataGenerator.Generate(20000, new DateTime(2015, 1, 1), new DateTime(2020, 8, 1), new DateTime(2020, 8, 1));
+            File.WriteAllText("loans.json", JSON.Serialize(automatSetup.LoansSetup));
+            File.WriteAllText("accounts.json", JSON.Serialize(automatSetup.AccountsSetup));
+            File.WriteAllText("payments.json", JSON.Serialize(automatSetup.PaymentsSetup));
+
+            automatSetup.AccountsSetup = new AccountsSetup { Accounts = new AccountDTO[0] };
+            automatSetup.LoansSetup = new LoansSetup { Loans = new LoanDTO[0] };
+            automatSetup.PaymentsSetup = new PaymentsSetup { Payments = new PaymentDTO[0] };
+            File.WriteAllText("setup.json", JSON.Serialize(automatSetup));
+            /*
             var businessUsersSetup = BusinessUserDataGenerator.Generate(200, new DateTime(2015, 1, 1), new DateTime(2020, 8, 1));
             var individualUsersSetup = IndividualUserDataGenerator.Generate(1000, new DateTime(2015, 1, 1), new DateTime(2020, 8, 1));
             var additionalUsers = new UserDTO[2] {
@@ -18,16 +29,11 @@ namespace DataGenerator
                 new UserDTO { Id = Guid.NewGuid().ToString(), Login = "automat", Password = "password" }
             };
 
-            var transactionsSetup = new TransactionsSetup { Transactions = businessUsersSetup.TransactionsSetup.Transactions.Concat(individualUsersSetup.TransactionsSetup.Transactions).ToArray() };
-            var setupAll = new SetupAll
-            {
-                UsersSetup = new UsersSetup { Users = businessUsersSetup.UsersSetup.Users.Concat(individualUsersSetup.UsersSetup.Users).Concat(additionalUsers).ToArray() },
-                AccountsSetup = new AccountsSetup { Accounts = businessUsersSetup.AccountsSetup.Accounts.Concat(individualUsersSetup.AccountsSetup.Accounts).ToArray() },
-                CardsSetup = new CardsSetup { Cards = businessUsersSetup.CardsSetup.Cards.Concat(individualUsersSetup.CardsSetup.Cards).ToArray() },
-                LoansSetup = new LoansSetup { Loans = businessUsersSetup.LoansSetup.Loans.Concat(individualUsersSetup.LoansSetup.Loans).ToArray() },
-                PaymentsSetup = new PaymentsSetup { Payments = businessUsersSetup.PaymentsSetup.Payments.Concat(individualUsersSetup.PaymentsSetup.Payments).ToArray() },
-                TransactionsSetup = new TransactionsSetup { Transactions = new TransactionDTO[0] }
-            };
+            var transactionsSetup = businessUsersSetup.TransactionsSetup.Concat(individualUsersSetup.TransactionsSetup);
+            businessUsersSetup.TransactionsSetup = new TransactionsSetup();
+            individualUsersSetup.TransactionsSetup = new TransactionsSetup();
+
+            var setupAll = businessUsersSetup.Concat(individualUsersSetup);
 
             File.WriteAllText("setup.json", JSON.Serialize(setupAll));
             File.WriteAllText("transactions.json", JSON.Serialize(transactionsSetup));
@@ -42,7 +48,7 @@ namespace DataGenerator
             File.WriteAllText("userActivityReportScenario.json", userActivityReportScenario);
 
             var overallReportScenario = ScenarioGenerator.OverallReportScenario(10, 100, new DateTime(2015, 1, 1), new DateTime(2020, 8, 1));
-            File.WriteAllText("overallReportScenario.json", overallReportScenario);
+            File.WriteAllText("overallReportScenario.json", overallReportScenario);*/
         }
     }
 }
