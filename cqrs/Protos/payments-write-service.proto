@@ -9,6 +9,7 @@ package PaymentsWriteMicroservice;
 service PaymentsWrite {
   rpc Create (CreatePaymentRequest) returns (CreatePaymentResult);
   rpc Cancel (CancelPaymentsRequest) returns (Empty);
+  rpc UpdateRepayTimestamp (UpdateRepayTimestampRequest) returns (Empty);
   rpc Setup(SetupRequest) returns (Empty);
   rpc SetupAppend(SetupRequest) returns (Empty);
 }
@@ -20,6 +21,12 @@ message CreatePaymentRequest {
   int64 interval = 4;
   string accountId = 5;
   string recipient = 6;
+}
+
+message UpdateRepayTimestampRequest {
+  string flowId = 1;
+  repeated string ids = 2;
+  int64 repayTimestamp = 3;
 }
 
 message CreatePaymentResult {

@@ -35,6 +35,14 @@ namespace PaymentsWriteMicroservice
             return Task.FromResult(new CreatePaymentResult { Payment = mapper.Map<Payment>(payment) });
         }
 
+        public override Task<Empty> UpdateRepayTimestamp(UpdateRepayTimestampRequest request, ServerCallContext context)
+        {
+            paymentsRepository.UpdateLastRepayTimestamp(request.Ids, request.RepayTimestamp);
+            var updatedPayments = request.Ids.Select(id => paymentsRepository.Get(id)).ToArray();
+            projectionChannel.Publish(request.FlowId.ToString(), new DataProjection<Repository.Payment, string> { Upsert = updatedPayments });
+            return Task.FromResult(new Empty());
+        }
+
         public override Task<Empty> Cancel(CancelPaymentsRequest request, ServerCallContext context)
         {
             foreach (var id in request.Ids)

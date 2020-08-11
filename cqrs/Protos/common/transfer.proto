@@ -5,4 +5,6 @@ message Transfer {
   string recipient = 3;
   string title = 4;
   float amount = 5;
+  string cardId = 6;
+  string paymentId = 7;
 }

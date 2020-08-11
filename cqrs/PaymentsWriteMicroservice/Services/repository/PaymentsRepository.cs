@@ -26,6 +26,12 @@ namespace PaymentsWriteMicroservice.Repository
             return payments.Values.Where(p => accountsSet.Contains(p.AccountId)).ToArray();
         }
 
+        public void UpdateLastRepayTimestamp(IEnumerable<string> paymentsIds, long repayTimestamp)
+        {
+            foreach (var id in paymentsIds)
+                payments[id].UpdateLastRepayTimestamp(repayTimestamp);
+        }
+
         public Payment Create(float amount, long startTimestamp, long interval, string accountId, string recipient)
         {
             var payment = new Repository.Payment(Guid.NewGuid().ToString(), amount, startTimestamp, 0, interval, PaymentStatus.ACTIVE, accountId, recipient);

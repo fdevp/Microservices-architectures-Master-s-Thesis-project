@@ -52,6 +52,12 @@ namespace PaymentsMicroservice
             return WithLoans(payments, request.FlowId);
         }
 
+        public override Task<Empty> UpdateRepayTimestamp(UpdateRepayTimestampRequest request, ServerCallContext context)
+        {
+            paymentsRepository.UpdateLastRepayTimestamp(request.Ids, request.RepayTimestamp);
+            return Task.FromResult(new Empty());
+        }
+
         public override Task<CreatePaymentResult> Create(CreatePaymentRequest request, ServerCallContext context)
         {
             var payment = paymentsRepository.Create(request.Amount, request.StartTimestamp, request.Interval, request.AccountId, request.Recipient);

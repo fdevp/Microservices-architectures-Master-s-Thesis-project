@@ -22,6 +22,12 @@ namespace PaymentsMicroservice.Repository
 
         public string[] GetIds() => payments.Values.Select(p => p.Id).ToArray();
 
+        public void UpdateLastRepayTimestamp(IEnumerable<string> paymentsIds, long repayTimestamp)
+        {
+            foreach(var id in paymentsIds)
+                payments[id].UpdateLastRepayTimestamp(repayTimestamp);
+        }
+
         public Payment[] GetByAccounts(IEnumerable<string> accountIds)
         {
             var accountsSet = accountIds.ToHashSet();

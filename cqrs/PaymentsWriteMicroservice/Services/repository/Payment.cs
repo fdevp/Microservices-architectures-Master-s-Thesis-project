@@ -5,7 +5,7 @@ namespace PaymentsWriteMicroservice.Repository
         public string Id { get; }
         public float Amount { get; }
         public long StartTimestamp { get; }
-        public long LastRepayTimestamp { get; }
+        public long LastRepayTimestamp { get; private set; }
         public long Interval { get; }
         public PaymentStatus Status { get; private set; }
         public string AccountId { get; }
@@ -21,6 +21,11 @@ namespace PaymentsWriteMicroservice.Repository
             Status = status;
             AccountId = accountId;
             Recipient = recipient;
+        }
+
+        public void UpdateLastRepayTimestamp(long repayTimestamp)
+        {
+            this.LastRepayTimestamp = repayTimestamp;
         }
 
         public void Cancel()

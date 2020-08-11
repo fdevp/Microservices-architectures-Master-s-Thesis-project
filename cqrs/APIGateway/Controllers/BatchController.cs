@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -11,12 +12,14 @@ using LoansWriteMicroservice;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using PaymentsReadMicroservice;
+using PaymentsWriteMicroservice;
 using UsersMicroservice;
 using static AccountsReadMicroservice.AccountsRead;
 using static AccountsWriteMicroservice.AccountsWrite;
 using static LoansReadMicroservice.LoansRead;
 using static LoansWriteMicroservice.LoansWrite;
 using static PaymentsReadMicroservice.PaymentsRead;
+using static PaymentsWriteMicroservice.PaymentsWrite;
 using static UsersMicroservice.Users;
 
 namespace APIGateway.Controllers
@@ -30,6 +33,7 @@ namespace APIGateway.Controllers
         private readonly AccountsReadClient accountsReadClient;
         private readonly LoansReadClient loansReadClient;
         private readonly PaymentsReadClient paymentsReadClient;
+        private readonly PaymentsWriteClient paymentsWriteClient;
         private readonly UsersClient usersClient;
         private readonly LoansWriteClient loansWriteClient;
         private readonly AccountsWriteClient accountsWriteClient;
@@ -38,6 +42,7 @@ namespace APIGateway.Controllers
          AccountsReadClient accountsReadClient,
          LoansReadClient loansReadClient,
          PaymentsReadClient paymentsReadClient,
+         PaymentsWriteClient paymentsWriteClient,
          UsersClient usersClient,
          LoansWriteClient loansWriteClient,
          AccountsWriteClient accountsWriteClient)
@@ -47,6 +52,7 @@ namespace APIGateway.Controllers
             this.accountsReadClient = accountsReadClient;
             this.loansReadClient = loansReadClient;
             this.paymentsReadClient = paymentsReadClient;
+            this.paymentsWriteClient = paymentsWriteClient;
             this.usersClient = usersClient;
             this.loansWriteClient = loansWriteClient;
             this.accountsWriteClient = accountsWriteClient;
@@ -111,6 +117,13 @@ namespace APIGateway.Controllers
                 parallelTasks.Add(Task.Run(async () =>
                 {
                     await accountsWriteClient.BatchTransferAsync(new BatchTransferRequest { FlowId = flowId, Transfers = { transfers } });
+                }));
+
+                parallelTasks.Add(Task.Run(async () =>
+                {
+                    var paymentIds = transfers.Select(t => t.PaymentId);
+                    var request = new UpdateRepayTimestampRequest { FlowId = flowId, Ids = { paymentIds }, RepayTimestamp = DateTime.UtcNow.Ticks };
+                    await paymentsWriteClient.UpdateRepayTimestampAsync(request);
                 }));
             }
 
