@@ -81,8 +81,6 @@ namespace BatchesBranchMicroservice
                 })));
             }
 
-
-
             if (request.RepaidInstalmentsIds.Count > 0)
                 tasks.Add(Task.Run(async () => await loansClient.BatchRepayInstalmentsAsync(new BatchRepayInstalmentsRequest
                 {
