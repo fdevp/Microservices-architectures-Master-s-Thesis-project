@@ -12,6 +12,7 @@ service AccountsWrite {
   rpc Transfer (TransferRequest) returns (TransferResponse);
   rpc BatchTransfer (BatchTransferRequest) returns (BatchTransferResponse);
   rpc Setup(SetupRequest) returns (Empty);
+  rpc SetupAppend(SetupRequest) returns (Empty);
 }
 
 message TransferRequest {

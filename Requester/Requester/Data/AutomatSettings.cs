@@ -8,8 +8,8 @@ namespace Requester.Data
     {
         public int TotalCount { get; set; }
         public int Offset { get; set; }
-        public TimeSpan TimeDelta { get; set; }
-        public DateTime CurrentDate { get; set; }
-        public DateTime DateLimit { get; set; }
+        public DateTime StartTime { get; set; }
+        public DateTime EndTime { get; set; }
+        public TimeSpan SleepTime { get; set; }
     }
 }

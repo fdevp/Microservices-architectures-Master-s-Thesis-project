@@ -50,11 +50,12 @@ namespace APIGateway.Controllers
             var transfers = data.Transfers.Select(t => mapper.Map<Transfer>(t));
             var request = new ProcessBatchRequest
             {
+                FlowId = HttpContext.Items["flowId"].ToString(),
+                RepayTimestamp = data.RepayTimestamp.Ticks,
                 Transfers = { transfers },
                 Messages = { messages },
                 RepaidInstalmentsIds = { data.RepaidInstalmentsIds }
             };
-            request.FlowId = HttpContext.Items["flowId"].ToString();
 
             await batchesBranchClient.ProcessAsync(request);
         }

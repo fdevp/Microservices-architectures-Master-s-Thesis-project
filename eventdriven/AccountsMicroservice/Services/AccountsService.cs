@@ -51,7 +51,7 @@ namespace AccountsMicroservice
         {
             var balances = inputEvent.Ids.Select(id => accountsRepository.Get(id))
                 .Where(account => account != null)
-                .Select(account => new AccountBalance { Id = account.Id, Balance = account.Balance })
+                .Select(account => new AccountBalance { Id = account.Id, UserId = account.UserId, Balance = account.Balance })
                 .ToArray();
             publishingRouter.Publish(context.ReplyTo, new SelectedBalancesEvent { Balances = balances }, context.FlowId);
             return Task.CompletedTask;
@@ -74,7 +74,7 @@ namespace AccountsMicroservice
 
             var transfer = TransferToCreateTransactionEvent(inputEvent.Transfer);
             accountsRepository.Transfer(inputEvent.Transfer.AccountId, inputEvent.Transfer.Recipient, inputEvent.Transfer.Amount);
-            
+
             //info do kogo ma wrocic
             publishingRouter.Publish(Queues.Transactions, transfer, context.FlowId, context.ReplyTo);
             return Task.CompletedTask;
@@ -104,6 +104,13 @@ namespace AccountsMicroservice
         public Task Setup(MessageContext context, SetupAccountsEvent inputEvent)
         {
             accountsRepository.Setup(inputEvent.Accounts);
+            return Task.CompletedTask;
+        }
+
+        [EventHandlingMethod(typeof(SetupAppendAccountsEvent))]
+        public Task SetupAppend(MessageContext context, SetupAppendAccountsEvent inputEvent)
+        {
+            accountsRepository.SetupAppend(inputEvent.Accounts);
             return Task.CompletedTask;
         }
 

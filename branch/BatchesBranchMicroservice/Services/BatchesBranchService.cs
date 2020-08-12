@@ -65,12 +65,21 @@ namespace BatchesBranchMicroservice
 
 
             if (request.Transfers.Count > 0)
+            {
                 tasks.Add(Task.Run(async () => await accountsClient.BatchTransferAsync(new BatchTransferRequest
                 {
                     FlowId = request.FlowId,
                     Transfers = { request.Transfers }
                 })));
 
+                var paymentIds = request.Transfers.Select(t => t.PaymentId);
+                tasks.Add(Task.Run(async () => await paymentsClient.UpdateRepayTimestampAsync(new UpdateRepayTimestampRequest
+                {
+                    FlowId = request.FlowId,
+                    Ids = { paymentIds },
+                    RepayTimestamp = request.RepayTimestamp
+                })));
+            }
 
             if (request.RepaidInstalmentsIds.Count > 0)
                 tasks.Add(Task.Run(async () => await loansClient.BatchRepayInstalmentsAsync(new BatchRepayInstalmentsRequest

@@ -73,12 +73,16 @@ namespace APIGateway.Controllers
             return Task.CompletedTask;
         }
 
-        [HttpPost]
+         [HttpPost]
         [Route("setup")]
-        public Task Setup(AccountsSetup setup)
+        public Task Setup(LoansSetup setup)
         {
-            var payload = mapper.Map<SetupAccountsEvent>(setup);
-            publishingRouter.Publish(Queues.Accounts, payload, null);
+            for (int i = 0; i < setup.loans.Length; i += 10000)
+            {
+                var portion = setup.loans.Skip(i).Take(10000).ToArray();
+                var accountsEvent = new SetupAppendAccountsEvent { Accounts = portion.Select(a => mapper.Map<Account>(a)).ToArray() };
+                this.publishingRouter.Publish(Queues.Accounts, accountsEvent, null);
+            }
             return Task.CompletedTask;
         }
     }

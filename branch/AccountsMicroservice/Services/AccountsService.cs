@@ -43,7 +43,7 @@ namespace AccountsMicroservice
         {
             var balances = request.Ids.Select(id => accountsRepository.Get(id))
                 .Where(account => account != null)
-                .Select(account => new AccountBalance { Id = account.Id, Balance = account.Balance });
+                .Select(account => new AccountBalance { Id = account.Id, UserId = account.UserId, Balance = account.Balance });
             return Task.FromResult(new GetBalancesResponse { Balances = { balances } });
         }
 
@@ -88,6 +88,13 @@ namespace AccountsMicroservice
         {
             var accounts = request.Accounts.Select(a => mapper.Map<Repository.Account>(a));
             accountsRepository.Setup(accounts);
+            return Task.FromResult(new Empty());
+        }
+
+        public override Task<Empty> SetupAppend(SetupRequest request, ServerCallContext context)
+        {
+            var accounts = request.Accounts.Select(a => mapper.Map<Repository.Account>(a));
+            accountsRepository.SetupAppend(accounts);
             return Task.FromResult(new Empty());
         }
 

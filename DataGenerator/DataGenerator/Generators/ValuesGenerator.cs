@@ -21,7 +21,7 @@ namespace DataGenerator
                 var name = $"{personGenerator.GenerateRandomFirstName().ToLower()}_{personGenerator.GenerateRandomLastName().ToLower()}";
                 while (generated.Contains(name))
                     name = $"{personGenerator.GenerateRandomFirstName().ToLower()}_{personGenerator.GenerateRandomLastName().ToLower()}";
-
+                generated.Add(name);
                 yield return new UserDTO { Id = Guid.NewGuid().ToString(), Login = name, Password = "password" };
             }
         }
@@ -56,61 +56,75 @@ namespace DataGenerator
             }
         }
 
-        public static IEnumerable<PaymentDTO> CreatePayments(AccountDTO[] accounts, PaymentStatus status, IRnd<string> recipientRnd, IRnd<int> countRnd, IRnd<float> amountRnd, IRnd<DateTime> startDateRnd, IRnd<TimeSpan> intervalRnd)
+        public static IEnumerable<PaymentDTO> CreatePayments(AccountDTO[] accounts, PaymentStatus status, IRnd<string> recipientRnd,
+            IRnd<int> countRnd, IRnd<float> amountRnd, IRnd<DateTime> startDateRnd, Func<DateTime> datetimeNow, IRnd<TimeSpan> intervalRnd)
         {
             foreach (var account in accounts)
             {
-                yield return new PaymentDTO
+                var count = countRnd.Next();
+                for (int i = 0; i < count; i++)
                 {
-                    Id = Guid.NewGuid().ToString(),
-                    AccountId = account.Id,
-                    Amount = amountRnd.Next(),
-                    StartTimestamp = startDateRnd.Next(),
-                    Interval = intervalRnd.Next(),
-                    Status = status,
-                    Recipient = recipientRnd.Next(account.Id)
-                };
-
+                    var interval = intervalRnd.Next();
+                    var startTimestamp = startDateRnd.Next();
+                    var repayDiff = (int)((datetimeNow() - startTimestamp) / interval);
+                    var lastRepayTimestamp = startTimestamp + repayDiff * interval;
+                    yield return new PaymentDTO
+                    {
+                        Id = Guid.NewGuid().ToString(),
+                        AccountId = account.Id,
+                        Amount = amountRnd.Next(),
+                        StartTimestamp = startTimestamp,
+                        LastRepayTimestamp = lastRepayTimestamp,
+                        Interval = interval,
+                        Status = status,
+                        Recipient = recipientRnd.Next(account.Id)
+                    };
+                }
             }
         }
 
-        public static IEnumerable<(LoanDTO, PaymentDTO)> CreateLoans(AccountDTO[] loansAccounts, IRnd<float> totalRnd, LoanInstalmentsRnd instalmentsRnd, Rnd<int> paidInstalmentsRnd, IRnd<TimeSpan> intervalRnd, IRnd<string> recipientRnd)
+        public static IEnumerable<(LoanDTO, PaymentDTO)> CreateLoans(AccountDTO[] loansAccounts, IRnd<int> countRnd, IRnd<float> totalRnd,
+            LoanInstalmentsRnd instalmentsRnd, Rnd<int> paidInstalmentsRnd, IRnd<TimeSpan> intervalRnd, Func<DateTime> datetimeNow, IRnd<string> recipientRnd)
         {
             foreach (var account in loansAccounts)
             {
-                var totalAmount = totalRnd.Next();
-                var instalments = instalmentsRnd.Next(totalAmount);
-                paidInstalmentsRnd.Max = instalments;
-                var paidInstalments = paidInstalmentsRnd.Next();
-                var paidAmount = (float)paidInstalments / instalments * totalAmount;
-
-                var loan = new LoanDTO
+                var count = countRnd.Next();
+                for (int i = 0; i < count; i++)
                 {
-                    Id = Guid.NewGuid().ToString(),
-                    Instalments = instalments,
-                    TotalAmount = totalAmount,
-                    PaidAmount = paidAmount,
-                    AccountId = account.Id
-                };
+                    var totalAmount = totalRnd.Next();
+                    var instalments = instalmentsRnd.Next(totalAmount);
+                    paidInstalmentsRnd.Max = instalments;
+                    var paidInstalments = paidInstalmentsRnd.Next();
+                    var paidAmount = (float)paidInstalments / instalments * totalAmount;
 
+                    var loan = new LoanDTO
+                    {
+                        Id = Guid.NewGuid().ToString(),
+                        Instalments = instalments,
+                        TotalAmount = totalAmount,
+                        PaidAmount = paidAmount,
+                        AccountId = account.Id
+                    };
 
-                var interval = intervalRnd.Next();
-                var start = DateTime.UtcNow - interval * paidInstalments;
-                var recipient = recipientRnd.Next(account.Id);
+                    var interval = intervalRnd.Next();
+                    var start = datetimeNow() - interval * paidInstalments;
+                    var recipient = recipientRnd.Next(account.Id);
+                    var lastRepayTimestamp = start + interval * paidInstalments;
+                    var payment = new PaymentDTO
+                    {
+                        Id = Guid.NewGuid().ToString(),
+                        AccountId = account.Id,
+                        Amount = totalAmount / instalments,
+                        Interval = interval,
+                        StartTimestamp = start,
+                        LastRepayTimestamp = lastRepayTimestamp,
+                        Status = PaymentStatus.ACTIVE,
+                        Recipient = recipient
+                    };
 
-                var payment = new PaymentDTO
-                {
-                    Id = Guid.NewGuid().ToString(),
-                    AccountId = account.Id,
-                    Amount = totalAmount / instalments,
-                    Interval = interval,
-                    StartTimestamp = start,
-                    Status = PaymentStatus.ACTIVE,
-                    Recipient = recipient
-                };
-
-                loan.PaymentId = payment.Id;
-                yield return (loan, payment);
+                    loan.PaymentId = payment.Id;
+                    yield return (loan, payment);
+                }
             }
         }
 

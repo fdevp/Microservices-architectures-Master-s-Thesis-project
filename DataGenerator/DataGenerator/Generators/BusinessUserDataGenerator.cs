@@ -39,7 +39,7 @@ namespace DataGenerator
                 AccountsSetup = new AccountsSetup { Accounts = accounts },
                 CardsSetup = new CardsSetup { Cards = cards },
                 LoansSetup = new LoansSetup { Loans = loansAndPayments.Select(x => x.loan).ToArray() },
-                PaymentsSetup = new PaymentsSetup { Payments = loansAndPayments.Select(x => x.payment).ToArray() },
+                PaymentsSetup = new PaymentsSetup { Payments = loansAndPayments.Select(x => x.payment).Concat(activePayments).ToArray() },
                 UsersSetup = new UsersSetup { Users = users },
                 TransactionsSetup = new TransactionsSetup { Transactions = allTransactions },
             };
@@ -57,6 +57,8 @@ namespace DataGenerator
             var amountRnd = new RndBuilder<float>(new CurrencyRnd())
                 .Min(5000)
                 .Max(2000000)
+                .DistributionValues(new float[] { 10000, 30000, 50000, 100000, 300000, 800000, 1500000 })
+                .DistributionProbabilities(new int[] { 20, 25, 20, 15, 5, 5, 5, 5 })
                 .Build();
 
             return ValuesGenerator.CreateAccounts(users, countRnd, amountRnd).ToArray();
@@ -90,7 +92,7 @@ namespace DataGenerator
               .DistributionProbabilities(new[] { 10, 20, 65, 5 })
               .Build();
 
-            return ValuesGenerator.CreatePayments(accounts, PaymentStatus.ACTIVE, recipientRnd, countRnd, amountRnd, startDateRnd, intervalRnd).ToArray();
+            return ValuesGenerator.CreatePayments(accounts, PaymentStatus.ACTIVE, recipientRnd, countRnd, amountRnd, startDateRnd, () => DateTime.UtcNow, intervalRnd).ToArray();
         }
 
         static (LoanDTO loan, PaymentDTO payment)[] ActiveLoans(AccountDTO[] accounts, IRnd<string> recipientRnd)
@@ -112,7 +114,7 @@ namespace DataGenerator
               .DistributionValues(new[] { TimeSpan.FromDays(14), TimeSpan.FromDays(30), TimeSpan.FromDays(60) })
               .DistributionProbabilities(new[] { 20, 70, 10 })
               .Build();
-            return ValuesGenerator.CreateLoans(accounts, totalRnd, instalmentsRnd, paidInstalmentsRnd, intervalRnd, recipientRnd).ToArray();
+            return ValuesGenerator.CreateLoans(accounts, countRnd, totalRnd, instalmentsRnd, paidInstalmentsRnd, intervalRnd, () => DateTime.UtcNow, recipientRnd).ToArray();
         }
 
         static TransactionDTO[] AccountsTransactions(AccountDTO[] accounts, IRnd<string> recipientRnd, IRnd<DateTime> timestampRnd)

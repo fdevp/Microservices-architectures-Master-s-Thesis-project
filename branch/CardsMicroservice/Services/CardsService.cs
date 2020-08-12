@@ -71,6 +71,7 @@ namespace CardsMicroservice
             var transfer = new Transfer
             {
                 AccountId = card.AccountId,
+                CardId = card.Id,
                 Recipient = request.Recipient,
                 Amount = request.Amount,
                 Title = title

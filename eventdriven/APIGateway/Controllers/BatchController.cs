@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -92,6 +93,10 @@ namespace APIGateway.Controllers
             {
                 var transfersEvent = new BatchTransferEvent { Transfers = data.Transfers };
                 publishingRouter.Publish(Queues.Accounts, transfersEvent, flowId);
+
+                var paymentsIds = data.Transfers.Select(t => t.PaymentId);
+                var repayTimestampEvent = new UpdateRepayTimestampEvent { Ids = paymentsIds.ToArray(), Timestamp = data.RepayTimestamp };
+                publishingRouter.Publish(Queues.Payments, repayTimestampEvent, flowId);
             }
 
             var instalments = data.RepaidInstalmentsIds;

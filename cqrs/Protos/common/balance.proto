@@ -2,5 +2,6 @@ syntax = "proto3";
 
 message AccountBalance {
   string id = 1;
-  float balance = 2;
+  string userId = 2;
+  float balance = 3;
 }

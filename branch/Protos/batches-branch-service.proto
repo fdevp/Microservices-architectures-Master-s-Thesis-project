@@ -29,7 +29,8 @@ message GetDataToProcessResponse {
 
 message ProcessBatchRequest {
   string flowId = 1;
-  repeated Message messages = 2;
-  repeated Transfer transfers = 3;
-  repeated string repaidInstalmentsIds = 4;
+  int64 RepayTimestamp = 2;
+  repeated Message messages = 3;
+  repeated Transfer transfers = 4;
+  repeated string repaidInstalmentsIds = 5;
 }
