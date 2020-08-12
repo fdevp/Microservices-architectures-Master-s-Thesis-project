@@ -31,20 +31,17 @@ namespace LoansWriteMicroservice
 
         public override async Task<Empty> BatchRepayInstalments(BatchRepayInstalmentsRequest request, ServerCallContext context)
         {
-            var paymentsToFinish = new List<string>();
-            foreach (var id in request.Ids)
-            {
-                var totalAmountPaid = loansRepository.RepayInstalment(id);
-                if (totalAmountPaid)
-                    paymentsToFinish.Add(loansRepository.Get(id).PaymentId);
-            }
+            var paymentsToFinish = RepayInstalments(request);
 
-            var cancelPaymentsRequest = new CancelPaymentsRequest
+            if (paymentsToFinish.Any())
             {
-                FlowId = request.FlowId,
-                Ids = { paymentsToFinish }
-            };
-            await paymentsClient.CancelAsync(cancelPaymentsRequest);
+                var cancelPaymentsRequest = new CancelPaymentsRequest
+                {
+                    FlowId = request.FlowId,
+                    Ids = { paymentsToFinish }
+                };
+                await paymentsClient.CancelAsync(cancelPaymentsRequest);
+            }
 
             var repaidInstalments = request.Ids.Select(id => loansRepository.Get(id)).ToArray();
             projectionChannel.Publish(request.FlowId.ToString(), new DataProjection<Repository.Loan, string> { Upsert = repaidInstalments });
@@ -65,6 +62,16 @@ namespace LoansWriteMicroservice
             loansRepository.SetupAppend(loans);
             projectionChannel.Publish(null, new DataProjection<Repository.Loan, string> { Upsert = loans.ToArray() });
             return Task.FromResult(new Empty());
+        }
+
+        private IEnumerable<string> RepayInstalments(BatchRepayInstalmentsRequest request)
+        {
+            foreach (var id in request.Ids)
+            {
+                var totalAmountPaid = loansRepository.RepayInstalment(id);
+                if (totalAmountPaid)
+                    yield return loansRepository.Get(id).PaymentId;
+            }
         }
     }
 }

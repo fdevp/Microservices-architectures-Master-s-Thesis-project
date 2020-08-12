@@ -64,8 +64,11 @@ namespace LoansMicroservice
         public Task BatchRepayInstalments(MessageContext context, BatchRepayInstalmentsEvent inputEvent)
         {
             var paymentsToFinish = RepayInstalments(inputEvent);
-            var cancelPaymentsEvent = new CancelPaymentsEvent { Ids = paymentsToFinish.ToArray() };
-            publishingRouter.Publish(Queues.Payments, cancelPaymentsEvent, context.FlowId);
+            if (paymentsToFinish.Any())
+            {
+                var cancelPaymentsEvent = new CancelPaymentsEvent { Ids = paymentsToFinish.ToArray() };
+                publishingRouter.Publish(Queues.Payments, cancelPaymentsEvent, context.FlowId);
+            }
             return Task.CompletedTask;
         }
 

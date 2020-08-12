@@ -48,7 +48,7 @@ namespace AccountsWriteMicroservice
             return new TransferResponse { Transaction = result.Transaction };
         }
 
-        public override async Task<BatchTransferResponse> BatchTransfer(BatchTransferRequest request, Grpc.Core.ServerCallContext context)
+        public override async Task<Empty> BatchTransfer(BatchTransferRequest request, Grpc.Core.ServerCallContext context)
         {
             if (request.Transfers.Any(r => !accountsRepository.CanTransfer(r.AccountId, r.Recipient, r.Amount)))
                 throw new ArgumentException("Cannot transfer founds.");
@@ -64,7 +64,7 @@ namespace AccountsWriteMicroservice
             var affectedAccounts = ApplyBatchToRepository(request);
             projectionChannel.Publish(request.FlowId.ToString(), new DataProjection<Repository.Account, string> { Upsert = affectedAccounts.ToArray() });
 
-            return new BatchTransferResponse { Transactions = { { result.Transactions } } };
+            return new Empty();
         }
 
         private IEnumerable<Repository.Account> ApplyBatchToRepository(BatchTransferRequest request)

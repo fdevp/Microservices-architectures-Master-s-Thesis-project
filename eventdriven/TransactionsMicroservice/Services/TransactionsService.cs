@@ -53,9 +53,6 @@ namespace TransactionsMicroservice
             var transactions = inputEvent.Requests
                 .Select(r => transactionsRepository.Create(r.Title, r.Amount, r.Recipient, r.Sender, r.PaymentId, r.CardId))
                 .ToArray();
-
-            if (context.ReplyTo != null)
-                publishingRouter.Publish(context.ReplyTo, new SelectedTransactionsEvent { Transactions = transactions }, context.FlowId);
             return Task.CompletedTask;
         }
 

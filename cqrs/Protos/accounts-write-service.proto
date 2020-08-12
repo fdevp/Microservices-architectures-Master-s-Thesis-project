@@ -10,7 +10,7 @@ package AccountsMicroservice;
 
 service AccountsWrite {
   rpc Transfer (TransferRequest) returns (TransferResponse);
-  rpc BatchTransfer (BatchTransferRequest) returns (BatchTransferResponse);
+  rpc BatchTransfer (BatchTransferRequest) returns (Empty);
   rpc Setup(SetupRequest) returns (Empty);
   rpc SetupAppend(SetupRequest) returns (Empty);
 }
@@ -27,10 +27,6 @@ message TransferResponse {
 message BatchTransferRequest {
   string flowId = 1;
   repeated Transfer transfers = 2;
-}
-
-message BatchTransferResponse {
-  repeated Transaction transactions = 1;
 }
 
 message SetupRequest {

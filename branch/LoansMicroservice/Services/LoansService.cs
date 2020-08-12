@@ -62,20 +62,16 @@ namespace LoansMicroservice
 
         public override async Task<Empty> BatchRepayInstalments(BatchRepayInstalmentsRequest request, ServerCallContext context)
         {
-            var paymentsToFinish = new List<string>();
-            foreach (var id in request.Ids)
+            var paymentsToFinish = RepayInstalments(request);
+            if (paymentsToFinish.Any())
             {
-                var totalAmountPaid = loansRepository.RepayInstalment(id);
-                if (totalAmountPaid)
-                    paymentsToFinish.Add(loansRepository.Get(id).PaymentId);
+                var cancelPaymentsRequest = new CancelPaymentsRequest
+                {
+                    FlowId = request.FlowId,
+                    Ids = { paymentsToFinish }
+                };
+                await paymentsClient.CancelAsync(cancelPaymentsRequest);
             }
-
-            var cancelPaymentsRequest = new CancelPaymentsRequest
-            {
-                FlowId = request.FlowId,
-                Ids = { paymentsToFinish }
-            };
-            await paymentsClient.CancelAsync(cancelPaymentsRequest);
             return new Empty();
         }
 
@@ -91,6 +87,16 @@ namespace LoansMicroservice
             var loans = request.Loans.Select(l => mapper.Map<Repository.Loan>(l));
             loansRepository.SetupAppend(loans);
             return Task.FromResult(new Empty());
+        }
+
+        private IEnumerable<string> RepayInstalments(BatchRepayInstalmentsRequest request)
+        {
+            foreach (var id in request.Ids)
+            {
+                var totalAmountPaid = loansRepository.RepayInstalment(id);
+                if (totalAmountPaid)
+                    yield return loansRepository.Get(id).PaymentId;
+            }
         }
     }
 }
