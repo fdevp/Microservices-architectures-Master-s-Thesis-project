@@ -41,7 +41,7 @@ namespace BatchesBranchMicroservice
             var paymentsAndLoansRequest = new GetPartRequest { FlowId = request.FlowId, Part = request.Part, TotalParts = request.TotalParts };
             var paymentsAndLoans = await paymentsClient.GetPartAsync(paymentsAndLoansRequest);
 
-            var paymentAccounts = paymentsAndLoans.Payments.Select(p => p.AccountId);
+            var paymentAccounts = paymentsAndLoans.Payments.Select(p => p.AccountId).Distinct();
             var accountsRequest = new GetBalancesRequest { FlowId = request.FlowId, Ids = { paymentAccounts } };
             var balances = await accountsClient.GetBalancesAsync(accountsRequest);
 
@@ -77,7 +77,7 @@ namespace BatchesBranchMicroservice
                 {
                     FlowId = request.FlowId,
                     Ids = { paymentIds },
-                    RepayTimestamp = DateTime.UtcNow.Ticks
+                    RepayTimestamp = request.RepayTimestamp
                 })));
             }
 

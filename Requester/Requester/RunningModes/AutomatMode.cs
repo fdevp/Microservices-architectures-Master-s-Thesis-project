@@ -1,10 +1,14 @@
 ﻿using Newtonsoft.Json;
 using Requester.Data;
+using Requester.Requests;
+using Serilog;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Requester.RunningModes
@@ -14,12 +18,16 @@ namespace Requester.RunningModes
         private readonly HttpClient httpClient;
         private readonly Settings settings;
         private readonly AutomatSettings automatSettings;
+        private readonly SessionRequester sessionRequester;
+        private readonly ILogger logger;
 
-        public AutomatMode(HttpClient httpClient, Settings settings, AutomatSettings automatSettings)
+        public AutomatMode(HttpClient httpClient, Settings settings, AutomatSettings automatSettings, SessionRequester sessionRequester, ILogger logger)
         {
             this.httpClient = httpClient;
             this.settings = settings;
             this.automatSettings = automatSettings;
+            this.sessionRequester = sessionRequester;
+            this.logger = logger;
         }
 
         public void Perform()
@@ -29,25 +37,57 @@ namespace Requester.RunningModes
 
         private void Perform(int index)
         {
-            var currentTime = automatSettings.CurrentDate;
+            var currentTime = automatSettings.StartTime;
+            while (currentTime < automatSettings.EndTime)
+            {
+                var scenarioTimer = Stopwatch.StartNew();
+                var scenarioId = Guid.NewGuid().ToString();
 
-            var scenarioId = Guid.NewGuid().ToString();
-            var data = GetData(index, scenarioId);
-            var toPay = data.Payments.Where(p => p.LastRepayTimestamp + p.Interval < currentTime);
+                var scenarioPartTimer = Stopwatch.StartNew();
+                var token = sessionRequester.GetToken("automat", scenarioId);
+                logger.Information($"Service='Automat' ScenarioId='{scenarioId}' Method='automat token' Processing='{scenarioPartTimer.ElapsedMilliseconds}'");
 
-            var balancesDict = data.Balances.ToDictionary(k => k.Id, v => v);
-            var loansDict = data.Loans.ToDictionary(k => k.PaymentId, v => v);
+                scenarioPartTimer.Restart();
+                var data = GetData(index, scenarioId);
+                logger.Information($"Service='Automat' ScenarioId='{scenarioId}' Method='automat getbatch' Processing='{scenarioPartTimer.ElapsedMilliseconds}'");
 
-            var withSufficientBalance = toPay.Where(p => p.Amount <= balancesDict[p.AccountId].Amount).ToArray();
-            var withInsufficientBalance = toPay.Except(withSufficientBalance);
-            var paidIds = withSufficientBalance.Select(p => p.Id).ToHashSet();
+                var toPay = data.Payments.Where(p => p.LastRepayTimestamp + p.Interval < DateTime.UtcNow);
 
-            var transfers = withSufficientBalance.Select(p => CreateTransfer(p, loansDict.ContainsKey(p.Id) ? loansDict[p.Id] : null)).ToArray();
-            var messages = withInsufficientBalance.Select(p => CreateMessage(p, balancesDict[p.AccountId])).ToArray();
-            var repaidInstalments = data.Loans.Where(l => paidIds.Contains(l.PaymentId)).Select(l => l.Id).ToArray();
+                var balancesDict = data.Balances.ToDictionary(k => k.Id, v => v);
+                var loansDict = data.Loans.ToDictionary(k => k.PaymentId, v => v);
 
-            var batchProcess = new BatchProcess { Transfers = transfers, Messages = messages, RepaidInstalmentsIds = repaidInstalments };
-            SendData(batchProcess, scenarioId);
+                var withSufficientBalance = toPay.Where(p =>
+                {
+                    if (p.Amount <= balancesDict[p.AccountId].Amount)
+                    {
+                        balancesDict[p.AccountId].Amount -= p.Amount;
+                        return true;
+                    }
+                    else { return false; };
+                }).ToArray();
+                var withInsufficientBalance = toPay.Except(withSufficientBalance);
+                var paidIds = withSufficientBalance.Select(p => p.Id).ToHashSet();
+
+                var transfers = withSufficientBalance.Select(p => CreateTransfer(p, loansDict.ContainsKey(p.Id) ? loansDict[p.Id] : null)).ToArray();
+                var messages = withInsufficientBalance.Select(p => CreateMessage(p, balancesDict[p.AccountId])).ToArray();
+                var repaidInstalments = data.Loans.Where(l => paidIds.Contains(l.PaymentId)).Select(l => l.Id).ToArray();
+
+
+                var batchProcess = new BatchProcess { RepayTimestamp = currentTime, Transfers = transfers, Messages = messages, RepaidInstalmentsIds = repaidInstalments };
+
+                scenarioPartTimer.Restart();
+                SendData(batchProcess, scenarioId);
+                logger.Information($"Service='Automat' ScenarioId='{scenarioId}' Method='automat processbatch' Processing='{scenarioPartTimer.ElapsedMilliseconds}'");
+
+                scenarioPartTimer.Restart();
+                sessionRequester.Logout(token, scenarioId);
+                logger.Information($"Service='Automat' ScenarioId='{scenarioId}' Method='automat logout' Processing='{scenarioPartTimer.ElapsedMilliseconds}'");
+
+                logger.Information($"Service='Automat' ScenarioId='{scenarioId}' Method='automat scenario' Processing='{scenarioTimer.ElapsedMilliseconds}'");
+
+                Thread.Sleep(automatSettings.SleepTime);
+                currentTime += scenarioTimer.Elapsed;
+            }
         }
 
         private void SendData(BatchProcess batchProcess, string scenarioId)

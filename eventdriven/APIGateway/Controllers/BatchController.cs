@@ -62,7 +62,7 @@ namespace APIGateway.Controllers
             parallelTasks.Add(Task.Run(async () =>
             {
                 var balancesFlowId = flowId + "_b";
-                var accountsIds = payments.Select(p => p.AccountId).ToArray();
+                var accountsIds = payments.Select(p => p.AccountId).Distinct().ToArray();
                 var balancesEvent = new GetBalancesEvent { Ids = accountsIds };
                 var balancesRequest = await eventsAwaiter.AwaitResponse<SelectedBalancesEvent>(balancesFlowId, () => publishingRouter.Publish(Queues.Accounts, balancesEvent, balancesFlowId, Queues.APIGateway));
                 balances = balancesRequest.Balances;
@@ -95,7 +95,7 @@ namespace APIGateway.Controllers
                 publishingRouter.Publish(Queues.Accounts, transfersEvent, flowId);
 
                 var paymentsIds = data.Transfers.Select(t => t.PaymentId);
-                var repayTimestampEvent = new UpdateRepayTimestampEvent { Ids = paymentsIds.ToArray(), Timestamp = DateTime.UtcNow };
+                var repayTimestampEvent = new UpdateRepayTimestampEvent { Ids = paymentsIds.ToArray(), Timestamp = data.RepayTimestamp };
                 publishingRouter.Publish(Queues.Payments, repayTimestampEvent, flowId);
             }
 

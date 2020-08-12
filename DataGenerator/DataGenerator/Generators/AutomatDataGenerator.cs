@@ -9,15 +9,32 @@ namespace DataGenerator.Generators
 {
     public static class AutomatDataGenerator
     {
-        public static SetupAll Generate(int usersCount, DateTime minDate, DateTime maxDate, DateTime now)
+        public static SetupAll Generate(int usersCount, DateTime minDate, DateTime maxDate)
         {
             var users = ValuesGenerator.CreateUsers(usersCount).ToArray();
             var accounts = Accounts(users);
             var recipientRnd = new RndBuilder<string>().DistributionValues(accounts.Select(a => a.Id)).Build();
             var timestampRnd = new RndBuilder<DateTime>().Min(minDate).Max(maxDate).Build();
 
-            var activePayments = ActivePayments(accounts, recipientRnd, timestampRnd, now);
-            var loansAndPayments = ActiveLoans(accounts, recipientRnd, now);
+            var activePayments = ActivePayments(accounts, recipientRnd, timestampRnd);
+            var loansAndPayments = ActiveLoans(accounts, recipientRnd);
+
+            var totalPaymentsCount = activePayments.Count() + loansAndPayments.Count();
+            var interval = (maxDate - minDate) / totalPaymentsCount;
+            var date = minDate;
+            foreach(var payment in activePayments)
+            {
+                payment.LastRepayTimestamp = date;
+                payment.StartTimestamp = date - payment.Interval;
+                date += interval;
+            }
+            
+            foreach(var pair in loansAndPayments)
+            {
+                pair.payment.LastRepayTimestamp = date;
+                pair.payment.StartTimestamp = date - ((pair.loan.PaidAmount / pair.loan.TotalAmount) * pair.loan.Instalments) * pair.payment.Interval;
+                date += interval;
+            }
 
             var setupall = new SetupAll
             {
@@ -27,13 +44,13 @@ namespace DataGenerator.Generators
                 UsersSetup = new UsersSetup { Users = users },
 
                 CardsSetup = new CardsSetup { Cards = new CardDTO[0] },
-                TransactionsSetup = new TransactionsSetup{ Transactions = new TransactionDTO[0] },
+                TransactionsSetup = new TransactionsSetup { Transactions = new TransactionDTO[0] },
             };
 
             return setupall;
         }
 
-        static PaymentDTO[] ActivePayments(AccountDTO[] accounts, IRnd<string> recipientRnd, IRnd<DateTime> timestampRnd, DateTime now)
+        static PaymentDTO[] ActivePayments(AccountDTO[] accounts, IRnd<string> recipientRnd, IRnd<DateTime> timestampRnd)
         {
             var countRnd = new RndBuilder<int>()
               .DistributionValues(new[] { 1, 3, 5, 10 })
@@ -51,10 +68,10 @@ namespace DataGenerator.Generators
               .DistributionProbabilities(new[] { 75, 10, 10, 5 })
               .Build();
 
-            return ValuesGenerator.CreatePayments(accounts, PaymentStatus.ACTIVE, recipientRnd, countRnd, amountRnd, startDateRnd, () => now, intervalRnd).ToArray();
+            return ValuesGenerator.CreatePayments(accounts, PaymentStatus.ACTIVE, recipientRnd, countRnd, amountRnd, startDateRnd, () => DateTime.UtcNow, intervalRnd).ToArray();
         }
 
-        static (LoanDTO loan, PaymentDTO payment)[] ActiveLoans(AccountDTO[] accounts, IRnd<string> recipientRnd, DateTime now)
+        static (LoanDTO loan, PaymentDTO payment)[] ActiveLoans(AccountDTO[] accounts, IRnd<string> recipientRnd)
         {
             var countRnd = new RndBuilder<int>()
               .DistributionValues(new[] { 1, 3, 5 })
@@ -67,13 +84,13 @@ namespace DataGenerator.Generators
                 .Build(); //dystrybuanta
 
             var instalmentsRnd = new LoanInstalmentsRnd(); //todo w zaleznosci od totalRnd
-            var paidInstalmentsRnd = (Rnd<int>)new RndBuilder<int>().Min(0).Build();
+            var paidInstalmentsRnd = new CustomPaidInstalmentsRnd(2);
 
             var intervalRnd = new RndBuilder<TimeSpan>()
               .DistributionValues(new[] { TimeSpan.FromDays(7), TimeSpan.FromDays(14), TimeSpan.FromDays(21), TimeSpan.FromDays(28), })
               .DistributionProbabilities(new[] { 75, 10, 10, 5 })
               .Build();
-            return ValuesGenerator.CreateLoans(accounts, countRnd, totalRnd, instalmentsRnd, paidInstalmentsRnd, intervalRnd, () => now, recipientRnd).ToArray();
+            return ValuesGenerator.CreateLoans(accounts, countRnd, totalRnd, instalmentsRnd, paidInstalmentsRnd, intervalRnd, () => DateTime.UtcNow, recipientRnd).ToArray();
         }
 
         static AccountDTO[] Accounts(UserDTO[] users)
@@ -91,6 +108,23 @@ namespace DataGenerator.Generators
                 .Build();
 
             return ValuesGenerator.CreateAccounts(users, countRnd, amountRnd).ToArray();
+        }
+
+        private class CustomPaidInstalmentsRnd : IntRnd
+        {
+            private readonly int maxInstalments;
+
+            public CustomPaidInstalmentsRnd(int maxInstalments)
+            {
+                this.maxInstalments = maxInstalments;
+                this.Min = 0;
+            }
+
+            public override int Next()
+            {
+                this.Max = maxInstalments;
+                return base.Next();
+            }
         }
     }
 }

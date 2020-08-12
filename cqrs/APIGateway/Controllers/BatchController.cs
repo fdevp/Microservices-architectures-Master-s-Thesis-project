@@ -79,7 +79,7 @@ namespace APIGateway.Controllers
             }));
             parallelTasks.Add(Task.Run(async () =>
             {
-                var accountsIds = payments.Select(p => p.AccountId);
+                var accountsIds = payments.Select(p => p.AccountId).Distinct();
                 var balancesResponse = await accountsReadClient.GetBalancesAsync(new GetBalancesRequest { FlowId = flowId, Ids = { accountsIds } });
                 balances = balancesResponse.Balances;
             }));
@@ -122,7 +122,7 @@ namespace APIGateway.Controllers
                 parallelTasks.Add(Task.Run(async () =>
                 {
                     var paymentIds = transfers.Select(t => t.PaymentId);
-                    var request = new UpdateRepayTimestampRequest { FlowId = flowId, Ids = { paymentIds }, RepayTimestamp = DateTime.UtcNow.Ticks };
+                    var request = new UpdateRepayTimestampRequest { FlowId = flowId, Ids = { paymentIds }, RepayTimestamp = data.RepayTimestamp.Ticks };
                     await paymentsWriteClient.UpdateRepayTimestampAsync(request);
                 }));
             }

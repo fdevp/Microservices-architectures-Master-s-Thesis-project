@@ -61,22 +61,25 @@ namespace DataGenerator
         {
             foreach (var account in accounts)
             {
-                var interval = intervalRnd.Next();
-                var startTimestamp = startDateRnd.Next();
-                var repayDiff = (int)((datetimeNow() - startTimestamp) / interval);
-                var lastRepayTimestamp = startTimestamp + repayDiff * interval;
-                yield return new PaymentDTO
+                var count = countRnd.Next();
+                for (int i = 0; i < count; i++)
                 {
-                    Id = Guid.NewGuid().ToString(),
-                    AccountId = account.Id,
-                    Amount = amountRnd.Next(),
-                    StartTimestamp = startTimestamp,
-                    LastRepayTimestamp = lastRepayTimestamp,
-                    Interval = interval,
-                    Status = status,
-                    Recipient = recipientRnd.Next(account.Id)
-                };
-
+                    var interval = intervalRnd.Next();
+                    var startTimestamp = startDateRnd.Next();
+                    var repayDiff = (int)((datetimeNow() - startTimestamp) / interval);
+                    var lastRepayTimestamp = startTimestamp + repayDiff * interval;
+                    yield return new PaymentDTO
+                    {
+                        Id = Guid.NewGuid().ToString(),
+                        AccountId = account.Id,
+                        Amount = amountRnd.Next(),
+                        StartTimestamp = startTimestamp,
+                        LastRepayTimestamp = lastRepayTimestamp,
+                        Interval = interval,
+                        Status = status,
+                        Recipient = recipientRnd.Next(account.Id)
+                    };
+                }
             }
         }
 

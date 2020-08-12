@@ -12,7 +12,7 @@ namespace DataGenerator
     {
         static void Main(string[] args)
         {
-            var automatSetup = AutomatDataGenerator.Generate(20000, new DateTime(2015, 1, 1), new DateTime(2020, 8, 1), new DateTime(2020, 8, 1));
+            var automatSetup = AutomatDataGenerator.Generate(20000, new DateTime(2020, 8, 1, 0,0,0), new DateTime(2020, 8, 1, 3, 0, 0));
             File.WriteAllText("loans.json", JSON.Serialize(automatSetup.LoansSetup));
             File.WriteAllText("accounts.json", JSON.Serialize(automatSetup.AccountsSetup));
             File.WriteAllText("payments.json", JSON.Serialize(automatSetup.PaymentsSetup));
