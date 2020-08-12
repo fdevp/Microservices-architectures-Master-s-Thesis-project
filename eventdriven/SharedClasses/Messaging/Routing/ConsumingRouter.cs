@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using Jil;
 using Microsoft.Extensions.Logging;
+using SharedClasses.Events;
 
 namespace SharedClasses.Messaging
 {
