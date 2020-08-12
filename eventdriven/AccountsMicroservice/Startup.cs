@@ -40,22 +40,24 @@ namespace AccountsMicroservice
             var publishers = new Dictionary<string, IPublisher>();
             publishers.Add(Queues.APIGateway, factory.CreatePublisher(Queues.APIGateway));
             publishers.Add(Queues.Transactions, factory.CreatePublisher(Queues.Transactions));
-            services.AddSingleton(new PublishingRouter(publishers));
+            publishers.Add(Queues.Cards, factory.CreatePublisher(Queues.Cards));
+            var publishingRouter = new PublishingRouter(publishers);
+            services.AddSingleton(publishingRouter);
 
             var servicesProvider = services.BuildServiceProvider();
             var logger = servicesProvider.GetService<ILogger<IConsumer>>();
             var accountsService = servicesProvider.GetService<AccountsService>();
 
-            var consumingRouter = ConsumingRouter<AccountsService>.Create(accountsService, "Accounts", logger);
+            var consumingRouter = ConsumingRouter<AccountsService>.Create(accountsService, publishingRouter, "Accounts", logger);
             var consumer = factory.CreateConsumer(Queues.Accounts);
             consumingRouter.LinkConsumer(consumer);
             services.AddSingleton(consumingRouter);
         }
 
-         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory)
         {
-            
+
         }
     }
 }

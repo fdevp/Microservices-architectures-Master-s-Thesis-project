@@ -21,6 +21,7 @@ using SharedClasses.Events.Users;
 using SharedClasses.Messaging;
 using SharedClasses.Messaging.RabbitMq;
 using SharedClasses.Models;
+using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace APIGateway
 {
@@ -37,9 +38,11 @@ namespace APIGateway
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddLogging(c => c.AddSerilog().AddFile("log.txt"));
+            var loggerServicesProvier = services.BuildServiceProvider();
+
             services.AddControllers().AddNewtonsoftJson();
             services.AddSingleton(CreateMapper());
-            ConfigureRabbitMq(services);
+            ConfigureRabbitMq(services, loggerServicesProvier);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -53,8 +56,8 @@ namespace APIGateway
             app.UseHttpsRedirection();
             app.UseRouting();
             app.UseAuthorization();
-			
-			app.UseMiddleware<FlowIdMiddleware>();
+
+            app.UseMiddleware<FlowIdMiddleware>();
             app.UseMiddleware<LoggingMiddleware>();
 
             app.UseEndpoints(endpoints =>
@@ -86,19 +89,18 @@ namespace APIGateway
             return new Mapper(config);
         }
 
-        private void ConfigureRabbitMq(IServiceCollection services)
+        private void ConfigureRabbitMq(IServiceCollection services, ServiceProvider loggerServicesProvier)
         {
             var config = new RabbitMqConfig();
             Configuration.GetSection("RabbitMq").Bind(config);
             var rabbitMqFactory = RabbitMqFactory.Create(config);
-
-            AddAwaiter(services, rabbitMqFactory);
+            AddAwaiter(services, rabbitMqFactory, loggerServicesProvier);
             AddPublishing(services, rabbitMqFactory);
         }
 
-        private void AddAwaiter(IServiceCollection services, RabbitMqFactory factory)
+        private void AddAwaiter(IServiceCollection services, RabbitMqFactory factory, ServiceProvider loggerServicesProvier)
         {
-            var awaiter = new EventsAwaiter("APIGateway");
+            var awaiter = new EventsAwaiter("APIGateway", loggerServicesProvier.GetService<ILogger<EventsAwaiter>>());
 
             var consumer = factory.CreateConsumer(Queues.APIGateway);
             awaiter.BindConsumer(consumer);
@@ -106,7 +108,7 @@ namespace APIGateway
             services.AddSingleton(awaiter);
         }
 
-        private void AddPublishing(IServiceCollection services, RabbitMqFactory factory)
+        private PublishingRouter AddPublishing(IServiceCollection services, RabbitMqFactory factory)
         {
             //TODO przepisac na builder
             var publishers = new Dictionary<string, IPublisher>();
@@ -116,7 +118,9 @@ namespace APIGateway
             publishers.Add(Queues.Loans, factory.CreatePublisher(Queues.Loans));
             publishers.Add(Queues.Payments, factory.CreatePublisher(Queues.Payments));
             publishers.Add(Queues.Users, factory.CreatePublisher(Queues.Users));
-            services.AddSingleton(new PublishingRouter(publishers));
+            var publishingRouter = new PublishingRouter(publishers);
+            services.AddSingleton(publishingRouter);
+            return publishingRouter;
         }
     }
 }

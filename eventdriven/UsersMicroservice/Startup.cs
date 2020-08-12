@@ -43,13 +43,14 @@ namespace UsersMicroservice
 
             var publishers = new Dictionary<string, IPublisher>();
             publishers.Add(Queues.APIGateway, factory.CreatePublisher(Queues.APIGateway));
-            services.AddSingleton(new PublishingRouter(publishers));
+            var publishingRouter = new PublishingRouter(publishers);
+            services.AddSingleton(publishingRouter);
 
             var servicesProvider = services.BuildServiceProvider();
             var logger = servicesProvider.GetService<ILogger<IConsumer>>();
             var usersService = services.BuildServiceProvider().GetService<UsersService>();
 
-            var consumingRouter = ConsumingRouter<UsersService>.Create(usersService, "Users", logger);
+            var consumingRouter = ConsumingRouter<UsersService>.Create(usersService, publishingRouter, "Users", logger);
             var consumer = factory.CreateConsumer(Queues.Users);
             consumingRouter.LinkConsumer(consumer);
             services.AddSingleton(consumingRouter);

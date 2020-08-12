@@ -13,6 +13,7 @@ using Microsoft.Extensions.Logging;
 using Serilog;
 using SharedClasses.Messaging;
 using SharedClasses.Messaging.RabbitMq;
+using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace CardsMicroservice
 {
@@ -28,19 +29,20 @@ namespace CardsMicroservice
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddLogging(c => c.AddSerilog().AddFile("log.txt"));
+            var loggerServicesProvier = services.BuildServiceProvider();
             services.AddSingleton<CardsRepository>();
             services.AddSingleton<CardsService>();
-            ConfigureRabbitMq(services);
+            ConfigureRabbitMq(services, loggerServicesProvier);
         }
 
-        private void ConfigureRabbitMq(IServiceCollection services)
+        private void ConfigureRabbitMq(IServiceCollection services, ServiceProvider loggerServicesProvier)
         {
             var config = new RabbitMqConfig();
             Configuration.GetSection("RabbitMq").Bind(config);
             var factory = RabbitMqFactory.Create(config);
 
             var cardsConsumer = factory.CreateConsumer(Queues.Cards);
-            var awaiter = new EventsAwaiter("Cards");
+            var awaiter = new EventsAwaiter("Cards", loggerServicesProvier.GetService<ILogger<EventsAwaiter>>());
             awaiter.BindConsumer(cardsConsumer);
             services.AddSingleton(awaiter);
 
@@ -48,20 +50,20 @@ namespace CardsMicroservice
             publishers.Add(Queues.APIGateway, factory.CreatePublisher(Queues.APIGateway));
             publishers.Add(Queues.Accounts, factory.CreatePublisher(Queues.Accounts));
             publishers.Add(Queues.Transactions, factory.CreatePublisher(Queues.Transactions));
-            services.AddSingleton(new PublishingRouter(publishers));
+            var publishingRouter = new PublishingRouter(publishers);
+            services.AddSingleton(publishingRouter);
 
             var servicesProvider = services.BuildServiceProvider();
-            var logger = servicesProvider.GetService<ILogger<IConsumer>>();
             var cardsService = servicesProvider.GetService<CardsService>();
 
-            var consumingRouter = ConsumingRouter<CardsService>.Create(cardsService, "Cards", logger);
+            var consumingRouter = ConsumingRouter<CardsService>.Create(cardsService, publishingRouter, "Cards", loggerServicesProvier.GetService<ILogger<IConsumer>>());
             consumingRouter.LinkConsumer(cardsConsumer);
             services.AddSingleton(consumingRouter);
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory)
         {
-            
+
         }
     }
 }

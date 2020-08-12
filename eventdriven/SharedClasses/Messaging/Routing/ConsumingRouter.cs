@@ -13,24 +13,26 @@ namespace SharedClasses.Messaging
     public class ConsumingRouter<T>
     {
         private IReadOnlyDictionary<string, MethodInfo> routing;
+        private readonly PublishingRouter publishingRouter;
         private readonly string serviceName;
         private readonly ILogger logger;
         private readonly T service;
 
-        private ConsumingRouter(T service, IReadOnlyDictionary<string, MethodInfo> routing, string serviceName, ILogger logger)
+        private ConsumingRouter(T service, IReadOnlyDictionary<string, MethodInfo> routing, PublishingRouter publishingRouter, string serviceName, ILogger logger)
         {
             this.service = service;
             this.routing = routing;
+            this.publishingRouter = publishingRouter;
             this.serviceName = serviceName;
             this.logger = logger;
         }
 
-        public static ConsumingRouter<T> Create(T service, string serviceName, ILogger logger)
+        public static ConsumingRouter<T> Create(T service, PublishingRouter publishingRouter, string serviceName, ILogger logger)
         {
             var serviceType = service.GetType();
             var methods = serviceType.GetMethods();
             var eventHandlers = GetEventHandlersMethods(methods).ToDictionary(k => k.typeName, v => v.method);
-            return new ConsumingRouter<T>(service, eventHandlers, serviceName, logger);
+            return new ConsumingRouter<T>(service, eventHandlers, publishingRouter, serviceName, logger);
         }
 
         public void LinkConsumer(IConsumer consumer)
@@ -52,6 +54,12 @@ namespace SharedClasses.Messaging
             try
             {
                 await ((Task)method.Invoke(service, new[] { context, data }));
+            }
+            catch (Exception e)
+            {
+                if (message.ReplyTo != null)
+                    this.publishingRouter.Publish(message.ReplyTo, new ErrorEvent { Error = e.GetType().Name, Message = e.Message }, message.FlowId);
+                logger.LogInformation($"Service='{serviceName}' FlowId='{message.FlowId}' Method='{message.Type}' Type='Error'");
             }
             finally
             {
