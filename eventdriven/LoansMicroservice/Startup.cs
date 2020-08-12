@@ -40,13 +40,14 @@ namespace LoansMicroservice
             publishers.Add(Queues.APIGateway, factory.CreatePublisher(Queues.APIGateway));
             publishers.Add(Queues.Payments, factory.CreatePublisher(Queues.Payments));
             publishers.Add(Queues.Transactions, factory.CreatePublisher(Queues.Transactions));
-            services.AddSingleton(new PublishingRouter(publishers));
+            var publishingRouter = new PublishingRouter(publishers);
+            services.AddSingleton(publishingRouter);
 
             var servicesProvider = services.BuildServiceProvider();
             var logger = servicesProvider.GetService<ILogger<IConsumer>>();
             var loansService = servicesProvider.GetService<LoansService>();
 
-            var consumingRouter = ConsumingRouter<LoansService>.Create(loansService, "Loans", logger);
+            var consumingRouter = ConsumingRouter<LoansService>.Create(loansService, publishingRouter, "Loans", logger);
             var consumer = factory.CreateConsumer(Queues.Loans);
             consumingRouter.LinkConsumer(consumer);
             services.AddSingleton(consumingRouter);
@@ -54,7 +55,7 @@ namespace LoansMicroservice
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory)
         {
-            
+
         }
     }
 }

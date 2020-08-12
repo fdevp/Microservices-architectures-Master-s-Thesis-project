@@ -39,13 +39,14 @@ namespace PaymentsMicroservice
             var publishers = new Dictionary<string, IPublisher>();
             publishers.Add(Queues.APIGateway, factory.CreatePublisher(Queues.APIGateway));
             publishers.Add(Queues.Transactions, factory.CreatePublisher(Queues.Transactions));
+            var publishingRouter = new PublishingRouter(publishers);
             services.AddSingleton(new PublishingRouter(publishers));
 
             var servicesProvider = services.BuildServiceProvider();
             var logger = servicesProvider.GetService<ILogger<IConsumer>>();
             var paymentsService = servicesProvider.GetService<PaymentsService>();
 
-            var consumingRouter = ConsumingRouter<PaymentsService>.Create(paymentsService, "Payments", logger);
+            var consumingRouter = ConsumingRouter<PaymentsService>.Create(paymentsService, publishingRouter, "Payments", logger);
             var consumer = factory.CreateConsumer(Queues.Payments);
             consumingRouter.LinkConsumer(consumer);
             services.AddSingleton(consumingRouter);
@@ -53,7 +54,7 @@ namespace PaymentsMicroservice
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory)
         {
-            
+
         }
     }
 }

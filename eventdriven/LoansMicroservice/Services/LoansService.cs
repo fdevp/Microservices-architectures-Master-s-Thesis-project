@@ -77,7 +77,7 @@ namespace LoansMicroservice
         }
 
         [EventHandlingMethod(typeof(SetupAppendLoansEvent))]
-        public Task SetupAppend(MessageContext context, SetupLoansEvent inputEvent)
+        public Task SetupAppend(MessageContext context, SetupAppendLoansEvent inputEvent)
         {
             loansRepository.SetupAppend(inputEvent.Loans);
             return Task.CompletedTask;

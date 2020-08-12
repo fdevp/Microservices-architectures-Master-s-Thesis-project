@@ -92,7 +92,7 @@ namespace PaymentsMicroservice
         }
 
         [EventHandlingMethod(typeof(SetupAppendPaymentsEvent))]
-        public Task SetupAppend(MessageContext context, SetupPaymentsEvent inputEvent)
+        public Task SetupAppend(MessageContext context, SetupAppendPaymentsEvent inputEvent)
         {
             paymentsRepository.SetupAppend(inputEvent.Payments);
             return Task.CompletedTask;
