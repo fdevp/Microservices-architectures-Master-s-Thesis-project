@@ -33,7 +33,7 @@ namespace SharedClasses.Messaging
             cancellationToken.Register(() =>
             {
                 this.Callbacks.TryRemove(flowId, out var removed);
-                logger.LogInformation($"Service='{serviceName}' FlowId='{flowId}' Type='Timeout'");
+                logger.LogInformation($"Service='{serviceName}' FlowId='{flowId}' Type='Error'");
                 tcs.TrySetCanceled();
             });
 

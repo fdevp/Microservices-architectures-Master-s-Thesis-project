@@ -31,12 +31,15 @@ namespace PaymentsWriteMicroservice
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            var failureSettings = new FailureSettings();
+            configuration.GetSection("FailureSettings").Bind(failureSettings);
+
             services.AddLogging(c => c.AddSerilog().AddFile("log.txt"));
             var commandsRepository = new CommandsRepository();
             services.AddSingleton(commandsRepository);
             services.AddGrpc(options =>
             {
-                options.Interceptors.Add<LoggingInterceptor>("PaymentsWrite");
+                options.Interceptors.Add<LoggingInterceptor>("PaymentsWrite", failureSettings);
                 options.Interceptors.Add<CommandsInterceptor>(commandsRepository);
                 options.MaxReceiveMessageSize = 500 * 1024 * 1024;
             });

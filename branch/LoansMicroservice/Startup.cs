@@ -28,9 +28,12 @@ namespace LoansMicroservice
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            var failureSettings = new FailureSettings();
+            Configuration.GetSection("FailureSettings").Bind(failureSettings);
+
             services.AddGrpc(options =>
             {
-                options.Interceptors.Add<LoggingInterceptor>("Loans");
+                options.Interceptors.Add<LoggingInterceptor>("Loans", failureSettings);
                 options.MaxReceiveMessageSize = 8 * 1024 * 1024;
             });
             services.AddSingleton(CreateMapper());

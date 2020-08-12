@@ -5,6 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Serilog;
+using SharedClasses;
 using SharedClasses.Messaging;
 using SharedClasses.Messaging.RabbitMq;
 using TransactionsMicroservice.Reports;
@@ -36,6 +37,9 @@ namespace TransactionsMicroservice
 
         private void ConfigureRabbitMq(IServiceCollection services, ServiceProvider loggerServicesProvier)
         {
+            var failureSettings = new FailureSettings();
+            Configuration.GetSection("FailureSettings").Bind(failureSettings);
+
             var config = new RabbitMqConfig();
             Configuration.GetSection("RabbitMq").Bind(config);
             var factory = RabbitMqFactory.Create(config);
@@ -56,7 +60,7 @@ namespace TransactionsMicroservice
 
             var servicesProvider = services.BuildServiceProvider();
             var transactionsService = servicesProvider.GetService<TransactionsService>();
-            var consumingRouter = ConsumingRouter<TransactionsService>.Create(transactionsService, publishingRouter, "Transactions", loggerServicesProvier.GetService<ILogger<IConsumer>>());
+            var consumingRouter = ConsumingRouter<TransactionsService>.Create(transactionsService, publishingRouter, "Transactions", loggerServicesProvier.GetService<ILogger<IConsumer>>(), failureSettings);
             consumingRouter.LinkConsumer(consumer);
         }
 

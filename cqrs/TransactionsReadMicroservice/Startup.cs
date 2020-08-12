@@ -26,11 +26,14 @@ namespace TransactionsReadMicroservice
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            var failureSettings = new FailureSettings();
+            configuration.GetSection("FailureSettings").Bind(failureSettings);
+
             services.AddLogging(c => c.AddSerilog().AddFile("log.txt"));
             var repository = new TransactionsRepository();
             services.AddGrpc(options =>
             {
-                options.Interceptors.Add<LoggingInterceptor>("TransactionsRead");
+                options.Interceptors.Add<LoggingInterceptor>("TransactionsRead", failureSettings);
                 options.MaxReceiveMessageSize = 500 * 1024 * 1024;
             });
             services.AddSingleton(CreateMapper());

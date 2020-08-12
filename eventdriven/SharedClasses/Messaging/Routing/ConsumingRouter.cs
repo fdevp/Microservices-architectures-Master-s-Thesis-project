@@ -16,23 +16,25 @@ namespace SharedClasses.Messaging
         private readonly PublishingRouter publishingRouter;
         private readonly string serviceName;
         private readonly ILogger logger;
+        private readonly FailureSettings failureSettings;
         private readonly T service;
 
-        private ConsumingRouter(T service, IReadOnlyDictionary<string, MethodInfo> routing, PublishingRouter publishingRouter, string serviceName, ILogger logger)
+        private ConsumingRouter(T service, IReadOnlyDictionary<string, MethodInfo> routing, PublishingRouter publishingRouter, string serviceName, ILogger logger, FailureSettings failureSettings)
         {
             this.service = service;
             this.routing = routing;
             this.publishingRouter = publishingRouter;
             this.serviceName = serviceName;
             this.logger = logger;
+            this.failureSettings = failureSettings;
         }
 
-        public static ConsumingRouter<T> Create(T service, PublishingRouter publishingRouter, string serviceName, ILogger logger)
+        public static ConsumingRouter<T> Create(T service, PublishingRouter publishingRouter, string serviceName, ILogger logger, FailureSettings failureConfig)
         {
             var serviceType = service.GetType();
             var methods = serviceType.GetMethods();
             var eventHandlers = GetEventHandlersMethods(methods).ToDictionary(k => k.typeName, v => v.method);
-            return new ConsumingRouter<T>(service, eventHandlers, publishingRouter, serviceName, logger);
+            return new ConsumingRouter<T>(service, eventHandlers, publishingRouter, serviceName, logger, failureConfig);
         }
 
         public void LinkConsumer(IConsumer consumer)
@@ -44,6 +46,15 @@ namespace SharedClasses.Messaging
         {
             if (!routing.ContainsKey(message.Type))
                 return;
+
+
+            if (message.ReplyTo != null)
+            {
+                var flowId = message.FlowId.IndexOf('_') >= 0 ? message.FlowId.Split("_").First() : message.FlowId;
+                var isGuid = Guid.TryParse(message.FlowId, out var guid);
+                if (isGuid && guid.GetHashCode() % failureSettings.ComponentsCount == failureSettings.ComponentNumber)
+                    return;
+            }
 
             var method = routing[message.Type];
             var data = Parse(message.Type, message.Data);

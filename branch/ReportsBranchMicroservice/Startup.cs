@@ -28,9 +28,12 @@ namespace ReportsBranchMicroservice
 
         public void ConfigureServices(IServiceCollection services)
         {
+            var failureSettings = new FailureSettings();
+            Configuration.GetSection("FailureSettings").Bind(failureSettings);
+
             services.AddGrpc(options =>
             {
-                options.Interceptors.Add<LoggingInterceptor>("Reports_branch");
+                options.Interceptors.Add<LoggingInterceptor>("Reports_branch", failureSettings);
                 options.MaxReceiveMessageSize = 8 * 1024 * 1024;
             });
             CreateClients(services);
@@ -69,7 +72,7 @@ namespace ReportsBranchMicroservice
                 HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
             var httpClient = new HttpClient(httpClientHandler);
 
-            var transactionsChannel = GrpcChannel.ForAddress(addresses.Transactions, new GrpcChannelOptions { HttpClient = httpClient,  MaxReceiveMessageSize = 8 * 1024 * 1024 });
+            var transactionsChannel = GrpcChannel.ForAddress(addresses.Transactions, new GrpcChannelOptions { HttpClient = httpClient, MaxReceiveMessageSize = 8 * 1024 * 1024 });
             services.AddSingleton(new TransactionsClient(transactionsChannel));
 
             var accountsChannel = GrpcChannel.ForAddress(addresses.Accounts, new GrpcChannelOptions { HttpClient = httpClient, MaxReceiveMessageSize = 8 * 1024 * 1024 });

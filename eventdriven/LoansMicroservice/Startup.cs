@@ -6,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Serilog;
+using SharedClasses;
 using SharedClasses.Messaging;
 using SharedClasses.Messaging.RabbitMq;
 
@@ -32,6 +33,9 @@ namespace LoansMicroservice
 
         private void ConfigureRabbitMq(IServiceCollection services)
         {
+            var failureSettings = new FailureSettings();
+            Configuration.GetSection("FailureSettings").Bind(failureSettings);
+
             var config = new RabbitMqConfig();
             Configuration.GetSection("RabbitMq").Bind(config);
             var factory = RabbitMqFactory.Create(config);
@@ -47,7 +51,7 @@ namespace LoansMicroservice
             var logger = servicesProvider.GetService<ILogger<IConsumer>>();
             var loansService = servicesProvider.GetService<LoansService>();
 
-            var consumingRouter = ConsumingRouter<LoansService>.Create(loansService, publishingRouter, "Loans", logger);
+            var consumingRouter = ConsumingRouter<LoansService>.Create(loansService, publishingRouter, "Loans", logger, failureSettings);
             var consumer = factory.CreateConsumer(Queues.Loans);
             consumingRouter.LinkConsumer(consumer);
             services.AddSingleton(consumingRouter);

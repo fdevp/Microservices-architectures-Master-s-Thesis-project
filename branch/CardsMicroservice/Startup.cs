@@ -29,9 +29,12 @@ namespace CardsMicroservice
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            var failureSettings = new FailureSettings();
+            Configuration.GetSection("FailureSettings").Bind(failureSettings);
+
             services.AddGrpc(options =>
             {
-                options.Interceptors.Add<LoggingInterceptor>("Cards");
+                options.Interceptors.Add<LoggingInterceptor>("Cards", failureSettings);
                 options.MaxReceiveMessageSize = 8 * 1024 * 1024;
             });
             services.AddSingleton(CreateMapper());

@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using PaymentsMicroservice.Repository;
 using Serilog;
+using SharedClasses;
 using SharedClasses.Messaging;
 using SharedClasses.Messaging.RabbitMq;
 
@@ -32,6 +33,9 @@ namespace PaymentsMicroservice
 
         private void ConfigureRabbitMq(IServiceCollection services)
         {
+            var failureSettings = new FailureSettings();
+            Configuration.GetSection("FailureSettings").Bind(failureSettings);
+
             var config = new RabbitMqConfig();
             Configuration.GetSection("RabbitMq").Bind(config);
             var factory = RabbitMqFactory.Create(config);
@@ -46,7 +50,7 @@ namespace PaymentsMicroservice
             var logger = servicesProvider.GetService<ILogger<IConsumer>>();
             var paymentsService = servicesProvider.GetService<PaymentsService>();
 
-            var consumingRouter = ConsumingRouter<PaymentsService>.Create(paymentsService, publishingRouter, "Payments", logger);
+            var consumingRouter = ConsumingRouter<PaymentsService>.Create(paymentsService, publishingRouter, "Payments", logger, failureSettings);
             var consumer = factory.CreateConsumer(Queues.Payments);
             consumingRouter.LinkConsumer(consumer);
             services.AddSingleton(consumingRouter);
