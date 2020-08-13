@@ -15,8 +15,8 @@ namespace APIGateway.Reports
                 case Aggregation.Avg:
                     sb.AppendLine($";Średnia;{value}");
                     break;
-                case Aggregation.Median:
-                    sb.AppendLine($";Mediana;{value}");
+                case Aggregation.Sum:
+                    sb.AppendLine($";Sum;{value}");
                     break;
                 case Aggregation.Min:
                     sb.AppendLine($";Wartość minimalna;{value}");
