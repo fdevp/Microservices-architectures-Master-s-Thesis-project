@@ -20,9 +20,9 @@ namespace ReportsBranchMicroservice
                     value = period.Average(t => (float?)t.Transaction.Amount);
                     sb.AppendLine($";Średnia;{value ?? '-'}");
                     break;
-                case Aggregation.Median:
-                    value = (float?)Median(period.Select(period => period.Transaction.Amount));
-                    sb.AppendLine($";Mediana;{value ?? '-'}");
+                case Aggregation.Sum:
+                    value = period.Sum(period => period.Transaction.Amount);
+                    sb.AppendLine($";Suma;{value ?? '-'}");
                     break;
                 case Aggregation.Min:
                     value = period.Min(t => (float?)t.Transaction.Amount);
@@ -103,24 +103,6 @@ namespace ReportsBranchMicroservice
                     sb.AppendLine($";;suma;{balance}");
                 }
             }
-        }
-
-        private static double? Median<T>(IEnumerable<T> source)
-        {
-            if (Nullable.GetUnderlyingType(typeof(T)) != null)
-                source = source.Where(x => x != null);
-
-            int count = source.Count();
-            if (count == 0)
-                return null;
-
-            source = source.OrderBy(n => n);
-
-            int midpoint = count / 2;
-            if (count % 2 == 0)
-                return (Convert.ToDouble(source.ElementAt(midpoint - 1)) + Convert.ToDouble(source.ElementAt(midpoint))) / 2.0;
-            else
-                return Convert.ToDouble(source.ElementAt(midpoint));
         }
     }
 }
