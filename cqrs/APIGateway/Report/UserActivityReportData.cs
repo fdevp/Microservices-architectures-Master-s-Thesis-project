@@ -2,15 +2,6 @@ using System;
 
 namespace APIGateway.Reports
 {
-    public class UserActivityRaportData
-    {
-        public string UserId { get; set; }
-        public DateTime? From { get; set; }
-        public DateTime? To { get; set; }
-        public Granularity Granularity { get; set; }
-        public UserActivityReportPortions Portions { get; set; }
-    }
-
     public class UserActivityReportPortions
     {
         public UserReportPortion[] Accounts { get; set; }
