@@ -56,9 +56,9 @@ namespace APIGateway.Reports
             return response.Portions.ToArray();
         }
 
-        public async Task<UserActivityReportPortions> GetUserActivityPortions(string flowId, string userId, DateTime? from, DateTime? to, Granularity granularity)
+        public async Task<ReportPortions> GetUserActivityPortions(string flowId, string userId, DateTime? from, DateTime? to, Granularity granularity)
         {
-            var portions = new UserActivityReportPortions();
+            var portions = new ReportPortions();
 
             var fromTicks = from?.Ticks ?? 0;
             var toTicks = to?.Ticks ?? 0;

@@ -74,12 +74,12 @@ namespace TransactionsMicroservice
             return Task.CompletedTask;
         }
 
-        [EventHandlingMethod(typeof(GenerateOverallReportEvent))]
-        public async Task GenerateOverallReport(MessageContext context, GenerateOverallReportEvent inputEvent)
+        [EventHandlingMethod(typeof(AggregateOverallReportDataEvent))]
+        public async Task GenerateOverallReport(MessageContext context, AggregateOverallReportDataEvent inputEvent)
         {
             var filters = new Filters { TimestampFrom = inputEvent.TimestampFrom, TimestampTo = inputEvent.TimestampTo };
             var transactions = transactionsRepository.GetMany(inputEvent.Subject, new Filters { TimestampFrom = inputEvent.TimestampFrom, TimestampTo = inputEvent.TimestampTo });
-            
+
             if (inputEvent.Subject == ReportSubject.Loans)
             {
                 var accountsIds = transactions.Select(t => t.Sender).ToArray();
@@ -98,15 +98,15 @@ namespace TransactionsMicroservice
                 Transactions = transactions
             };
 
-            var csv = ReportGenerator.CreateOverallCsvReport(data);
-            publishingRouter.Publish(context.ReplyTo, new ReportCreatedEvent
+            var portions = ReportGenerator.AggregateOverall(data);
+            publishingRouter.Publish(context.ReplyTo, new AggregatedOverallReportEvent
             {
-                Report = csv
+                Portions = portions.ToArray()
             }, context.FlowId);
         }
 
-        [EventHandlingMethod(typeof(GenerateUserActivityReportEvent))]
-        public async Task GenerateUserActivityReport(MessageContext context, GenerateUserActivityReportEvent inputEvent)
+        [EventHandlingMethod(typeof(AggregateUserActivityReportDataEvent))]
+        public async Task GenerateUserActivityReport(MessageContext context, AggregateUserActivityReportDataEvent inputEvent)
         {
             var accounts = await reportsDataFetcher.GetAccounts(context.FlowId, inputEvent.UserId);
             var accountsIds = accounts.Select(a => a.Id).ToArray();
@@ -134,7 +134,8 @@ namespace TransactionsMicroservice
             parallelTasks.Add(Task.Run(async () => data.Cards = await reportsDataFetcher.GetCards(context.FlowId + "_c", accountsIds)));
             await Task.WhenAll(parallelTasks);
 
-            var csv = ReportGenerator.CreateUserActivityCsvReport(data);
+            var portions = ReportGenerator.AggregateUserActivity(data);
+            publishingRouter.Publish(context.ReplyTo, portions, context.FlowId);
         }
 
         [EventHandlingMethod(typeof(SetupTransactionsEvent))]

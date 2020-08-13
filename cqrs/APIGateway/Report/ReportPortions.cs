@@ -2,7 +2,7 @@ using System;
 
 namespace APIGateway.Reports
 {
-    public class UserActivityReportPortions
+    public class ReportPortions
     {
         public UserReportPortion[] Accounts { get; set; }
         public UserReportPortion[] Payments { get; set; }

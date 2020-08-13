@@ -6,11 +6,11 @@ option csharp_namespace = "ReportsBranchMicroservice";
 package ReportsBranchMicroservice;
 
 service ReportsBranch {
-  rpc GenerateUserActivityReport (GenerateUserActivityReportRequest) returns (GenerateReportResponse);
-  rpc GenerateOverallReport (GenerateOverallReportRequest) returns (GenerateReportResponse);
+  rpc AggregateUserActivity (AggregateUserActivityRequest) returns (AggregateUserActivityResponse);
+  rpc AggregateOverall (AggregateOverallRequest) returns (AggregateOverallResponse);
 }
 
-message GenerateUserActivityReportRequest {
+message AggregateUserActivityRequest {
   string flowId = 1;
   string userId = 2;
   int64 timestampFrom = 3;
@@ -18,7 +18,14 @@ message GenerateUserActivityReportRequest {
   Granularity granularity = 5;
 }
 
-message GenerateOverallReportRequest {
+message AggregateUserActivityResponse {
+  repeated UserReportPortion accountsPortions = 1;
+  repeated UserReportPortion paymentsPortions = 2;
+  repeated UserReportPortion loansPortions = 3;
+  repeated UserReportPortion cardsPortions = 4;
+}
+
+message AggregateOverallRequest {
   string flowId = 1;
   repeated Aggregation aggregations = 2;
   int64 timestampFrom = 3;
@@ -27,7 +34,6 @@ message GenerateOverallReportRequest {
   ReportSubject subject = 6;
 }
 
-message GenerateReportResponse {
-  string flowId = 1;
-  string report = 2;
+message AggregateOverallResponse {
+  repeated OverallReportPortion portions = 1;
 }

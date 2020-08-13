@@ -1,5 +1,6 @@
 using System.Threading.Tasks;
 using APIGateway.Models;
+using APIGateway.Reports;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using SharedClasses.Events.Reports;
@@ -26,7 +27,7 @@ namespace APIGateway.Controllers
         [Route("UserActivity")]
         public async Task<string> UserActivity(UserActivityReportRequest data)
         {
-            var payload = new GenerateUserActivityReportEvent
+            var payload = new AggregateUserActivityReportDataEvent
             {
                 Granularity = data.Granularity,
                 TimestampFrom = data.TimestampFrom,
@@ -34,15 +35,16 @@ namespace APIGateway.Controllers
                 UserId = data.UserId,
             };
             var flowId = HttpContext.Items["flowId"].ToString();
-            var response = await eventsAwaiter.AwaitResponse<ReportCreatedEvent>(flowId, () => publishingRouter.Publish(Queues.Transactions, payload, flowId, Queues.APIGateway));
-            return response.Report;
+            var response = await eventsAwaiter.AwaitResponse<AggregatedUserActivityReportEvent>(flowId, () => publishingRouter.Publish(Queues.Transactions, payload, flowId, Queues.APIGateway));
+
+            return ReportCsvSerializer.SerializerUserActivityReport(data.UserId, data.TimestampFrom, data.TimestampTo, data.Granularity, response);
         }
 
         [HttpPost]
         [Route("Overall")]
         public async Task<string> Overall(OverallReportRequest data)
         {
-            var payload = new GenerateOverallReportEvent
+            var payload = new AggregateOverallReportDataEvent
             {
                 Granularity = data.Granularity,
                 TimestampFrom = data.TimestampFrom,
@@ -51,8 +53,9 @@ namespace APIGateway.Controllers
                 Subject = data.Subject,
             };
             var flowId = HttpContext.Items["flowId"].ToString();
-            var response = await eventsAwaiter.AwaitResponse<ReportCreatedEvent>(flowId, () => publishingRouter.Publish(Queues.Transactions, payload, flowId, Queues.APIGateway));
-            return response.Report;
+            var response = await eventsAwaiter.AwaitResponse<AggregatedOverallReportEvent>(flowId, () => publishingRouter.Publish(Queues.Transactions, payload, flowId, Queues.APIGateway));
+
+            return ReportCsvSerializer.SerializerOverallReport(data.Subject, data.TimestampFrom, data.TimestampTo, data.Granularity, response.Portions);
         }
     }
 }

@@ -19,7 +19,7 @@ namespace ReportsBranchMicroservice
             this.dataFetcher = dataFetcher;
         }
 
-        public override async Task<GenerateReportResponse> GenerateOverallReport(GenerateOverallReportRequest request, ServerCallContext context)
+        public override async Task<AggregateOverallResponse> AggregateOverall(AggregateOverallRequest request, ServerCallContext context)
         {
             Transaction[] transactions;
 
@@ -50,11 +50,12 @@ namespace ReportsBranchMicroservice
                 Aggregations = request.Aggregations.ToArray(),
                 Transactions = transactions
             };
-            var csv = ReportGenerator.CreateOverallCsvReport(data);
-            return new GenerateReportResponse { FlowId = request.FlowId, Report = csv };
+
+            var portions = ReportGenerator.AggregateOverall(data);
+            return new AggregateOverallResponse { Portions = { portions } };
         }
 
-        public override async Task<GenerateReportResponse> GenerateUserActivityReport(GenerateUserActivityReportRequest request, ServerCallContext context)
+        public override async Task<AggregateUserActivityResponse> AggregateUserActivity(AggregateUserActivityRequest request, ServerCallContext context)
         {
             var accounts = await dataFetcher.GetAccounts(request.FlowId, request.UserId);
             var accountsIds = accounts.Select(a => a.Id).ToArray();
@@ -78,8 +79,7 @@ namespace ReportsBranchMicroservice
             parallelTasks.Add(Task.Run(async () => data.Cards = await dataFetcher.GetCards(request.FlowId, accountsIds)));
             await Task.WhenAll(parallelTasks);
 
-            var csv = ReportGenerator.CreateUserActivityCsvReport(data);
-            return new GenerateReportResponse { FlowId = request.FlowId, Report = csv };
+            return ReportGenerator.AggregateUserActivity(data);
         }
 
         private DateTime? GetDateTime(long ticks) => ticks > 0 ? new DateTime(ticks) : null as DateTime?;

@@ -2,12 +2,13 @@ using System;
 using System.Linq;
 using System.Text;
 using APIGateway.Models;
+using ReportsBranchMicroservice;
 
 namespace APIGateway.Reports
 {
-    public static class ReportGenerator
+    public static class ReportCsvSerializer
     {
-        public static string CreateOverallCsvReport(Models.ReportSubject subject, DateTime? from, DateTime? to, ReportGranularity granularity, OverallReportPortion[] portions)
+        public static string SerializerOverallReport(Models.ReportSubject subject, DateTime? from, DateTime? to, ReportGranularity granularity, OverallReportPortion[] portions)
         {
             var sb = new StringBuilder();
             sb.AppendLine($"Raport całościowy dla; {subject}");
@@ -28,7 +29,7 @@ namespace APIGateway.Reports
             return sb.ToString();
         }
 
-        public static string CreateUserActivityCsvReport(string userId, DateTime? from, DateTime? to, ReportGranularity granularity, UserActivityReportPortions portions)
+        public static string SerializerUserActivityReport(string userId, DateTime? from, DateTime? to, ReportGranularity granularity, AggregateUserActivityResponse portions)
         {
             var sb = new StringBuilder();
             sb.AppendLine($"Raport aktywności użytkownika; {userId}");
@@ -36,14 +37,13 @@ namespace APIGateway.Reports
             sb.AppendLine($"Zakres do; {to?.ToString() ?? "-"}");
             sb.AppendLine($"Granularność; {granularity}");
 
-            sb.WriteAccountsData(portions.Accounts);
-            sb.WriteCardsData(portions.Cards);
-            sb.WritePaymentsData(portions.Payments);
-            sb.WriteLoansData(portions.Loans);
+            sb.WriteAccountsData(portions.AccountsPortions.ToArray());
+            sb.WriteCardsData(portions.CardsPortions.ToArray());
+            sb.WritePaymentsData(portions.PaymentsPortions.ToArray());
+            sb.WriteLoansData(portions.LoansPortions.ToArray());
 
             return sb.ToString();
         }
-
 
         private static void WriteAggragation(this StringBuilder sb, string period, float value, Aggregation aggregation)
         {

@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using APIGateway.Models;
+using APIGateway.Reports;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -29,7 +30,7 @@ namespace APIGateway.Controllers
         [Route("UserActivity")]
         public async Task<string> UserActivity(UserActivityReportRequest data)
         {
-            var request = new GenerateUserActivityReportRequest
+            var request = new AggregateUserActivityRequest
             {
                 Granularity = mapper.Map<Granularity>(data.Granularity),
                 TimestampFrom = data.TimestampFrom.HasValue ? data.TimestampFrom.Value.Ticks : 0,
@@ -37,15 +38,15 @@ namespace APIGateway.Controllers
                 UserId = data.UserId,
             };
             request.FlowId = HttpContext.Items["flowId"].ToString();
-            var response = await reportsBranchClient.GenerateUserActivityReportAsync(request);
-            return response.Report;
+            var response = await reportsBranchClient.AggregateUserActivityAsync(request);
+            return ReportCsvSerializer.SerializerUserActivityReport(data.UserId, data.TimestampFrom, data.TimestampTo, data.Granularity, response);
         }
 
         [HttpPost]
         [Route("Overall")]
         public async Task<string> Overall(OverallReportRequest data)
         {
-            var request = new GenerateOverallReportRequest
+            var request = new AggregateOverallRequest
             {
                 Granularity = mapper.Map<Granularity>(data.Granularity),
                 TimestampFrom = data.TimestampFrom.HasValue ? data.TimestampFrom.Value.Ticks : 0,
@@ -55,8 +56,8 @@ namespace APIGateway.Controllers
             };
             request.FlowId = HttpContext.Items["flowId"].ToString();
 
-            var response = await reportsBranchClient.GenerateOverallReportAsync(request);
-            return response.Report;
+            var response = await reportsBranchClient.AggregateOverallAsync(request);
+            return ReportCsvSerializer.SerializerOverallReport(data.Subject, data.TimestampFrom, data.TimestampTo, data.Granularity, response.Portions.ToArray());
         }
     }
 }

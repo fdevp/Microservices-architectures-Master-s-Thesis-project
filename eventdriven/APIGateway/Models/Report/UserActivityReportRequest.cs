@@ -8,6 +8,6 @@ namespace APIGateway.Models
         public string UserId { get; set; }
         public DateTime? TimestampFrom { get; set; }
         public DateTime? TimestampTo { get; set; }
-        public Granularity Granularity { get; set; }
+        public ReportGranularity Granularity { get; set; }
     }
 }
