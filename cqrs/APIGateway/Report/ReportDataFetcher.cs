@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AccountsReadMicroservice;
+using Google.Protobuf.WellKnownTypes;
 using static AccountsReadMicroservice.AccountsRead;
 using static CardsReadMicroservice.CardsRead;
 using static LoansReadMicroservice.LoansRead;
@@ -56,12 +57,9 @@ namespace APIGateway.Reports
             return response.Portions.ToArray();
         }
 
-        public async Task<UserActivityReportPortions> GetUserActivityPortions(string flowId, string userId, DateTime? from, DateTime? to, Granularity granularity)
+        public async Task<UserActivityReportPortions> GetUserActivityPortions(string flowId, string userId, Timestamp from, Timestamp to, Granularity granularity)
         {
             var portions = new UserActivityReportPortions();
-
-            var fromTicks = from?.Ticks ?? 0;
-            var toTicks = to?.Ticks ?? 0;
 
             var accountsResponse = await accountsClient.GetUserAccountsAsync(new GetUserAccountsRequest { FlowId = flowId, UserId = userId });
             var accountsIds = accountsResponse.Accounts.Select(a => a.Id).ToArray();
@@ -69,25 +67,25 @@ namespace APIGateway.Reports
             var parallelTasks = new List<Task>();
             parallelTasks.Add(Task.Run(async () =>
             {
-                var request = new AccountsReadMicroservice.AggregateUserActivityRequest { UserId = userId, FlowId = flowId, TimestampFrom = fromTicks, TimestampTo = toTicks, Granularity = granularity };
+                var request = new AccountsReadMicroservice.AggregateUserActivityRequest { UserId = userId, FlowId = flowId, TimestampFrom = from, TimestampTo = to, Granularity = granularity };
                 var response = await accountsClient.AggregateUserActivityAsync(request);
                 portions.Accounts = response.Portions.ToArray();
             }));
             parallelTasks.Add(Task.Run(async () =>
             {
-                var request = new PaymentsReadMicroservice.AggregateUserActivityRequest { AccountsIds = { accountsIds }, FlowId = flowId, TimestampFrom = fromTicks, TimestampTo = toTicks, Granularity = granularity };
+                var request = new PaymentsReadMicroservice.AggregateUserActivityRequest { AccountsIds = { accountsIds }, FlowId = flowId, TimestampFrom = from, TimestampTo = to, Granularity = granularity };
                 var response = await paymentsClient.AggregateUserActivityAsync(request);
                 portions.Payments = response.Portions.ToArray();
             }));
             parallelTasks.Add(Task.Run(async () =>
             {
-                var request = new LoansReadMicroservice.AggregateUserActivityRequest { AccountsIds = { accountsIds }, FlowId = flowId, TimestampFrom = fromTicks, TimestampTo = toTicks, Granularity = granularity };
+                var request = new LoansReadMicroservice.AggregateUserActivityRequest { AccountsIds = { accountsIds }, FlowId = flowId, TimestampFrom = from, TimestampTo = to, Granularity = granularity };
                 var response = await loansClient.AggregateUserActivityAsync(request);
                 portions.Loans = response.Portions.ToArray();
             }));
             parallelTasks.Add(Task.Run(async () =>
             {
-                var request = new CardsReadMicroservice.AggregateUserActivityRequest { AccountsIds = { accountsIds }, FlowId = flowId, TimestampFrom = fromTicks, TimestampTo = toTicks, Granularity = granularity };
+                var request = new CardsReadMicroservice.AggregateUserActivityRequest { AccountsIds = { accountsIds }, FlowId = flowId, TimestampFrom = from, TimestampTo = to, Granularity = granularity };
                 var response = await cardsClient.AggregateUserActivityAsync(request);
                 portions.Cards = response.Portions.ToArray();
             }));

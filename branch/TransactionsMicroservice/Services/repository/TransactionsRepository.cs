@@ -13,7 +13,7 @@ namespace TransactionsMicroservice.Repository
         {
             var id = Guid.NewGuid().ToString();
             var timestamp = DateTime.UtcNow;
-            var transaction = new Repository.Transaction(id, title, amount, timestamp.Ticks, recipient, sender, paymentId, cardId);
+            var transaction = new Repository.Transaction(id, title, amount, timestamp, recipient, sender, paymentId, cardId);
             transactions.TryAdd(id, transaction);
             return transaction;
         }
@@ -53,9 +53,9 @@ namespace TransactionsMicroservice.Repository
 
         private bool SelectTransaction(Transaction transaction, Filters filters)
         {
-            if (filters.TimestampFrom != 0 && transaction.Timestamp < filters.TimestampFrom)
+            if (filters.TimestampFrom.HasValue && transaction.Timestamp < filters.TimestampFrom)
                 return false;
-            if (filters.TimestampTo != 0 && transaction.Timestamp > filters.TimestampTo)
+            if (filters.TimestampTo.HasValue && transaction.Timestamp > filters.TimestampTo)
                 return false;
 
             var anyPayments = filters.Payments?.Any() ?? false;
@@ -78,11 +78,11 @@ namespace TransactionsMicroservice.Repository
             if (anyDetailedFilter)
                 return false;
 
-            if (filters.TimestampFrom != 0 && filters.TimestampTo != 0)
+            if (filters.TimestampFrom.HasValue && filters.TimestampTo.HasValue)
                 return transaction.Timestamp >= filters.TimestampFrom && transaction.Timestamp <= filters.TimestampTo;
-            if (filters.TimestampTo != 0)
+            if (filters.TimestampTo.HasValue)
                 return transaction.Timestamp <= filters.TimestampTo;
-            if (filters.TimestampFrom != 0)
+            if (filters.TimestampFrom.HasValue)
                 return transaction.Timestamp >= filters.TimestampFrom;
 
             return false;

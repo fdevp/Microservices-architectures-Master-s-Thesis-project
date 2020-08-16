@@ -1,17 +1,19 @@
+using System;
+
 namespace PaymentsMicroservice.Repository
 {
     public class Payment
     {
         public string Id { get; }
         public float Amount { get; }
-        public long StartTimestamp { get; }
-        public long LastRepayTimestamp { get; private set; }
-        public long Interval { get; }
+        public DateTime StartTimestamp { get; }
+        public DateTime? LastRepayTimestamp { get; private set; }
+        public TimeSpan Interval { get; }
         public PaymentStatus Status { get; private set; }
         public string AccountId { get; }
         public string Recipient { get; }
 
-        public Payment(string id, float amount, long startTimestamp, long lastRepayTimestamp, long interval, PaymentStatus status, string accountId, string recipient)
+        public Payment(string id, float amount, DateTime startTimestamp, DateTime? lastRepayTimestamp, TimeSpan interval, PaymentStatus status, string accountId, string recipient)
         {
             Id = id;
             Amount = amount;
@@ -23,7 +25,7 @@ namespace PaymentsMicroservice.Repository
             Recipient = recipient;
         }
 
-        public void UpdateLastRepayTimestamp(long lastRepayTimestamp)
+        public void UpdateLastRepayTimestamp(DateTime lastRepayTimestamp)
         {
             this.LastRepayTimestamp = lastRepayTimestamp;
         }

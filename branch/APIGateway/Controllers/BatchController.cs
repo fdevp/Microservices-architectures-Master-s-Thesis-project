@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using APIGateway.Models;
 using AutoMapper;
 using BatchesBranchMicroservice;
+using Google.Protobuf.WellKnownTypes;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using static BatchesBranchMicroservice.BatchesBranch;
@@ -51,7 +52,7 @@ namespace APIGateway.Controllers
             var request = new ProcessBatchRequest
             {
                 FlowId = HttpContext.Items["flowId"].ToString(),
-                RepayTimestamp = data.RepayTimestamp.Ticks,
+                RepayTimestamp = Timestamp.FromDateTime(data.RepayTimestamp),
                 Transfers = { transfers },
                 Messages = { messages },
                 RepaidInstalmentsIds = { data.RepaidInstalmentsIds }

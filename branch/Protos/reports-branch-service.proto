@@ -1,5 +1,6 @@
 syntax = "proto3";
 import "common/report.proto";
+import "google/protobuf/timestamp.proto";
 
 option csharp_namespace = "ReportsBranchMicroservice";
 
@@ -13,16 +14,16 @@ service ReportsBranch {
 message GenerateUserActivityReportRequest {
   string flowId = 1;
   string userId = 2;
-  int64 timestampFrom = 3;
-  int64 timestampTo = 4;
+  google.protobuf.Timestamp timestampFrom = 3;
+  google.protobuf.Timestamp timestampTo = 4;
   Granularity granularity = 5;
 }
 
 message GenerateOverallReportRequest {
   string flowId = 1;
   repeated Aggregation aggregations = 2;
-  int64 timestampFrom = 3;
-  int64 timestampTo = 4;
+  google.protobuf.Timestamp timestampFrom = 3;
+  google.protobuf.Timestamp timestampTo = 4;
   Granularity granularity = 5;
   ReportSubject subject = 6;
 }

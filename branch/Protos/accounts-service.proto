@@ -4,6 +4,7 @@ import "common/balance.proto";
 import "common/account.proto";
 import "common/transfer.proto";
 import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
 
 
 option csharp_namespace = "AccountsMicroservice";
@@ -47,8 +48,8 @@ message GetBalancesResponse {
 message GetTransactionsRequest {
   string flowId = 1;
   repeated string ids = 2;
-  int64 timestampFrom = 3;
-  int64 timestampTo = 4;
+  google.protobuf.Timestamp timestampFrom = 3;
+  google.protobuf.Timestamp timestampTo = 4;
 }
 
 message GetTransactionsResponse {

@@ -1,4 +1,5 @@
 syntax = "proto3";
+import "google/protobuf/timestamp.proto";
 
 enum Granularity {
   DAY = 0;
@@ -43,8 +44,8 @@ message AggregateUserActivityResponse {
 message AggregateOverallRequest {
   string flowId = 1;
   repeated Aggregation aggregations = 2;
-  int64 timestampFrom = 3;
-  int64 timestampTo = 4;
+  google.protobuf.Timestamp timestampFrom = 3;
+  google.protobuf.Timestamp timestampTo = 4;
   Granularity granularity = 5;
 }
 

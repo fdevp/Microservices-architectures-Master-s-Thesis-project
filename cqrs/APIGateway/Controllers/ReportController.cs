@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using APIGateway.Models;
 using APIGateway.Reports;
 using AutoMapper;
+using Google.Protobuf.WellKnownTypes;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
@@ -28,7 +29,7 @@ namespace APIGateway.Controllers
         public async Task<string> UserActivity(UserActivityReportRequest request)
         {
             var flowId = HttpContext.Items["flowId"].ToString();
-            var granularity =  mapper.Map<Granularity>(request.Granularity);
+            var granularity = mapper.Map<Granularity>(request.Granularity);
             var portions = await reportDataFetcher.GetUserActivityPortions(flowId, request.UserId, request.TimestampFrom, request.TimestampTo, granularity);
             var csv = ReportGenerator.CreateUserActivityCsvReport(request.UserId, request.TimestampFrom, request.TimestampTo, request.Granularity, portions);
             return csv;
@@ -42,8 +43,8 @@ namespace APIGateway.Controllers
             var cqrsRequest = new AggregateOverallRequest
             {
                 Granularity = mapper.Map<Granularity>(request.Granularity),
-                TimestampFrom = request.TimestampFrom.HasValue ? request.TimestampFrom.Value.Ticks : 0,
-                TimestampTo = request.TimestampTo.HasValue ? request.TimestampTo.Value.Ticks : 0,
+                TimestampFrom = request.TimestampFrom.HasValue ? Timestamp.FromDateTime(request.TimestampFrom.Value) : null,
+                TimestampTo = request.TimestampTo.HasValue ? Timestamp.FromDateTime(request.TimestampTo.Value) : null,
                 Aggregations = { request.Aggregations.Select(a => mapper.Map<Aggregation>(a)) }
             };
             var data = await reportDataFetcher.GetOverallReportPortions(cqrsRequest, request.Subject);

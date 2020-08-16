@@ -2,6 +2,7 @@ syntax = "proto3";
 import "common/card.proto";
 import "common/block.proto";
 import "common/report.proto";
+import "google/protobuf/timestamp.proto";
 
 option csharp_namespace = "CardsReadMicroservice";
 
@@ -36,7 +37,7 @@ message GetBlocksResponse {
 message AggregateUserActivityRequest {
   string flowId = 1;
   repeated string accountsIds = 2;
-  int64 timestampFrom = 3;
-  int64 timestampTo = 4;
+  google.protobuf.Timestamp timestampFrom = 3;
+  google.protobuf.Timestamp timestampTo = 4;
   Granularity granularity = 5;
 }

@@ -7,6 +7,7 @@ using AccountsWriteMicroservice;
 using APIGateway.Models;
 using AutoMapper;
 using Google.Protobuf.Collections;
+using Google.Protobuf.WellKnownTypes;
 using LoansReadMicroservice;
 using LoansWriteMicroservice;
 using Microsoft.AspNetCore.Mvc;
@@ -122,7 +123,7 @@ namespace APIGateway.Controllers
                 parallelTasks.Add(Task.Run(async () =>
                 {
                     var paymentIds = transfers.Select(t => t.PaymentId);
-                    var request = new UpdateRepayTimestampRequest { FlowId = flowId, Ids = { paymentIds }, RepayTimestamp = data.RepayTimestamp.Ticks };
+                    var request = new UpdateRepayTimestampRequest { FlowId = flowId, Ids = { paymentIds }, RepayTimestamp = Timestamp.FromDateTime(data.RepayTimestamp) };
                     await paymentsWriteClient.UpdateRepayTimestampAsync(request);
                 }));
             }

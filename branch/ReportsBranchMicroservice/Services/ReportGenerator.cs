@@ -11,7 +11,7 @@ namespace ReportsBranchMicroservice
     {
         public static string CreateOverallCsvReport(OverallReportData data)
         {
-            var withTimestamps = data.Transactions.Select(t => new TransactionWithTimestamp { Timestamp = new DateTime(t.Timestamp), Transaction = t });
+            var withTimestamps = data.Transactions.Select(t => new TransactionWithTimestamp { Timestamp = t.Timestamp.ToDateTime(), Transaction = t });
             var periods = GroupByPeriods(data.Granularity, withTimestamps);
             var ordered = periods.OrderBy(p => p.Key);
 
@@ -33,7 +33,7 @@ namespace ReportsBranchMicroservice
 
         public static string CreateUserActivityCsvReport(UserActivityRaportData data)
         {
-            var withTimestamps = data.Transactions.Select(t => new TransactionWithTimestamp { Timestamp = new DateTime(t.Timestamp), Transaction = t });
+            var withTimestamps = data.Transactions.Select(t => new TransactionWithTimestamp { Timestamp = t.Timestamp.ToDateTime(), Transaction = t });
             var periods = GroupByPeriods(data.Granularity, withTimestamps);
             var ordered = periods.OrderBy(p => p.Key);
 
