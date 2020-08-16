@@ -1,20 +1,20 @@
 syntax = "proto3";
-import "common/empty.proto";
 import "common/loan.proto";
 import "common/transaction.proto";
+import "google/protobuf/empty.proto";
 
 option csharp_namespace = "LoansMicroservice";
 
 package LoansMicroservice;
 
 service Loans {
-  rpc BatchRepayInstalments (BatchRepayInstalmentsRequest) returns (Empty);
+  rpc BatchRepayInstalments (BatchRepayInstalmentsRequest) returns (google.protobuf.Empty);
   rpc Get (GetLoansRequest) returns (GetLoansResponse);
   rpc GetByPayments (GetLoansRequest) returns (GetLoansResponse);
   rpc GetByAccounts (GetLoansRequest) returns (GetLoansResponse);
   rpc GetTransactions (GetTransactionsRequest) returns (GetTransactionsResult);
-  rpc Setup(SetupRequest) returns (Empty);
-  rpc SetupAppend(SetupRequest) returns (Empty);
+  rpc Setup(SetupRequest) returns (google.protobuf.Empty);
+  rpc SetupAppend(SetupRequest) returns (google.protobuf.Empty);
 }
 
 message BatchRepayInstalmentsRequest {

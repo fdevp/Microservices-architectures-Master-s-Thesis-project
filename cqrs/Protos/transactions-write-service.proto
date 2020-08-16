@@ -1,15 +1,15 @@
 syntax = "proto3";
 import "common/transaction.proto";
-import "common/empty.proto";
+import "google/protobuf/empty.proto";
 
 option csharp_namespace = "TransactionsWriteMicroservice";
 package TransactionsWriteMicroservice;
 
 service TransactionsWrite {
   rpc Create (CreateTransactionRequest) returns (CreateTransactionResult);
-  rpc BatchCreate (BatchCreateTransactionRequest) returns (Empty);
-  rpc Setup(SetupRequest) returns (Empty);
-  rpc SetupAppend(SetupRequest) returns (Empty);
+  rpc BatchCreate (BatchCreateTransactionRequest) returns (google.protobuf.Empty);
+  rpc Setup(SetupRequest) returns (google.protobuf.Empty);
+  rpc SetupAppend(SetupRequest) returns (google.protobuf.Empty);
 }
 
 message CreateTransactionRequest {

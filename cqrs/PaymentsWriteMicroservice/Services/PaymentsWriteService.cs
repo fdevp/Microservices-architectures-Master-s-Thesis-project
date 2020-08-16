@@ -1,6 +1,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Microsoft.Extensions.Logging;
 using PaymentsWriteMicroservice.Repository;

@@ -1,10 +1,10 @@
 syntax = "proto3";
-import "common/empty.proto";
 import "common/loan.proto";
 import "common/payment.proto";
 import "common/balance.proto";
 import "common/transfer.proto";
 import "common/message.proto";
+import "google/protobuf/empty.proto";
 
 option csharp_namespace = "BatchesBranchMicroservice";
 
@@ -12,7 +12,7 @@ package BatchesBranchMicroservice;
 
 service BatchesBranch {
   rpc Get (GetDataToProcessRequest) returns (GetDataToProcessResponse);
-  rpc Process(ProcessBatchRequest) returns (Empty);
+  rpc Process(ProcessBatchRequest) returns (google.protobuf.Empty);
 }
 
 message GetDataToProcessRequest {

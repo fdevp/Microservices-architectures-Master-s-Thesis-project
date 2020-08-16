@@ -3,7 +3,8 @@ import "common/transaction.proto";
 import "common/balance.proto";
 import "common/account.proto";
 import "common/transfer.proto";
-import "common/empty.proto";
+import "google/protobuf/empty.proto";
+
 
 option csharp_namespace = "AccountsMicroservice";
 
@@ -15,9 +16,9 @@ service Accounts {
   rpc GetBalances (GetBalancesRequest) returns (GetBalancesResponse);
   rpc GetTransactions (GetTransactionsRequest) returns (GetTransactionsResponse);
   rpc Transfer (TransferRequest) returns (TransferResponse);
-  rpc BatchTransfer (BatchTransferRequest) returns (Empty);
-  rpc Setup(SetupRequest) returns (Empty);
-  rpc SetupAppend(SetupRequest) returns (Empty);
+  rpc BatchTransfer (BatchTransferRequest) returns (google.protobuf.Empty);
+  rpc Setup(SetupRequest) returns (google.protobuf.Empty);
+  rpc SetupAppend(SetupRequest) returns (google.protobuf.Empty);
 }
 
 message GetAccountsRequest {
