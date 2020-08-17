@@ -28,41 +28,14 @@ namespace TransactionsMicroservice.Reports
 
         public static AggregatedUserActivityReportEvent AggregateUserActivity(UserActivityRaportData data)
         {
-            var portions = GroupByPeriods(data.Granularity, data.Transactions);
-            var ordered = portions.OrderBy(p => p.Key);
+            var accounts = data.Accounts.SelectMany(a => AggregateUserAccountsTransactions(a, data.Transactions, data.Granularity));
+            
+            var cardsTransactions = data.Transactions.Where(t => t.CardId != null);
+            var cards = data.Cards.SelectMany(c => AggregateUserCardTransactions(c, cardsTransactions, data.Granularity));
 
-            var cards = new List<UserReportPortion>();
-            var payments = new List<UserReportPortion>();
-            var accounts = new List<UserReportPortion>();
-            var loans = new List<UserReportPortion>();
-
-            foreach (var portion in ordered)
-            {
-                cards.AddRange(data.Cards.Select(card =>
-                {
-                    var debits = portion.Where(p => p.CardId == card.Id).Sum(p => (float?)p.Amount) ?? 0;
-                    return new UserReportPortion { Period = portion.Key, Debits = debits, Element = card.Number };
-                }));
-
-                payments.AddRange(data.Payments.Select(payment =>
-                {
-                    var debits = portion.Where(p => p.PaymentId == payment.Id).Sum(p => (float?)p.Amount) ?? 0;
-                    return new UserReportPortion { Period = portion.Key, Debits = debits, Element = payment.Id };
-                }));
-
-                accounts.AddRange(data.Accounts.Select(account =>
-                {
-                    var incomes = portion.Where(p => p.Recipient == account.Id).Sum(p => (float?)p.Amount) ?? 0;
-                    var debits = portion.Where(p => p.Sender == account.Id).Sum(p => (float?)p.Amount) ?? 0;
-                    return new UserReportPortion { Period = portion.Key, Debits = debits, Incomes = incomes, Element = account.Number };
-                }));
-
-                loans.AddRange(data.Loans.Select(loan =>
-                {
-                    var debits = portion.Where(p => p.PaymentId == loan.PaymentId).Sum(p => (float?)p.Amount) ?? 0;
-                    return new UserReportPortion { Period = portion.Key, Debits = debits, Element = loan.Id };
-                }));
-            }
+            var paymentsTransactions = data.Transactions.Where(t => t.PaymentId != null);
+            var payments = data.Payments.SelectMany(p => AggregateUserPaymentsTransactions(p, paymentsTransactions, data.Granularity));
+            var loans = data.Loans.SelectMany(l => AggregateUserLoansTransactions(l, paymentsTransactions, data.Granularity));
 
             return new AggregatedUserActivityReportEvent
             {
@@ -73,7 +46,24 @@ namespace TransactionsMicroservice.Reports
             };
         }
 
-        private static string GetDate(DateTime date, int dayOfWeek) => date.AddDays(-(int)date.DayOfWeek + dayOfWeek).ToString("yyyy-MM-dd");
+        private static IEnumerable<IGrouping<string, Transaction>> GroupByPeriods(ReportGranularity granularity, IEnumerable<Transaction> transactions)
+        {
+            switch (granularity)
+            {
+                case ReportGranularity.Day:
+                    return transactions.GroupBy(t => t.Timestamp.ToString("yyyy-MM-dd"));
+                case ReportGranularity.Week:
+                    return transactions.GroupBy(t => $"{GetDate(t.Timestamp, 1)} do {GetDate(t.Timestamp, 7)}");
+                case ReportGranularity.Month:
+                    return transactions.GroupBy(t => t.Timestamp.ToString("yyyy-MM"));
+                case ReportGranularity.Year:
+                    return transactions.GroupBy(t => t.Timestamp.ToString("yyyy"));
+                case ReportGranularity.All:
+                    return transactions.GroupBy(t => "All time");
+                default:
+                    throw new InvalidOperationException("Unknown granularity");
+            }
+        }
 
         private static float Aggregate(IGrouping<string, Transaction> period, Aggregation aggregation)
         {
@@ -94,22 +84,54 @@ namespace TransactionsMicroservice.Reports
             }
         }
 
-        private static IEnumerable<IGrouping<string, Transaction>> GroupByPeriods(ReportGranularity granularity, IEnumerable<Transaction> transactions)
+        private static string GetDate(DateTime date, int dayOfWeek) => date.AddDays(-(int)date.DayOfWeek + dayOfWeek).ToString("yyyy-MM-dd");
+
+        private static IEnumerable<UserReportPortion> AggregateUserCardTransactions(Card card, IEnumerable<Transaction> allTransactions, ReportGranularity granularity)
         {
-            switch (granularity)
+            var transactions = allTransactions.Where(t => t.CardId == card.Id);
+            var portions = GroupByPeriods(granularity, transactions);
+            var ordered = portions.OrderBy(p => p.Key);
+            foreach (var portion in ordered)
             {
-                case ReportGranularity.Day:
-                    return transactions.GroupBy(t => t.Timestamp.ToString("yyyy-MM-dd"));
-                case ReportGranularity.Week:
-                    return transactions.GroupBy(t => $"{GetDate(t.Timestamp, 1)} do {GetDate(t.Timestamp, 7)}");
-                case ReportGranularity.Month:
-                    return transactions.GroupBy(t => t.Timestamp.ToString("yyyy-MM"));
-                case ReportGranularity.Year:
-                    return transactions.GroupBy(t => t.Timestamp.ToString("yyyy"));
-                case ReportGranularity.All:
-                    return transactions.GroupBy(t => "All time");
-                default:
-                    throw new InvalidOperationException("Unknown granularity");
+                var debits = portion.Sum(p => (float?)p.Amount) ?? 0;
+                yield return new UserReportPortion { Period = portion.Key, Debits = debits, Element = card.Number };
+            }
+        }
+
+        private static IEnumerable<UserReportPortion> AggregateUserAccountsTransactions(Account account, IEnumerable<Transaction> allTransactions, ReportGranularity granularity)
+        {
+            var transactions = allTransactions.Where(t => t.Sender == account.Id || t.Recipient == account.Id);
+            var portions = GroupByPeriods(granularity, transactions);
+            var ordered = portions.OrderBy(p => p.Key);
+            foreach (var portion in ordered)
+            {
+                var incomes = portion.Where(p => p.Recipient == account.Id).Sum(p => (float?)p.Amount) ?? 0;
+                var debits = portion.Where(p => p.Sender == account.Id).Sum(p => (float?)p.Amount) ?? 0;
+                yield return new UserReportPortion { Period = portion.Key, Debits = debits, Incomes = incomes, Element = account.Number };
+            }
+        }
+
+        private static IEnumerable<UserReportPortion> AggregateUserLoansTransactions(Loan loan, IEnumerable<Transaction> allTransactions, ReportGranularity granularity)
+        {
+            var transactions = allTransactions.Where(p => p.PaymentId == loan.PaymentId);
+            var portions = GroupByPeriods(granularity, transactions);
+            var ordered = portions.OrderBy(p => p.Key);
+            foreach (var portion in ordered)
+            {
+                var debits = portion.Sum(p => (float?)p.Amount) ?? 0;
+                yield return new UserReportPortion { Period = portion.Key, Debits = debits, Element = loan.Id };
+            }
+        }
+
+        private static IEnumerable<UserReportPortion> AggregateUserPaymentsTransactions(Payment payment, IEnumerable<Transaction> allTransactions, ReportGranularity granularity)
+        {
+            var transactions = allTransactions.Where(p => p.PaymentId == payment.Id);
+            var portions = GroupByPeriods(granularity, transactions);
+            var ordered = portions.OrderBy(p => p.Key);
+            foreach (var portion in ordered)
+            {
+                var debits = portion.Sum(p => (float?)p.Amount) ?? 0;
+                yield return new UserReportPortion { Period = portion.Key, Debits = debits, Element = payment.Id };
             }
         }
     }

@@ -56,7 +56,7 @@ namespace APIGateway.Reports
                     sb.AppendLine($";Średnia;{value}");
                     break;
                 case Aggregation.Sum:
-                    sb.AppendLine($";Sum;{value}");
+                    sb.AppendLine($";Suma;{value}");
                     break;
                 case Aggregation.Min:
                     sb.AppendLine($";Wartość minimalna;{value}");
