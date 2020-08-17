@@ -8,6 +8,7 @@ using Grpc.Core;
 using LoansMicroservice;
 using Microsoft.Extensions.Logging;
 using PaymentsMicroservice;
+using SharedClasses;
 using UsersMicroservice;
 using static AccountsMicroservice.Accounts;
 using static LoansMicroservice.Loans;
@@ -39,12 +40,12 @@ namespace BatchesBranchMicroservice
 
         public override async Task<GetDataToProcessResponse> Get(GetDataToProcessRequest request, ServerCallContext context)
         {
-            var paymentsAndLoansRequest = new GetPartRequest { FlowId = request.FlowId, Part = request.Part, TotalParts = request.TotalParts };
-            var paymentsAndLoans = await paymentsClient.GetPartAsync(paymentsAndLoansRequest);
+            var paymentsAndLoansRequest = new GetPartRequest { Part = request.Part, TotalParts = request.TotalParts };
+            var paymentsAndLoans = await paymentsClient.GetPartAsync(paymentsAndLoansRequest, context.RequestHeaders.SelectCustom());
 
             var paymentAccounts = paymentsAndLoans.Payments.Select(p => p.AccountId).Distinct();
-            var accountsRequest = new GetBalancesRequest { FlowId = request.FlowId, Ids = { paymentAccounts } };
-            var balances = await accountsClient.GetBalancesAsync(accountsRequest);
+            var accountsRequest = new GetBalancesRequest { Ids = { paymentAccounts } };
+            var balances = await accountsClient.GetBalancesAsync(accountsRequest, context.RequestHeaders.SelectCustom());
 
             return new GetDataToProcessResponse
             {
@@ -60,34 +61,30 @@ namespace BatchesBranchMicroservice
             if (request.Messages.Count > 0)
                 tasks.Add(Task.Run(async () => await usersClient.BatchAddMessagesAsync(new BatchAddMessagesRequest
                 {
-                    FlowId = request.FlowId,
                     Messages = { request.Messages }
-                })));
+                }, context.RequestHeaders.SelectCustom())));
 
 
             if (request.Transfers.Count > 0)
             {
                 tasks.Add(Task.Run(async () => await accountsClient.BatchTransferAsync(new BatchTransferRequest
                 {
-                    FlowId = request.FlowId,
                     Transfers = { request.Transfers }
-                })));
+                }, context.RequestHeaders.SelectCustom())));
 
                 var paymentIds = request.Transfers.Select(t => t.PaymentId);
                 tasks.Add(Task.Run(async () => await paymentsClient.UpdateRepayTimestampAsync(new UpdateRepayTimestampRequest
                 {
-                    FlowId = request.FlowId,
                     Ids = { paymentIds },
                     RepayTimestamp = request.RepayTimestamp
-                })));
+                }, context.RequestHeaders.SelectCustom())));
             }
 
             if (request.RepaidInstalmentsIds.Count > 0)
                 tasks.Add(Task.Run(async () => await loansClient.BatchRepayInstalmentsAsync(new BatchRepayInstalmentsRequest
                 {
-                    FlowId = request.FlowId,
                     Ids = { request.RepaidInstalmentsIds }
-                })));
+                }, context.RequestHeaders.SelectCustom())));
 
 
             if (tasks.Count > 0)

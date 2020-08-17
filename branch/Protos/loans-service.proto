@@ -19,13 +19,11 @@ service Loans {
 }
 
 message BatchRepayInstalmentsRequest {
-  string flowId = 1;
-  repeated string ids = 2;
+  repeated string ids = 1;
 }
 
 message GetLoansRequest {
-  string flowId = 1;
-  repeated string ids = 2;
+  repeated string ids = 1;
 }
 
 message GetLoansResponse {
@@ -33,10 +31,9 @@ message GetLoansResponse {
 }
 
 message GetTransactionsRequest {
-  string flowId = 1;
-  repeated string ids = 2;
-  google.protobuf.Timestamp timestampFrom = 3;
-  google.protobuf.Timestamp timestampTo = 4;
+  repeated string ids = 1;
+  google.protobuf.Timestamp timestampFrom = 2;
+  google.protobuf.Timestamp timestampTo = 3;
 }
 
 message GetTransactionsResult {

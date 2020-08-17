@@ -12,11 +12,10 @@ service ReportsBranch {
 }
 
 message AggregateUserActivityRequest {
-  string flowId = 1;
-  string userId = 2;
-  google.protobuf.Timestamp timestampFrom = 3;
-  google.protobuf.Timestamp timestampTo = 4;
-  Granularity granularity = 5;
+  string userId = 1;
+  google.protobuf.Timestamp timestampFrom = 2;
+  google.protobuf.Timestamp timestampTo = 3;
+  Granularity granularity = 4;
 }
 
 message AggregateUserActivityResponse {
@@ -27,12 +26,11 @@ message AggregateUserActivityResponse {
 }
 
 message AggregateOverallRequest {
-  string flowId = 1;
-  repeated Aggregation aggregations = 2;
-  google.protobuf.Timestamp timestampFrom = 3;
-  google.protobuf.Timestamp timestampTo = 4;
-  Granularity granularity = 5;
-  ReportSubject subject = 6;
+  repeated Aggregation aggregations = 1;
+  google.protobuf.Timestamp timestampFrom = 2;
+  google.protobuf.Timestamp timestampTo = 3;
+  Granularity granularity = 4;
+  ReportSubject subject = 5;
 }
 
 message AggregateOverallResponse {

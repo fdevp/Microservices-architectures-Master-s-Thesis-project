@@ -14,8 +14,7 @@ service PanelsBranch {
 }
 
 message GetPanelRequest {
-  string flowId = 1;
-  string userId = 2;
+  string userId = 1;
 }
 
 message GetPanelResponse {

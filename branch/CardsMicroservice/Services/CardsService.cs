@@ -7,6 +7,7 @@ using CardsMicroservice.Repository;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Microsoft.Extensions.Logging;
+using SharedClasses;
 using TransactionsMicroservice;
 using static AccountsMicroservice.Accounts;
 using static TransactionsMicroservice.Transactions;
@@ -55,8 +56,8 @@ namespace CardsMicroservice
         public override async Task<GetTransactionsResponse> GetTransactions(GetTransactionsRequest request, ServerCallContext context)
         {
             var ids = request.Ids.Any() ? request.Ids.ToArray() : cardsRepository.GetIds();
-            var transactionsRequest = new FilterTransactionsRequest { FlowId = request.FlowId, Cards = { ids }, TimestampFrom = request.TimestampFrom, TimestampTo = request.TimestampTo };
-            var transactionsResponse = await transactionsClient.FilterAsync(transactionsRequest);
+            var transactionsRequest = new FilterTransactionsRequest { Cards = { ids }, TimestampFrom = request.TimestampFrom, TimestampTo = request.TimestampTo };
+            var transactionsResponse = await transactionsClient.FilterAsync(transactionsRequest, context.RequestHeaders.SelectCustom());
             return new GetTransactionsResponse { Transactions = { transactionsResponse.Transactions } };
         }
 
@@ -77,13 +78,9 @@ namespace CardsMicroservice
                 Amount = request.Amount,
                 Title = title
             };
-            var transferRequest = new AccountsMicroservice.TransferRequest
-            {
-                FlowId = request.FlowId,
-                Transfer = transfer,
-            };
+            var transferRequest = new AccountsMicroservice.TransferRequest { Transfer = transfer };
 
-            var transferResponse = await accountsClient.TransferAsync(transferRequest);
+            var transferResponse = await accountsClient.TransferAsync(transferRequest, context.RequestHeaders.SelectCustom());
             cardsRepository.CreateBlock(card.Id, transferResponse.Transaction.Id, blockRequestTime);
 
             return new TransferResponse { Transaction = transferResponse.Transaction };

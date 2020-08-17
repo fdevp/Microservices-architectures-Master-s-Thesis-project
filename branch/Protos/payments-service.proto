@@ -23,8 +23,7 @@ service Payments {
 }
 
 message GetPaymentsRequest {
-  string flowId = 1;
-  repeated string ids = 2;
+  repeated string ids = 1;
 }
 
 message GetPaymentsResult {
@@ -32,9 +31,8 @@ message GetPaymentsResult {
 }
 
 message GetPartRequest {
-  string flowId = 1;
-  int32 part = 2;
-  int32 totalParts = 3;
+  int32 part = 1;
+  int32 totalParts = 2;
 }
 
 message GetPaymentsWithLoansResult 
@@ -44,10 +42,9 @@ message GetPaymentsWithLoansResult
 }
 
 message GetTransactionsRequest {
-  string flowId = 1;
-  repeated string ids = 2;
-  google.protobuf.Timestamp timestampFrom = 3;
-  google.protobuf.Timestamp timestampTo = 4;
+  repeated string ids = 1;
+  google.protobuf.Timestamp timestampFrom = 2;
+  google.protobuf.Timestamp timestampTo = 3;
 }
 
 message GetTransactionsResult {
@@ -55,18 +52,16 @@ message GetTransactionsResult {
 }
 
 message CreatePaymentRequest {
-  string flowId = 1;
-  float amount = 2;
-  google.protobuf.Timestamp startTimestamp = 3;
-  google.protobuf.Duration interval = 4;
-  string accountId = 5;
-  string recipient = 6;
+  float amount = 1;
+  google.protobuf.Timestamp startTimestamp = 2;
+  google.protobuf.Duration interval = 3;
+  string accountId = 4;
+  string recipient = 5;
 }
 
 message UpdateRepayTimestampRequest {
-  string flowId = 1;
-  repeated string ids = 2;
-  google.protobuf.Timestamp repayTimestamp = 3;
+  repeated string ids = 1;
+  google.protobuf.Timestamp repayTimestamp = 2;
 }
 
 message CreatePaymentResult {
@@ -74,8 +69,7 @@ message CreatePaymentResult {
 }
 
 message CancelPaymentsRequest {
-  string flowId = 1;
-  repeated string ids = 2;
+  repeated string ids = 1;
 }
 
 message SetupRequest {

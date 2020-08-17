@@ -25,8 +25,7 @@ message Block {
 }
 
 message GetCardsRequest {
-  string flowId = 1;
-  repeated string ids = 2;
+  repeated string ids = 1;
 }
 
 message GetCardsResponse {
@@ -34,8 +33,7 @@ message GetCardsResponse {
 }
 
 message GetBlocksRequest {
-  string flowId = 1;
-  string cardId = 2;
+  string cardId = 1;
 }
 
 message GetBlocksResponse {
@@ -43,10 +41,9 @@ message GetBlocksResponse {
 }
 
 message GetTransactionsRequest {
-  string flowId = 1;
-  repeated string ids = 2;
-  google.protobuf.Timestamp timestampFrom = 3;
-  google.protobuf.Timestamp timestampTo = 4;
+  repeated string ids = 1;
+  google.protobuf.Timestamp timestampFrom = 2;
+  google.protobuf.Timestamp timestampTo = 3;
 }
 
 message GetTransactionsResponse {
@@ -54,10 +51,9 @@ message GetTransactionsResponse {
 }
 
 message TransferRequest {
-  string flowId = 1;
-  string cardId = 2;
-  string recipient = 3;
-  float amount = 4;
+  string cardId = 1;
+  string recipient = 2;
+  float amount = 3;
 }
 
 message TransferResponse {

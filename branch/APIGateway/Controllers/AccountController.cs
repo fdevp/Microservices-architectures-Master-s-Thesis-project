@@ -31,8 +31,7 @@ namespace APIGateway.Controllers
         public async Task<IEnumerable<AccountDTO>> Get(string userId)
         {
             var request = new GetUserAccountsRequest { UserId = userId };
-            request.FlowId = HttpContext.Items["flowId"].ToString();
-            var response = await accountClient.GetUserAccountsAsync(request);
+            var response = await accountClient.GetUserAccountsAsync(request, HttpContext.CreateHeadersWithFlowId());
             var accounts = response.Accounts.Select(a => mapper.Map<AccountDTO>(a));
             return accounts;
         }
@@ -42,8 +41,7 @@ namespace APIGateway.Controllers
         public async Task<float> Balance(string accountId)
         {
             var request = new GetBalancesRequest { Ids = { accountId } };
-            request.FlowId = HttpContext.Items["flowId"].ToString();
-            var repsonse = await accountClient.GetBalancesAsync(request);
+            var repsonse = await accountClient.GetBalancesAsync(request, HttpContext.CreateHeadersWithFlowId());
             var balance = repsonse.Balances.Single();
             return balance.Balance;
         }
@@ -54,8 +52,7 @@ namespace APIGateway.Controllers
         {
             var transfer = mapper.Map<Transfer>(data);
             var request = new TransferRequest { Transfer = transfer };
-            request.FlowId = HttpContext.Items["flowId"].ToString();
-            await accountClient.TransferAsync(request);
+            await accountClient.TransferAsync(request, HttpContext.CreateHeadersWithFlowId());
         }
 
         [HttpPost]

@@ -8,6 +8,7 @@ using Grpc.Core;
 using LoansMicroservice.Repository;
 using Microsoft.Extensions.Logging;
 using PaymentsMicroservice;
+using SharedClasses;
 using TransactionsMicroservice;
 using static PaymentsMicroservice.Payments;
 using static TransactionsMicroservice.Transactions;
@@ -56,8 +57,8 @@ namespace LoansMicroservice
         public async override Task<GetTransactionsResult> GetTransactions(GetTransactionsRequest request, ServerCallContext context)
         {
             var ids = request.Ids.Any() ? request.Ids.ToArray() : loansRepository.GetPaymentsIds();
-            var transactionsRequest = new FilterTransactionsRequest { FlowId = request.FlowId, Payments = { ids }, TimestampFrom = request.TimestampFrom, TimestampTo = request.TimestampTo };
-            var transactionsResponse = await transactionsClient.FilterAsync(transactionsRequest);
+            var transactionsRequest = new FilterTransactionsRequest { Payments = { ids }, TimestampFrom = request.TimestampFrom, TimestampTo = request.TimestampTo };
+            var transactionsResponse = await transactionsClient.FilterAsync(transactionsRequest, context.RequestHeaders.SelectCustom());
             return new GetTransactionsResult { Transactions = { transactionsResponse.Transactions } };
         }
 
@@ -66,12 +67,8 @@ namespace LoansMicroservice
             var paymentsToFinish = RepayInstalments(request);
             if (paymentsToFinish.Any())
             {
-                var cancelPaymentsRequest = new CancelPaymentsRequest
-                {
-                    FlowId = request.FlowId,
-                    Ids = { paymentsToFinish }
-                };
-                await paymentsClient.CancelAsync(cancelPaymentsRequest);
+                var cancelPaymentsRequest = new CancelPaymentsRequest { Ids = { paymentsToFinish } };
+                await paymentsClient.CancelAsync(cancelPaymentsRequest, context.RequestHeaders.SelectCustom());
             }
             return new Empty();
         }

@@ -6,6 +6,7 @@ using AutoMapper;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Microsoft.Extensions.Logging;
+using SharedClasses;
 using TransactionsMicroservice;
 using static TransactionsMicroservice.Transactions;
 
@@ -50,8 +51,8 @@ namespace AccountsMicroservice
 
         public override async Task<GetTransactionsResponse> GetTransactions(GetTransactionsRequest request, ServerCallContext context)
         {
-            var filters = new FilterTransactionsRequest { FlowId = request.FlowId, Senders = { request.Ids }, Recipients = { request.Ids }, TimestampFrom = request.TimestampFrom, TimestampTo = request.TimestampTo };
-            var response = await transactionsClient.FilterAsync(filters);
+            var filters = new FilterTransactionsRequest { Senders = { request.Ids }, Recipients = { request.Ids }, TimestampFrom = request.TimestampFrom, TimestampTo = request.TimestampTo };
+            var response = await transactionsClient.FilterAsync(filters, context.RequestHeaders.SelectCustom());
             return new GetTransactionsResponse { Transactions = { response.Transactions } };
         }
 
@@ -60,8 +61,8 @@ namespace AccountsMicroservice
             if (!accountsRepository.CanTransfer(request.Transfer.AccountId, request.Transfer.Recipient, request.Transfer.Amount))
                 throw new ArgumentException("Cannot transfer founds.");
 
-            var transfer = CreateRequest(request.FlowId, request.Transfer);
-            var result = await transactionsClient.CreateAsync(transfer);
+            var transfer = CreateRequest(request.Transfer);
+            var result = await transactionsClient.CreateAsync(transfer, context.RequestHeaders.SelectCustom());
 
             accountsRepository.Transfer(request.Transfer.AccountId, request.Transfer.Recipient, request.Transfer.Amount);
             return new TransferResponse { Transaction = result.Transaction };
@@ -72,13 +73,12 @@ namespace AccountsMicroservice
             if (request.Transfers.Any(r => !accountsRepository.CanTransfer(r.AccountId, r.Recipient, r.Amount)))
                 throw new ArgumentException("Cannot transfer founds.");
 
-            var transferRequests = request.Transfers.Select(r => CreateRequest(request.FlowId, r));
+            var transferRequests = request.Transfers.Select(r => CreateRequest(r));
             var batchAddTransactionsRequest = new BatchCreateTransactionRequest
             {
-                FlowId = request.FlowId,
                 Requests = { transferRequests }
             };
-            var result = await transactionsClient.BatchCreateAsync(batchAddTransactionsRequest);
+            var result = await transactionsClient.BatchCreateAsync(batchAddTransactionsRequest, context.RequestHeaders.SelectCustom());
 
             foreach (var t in request.Transfers)
                 accountsRepository.Transfer(t.AccountId, t.Recipient, t.Amount);
@@ -99,14 +99,13 @@ namespace AccountsMicroservice
             return Task.FromResult(new Empty());
         }
 
-        private CreateTransactionRequest CreateRequest(string flowId, Transfer request)
+        private CreateTransactionRequest CreateRequest(Transfer request)
         {
             var account = accountsRepository.Get(request.AccountId);
             var recipient = accountsRepository.Get(request.Recipient);
 
             var transcation = new CreateTransactionRequest
             {
-                FlowId = flowId,
                 Sender = request.AccountId,
                 Recipient = request.Recipient,
                 Title = request.Title,

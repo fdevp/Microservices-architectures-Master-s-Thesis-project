@@ -8,6 +8,7 @@ using Grpc.Core;
 using LoansMicroservice;
 using Microsoft.Extensions.Logging;
 using PaymentsMicroservice.Repository;
+using SharedClasses;
 using TransactionsMicroservice;
 using static LoansMicroservice.Loans;
 using static TransactionsMicroservice.Transactions;
@@ -44,13 +45,13 @@ namespace PaymentsMicroservice
         public override Task<GetPaymentsWithLoansResult> GetByAccounts(GetPaymentsRequest request, ServerCallContext context)
         {
             var payments = paymentsRepository.GetByAccounts(request.Ids);
-            return WithLoans(payments, request.FlowId);
+            return WithLoans(payments, context.RequestHeaders.SelectCustom());
         }
 
         public override Task<GetPaymentsWithLoansResult> GetPart(GetPartRequest request, ServerCallContext context)
         {
             var payments = paymentsRepository.Get(request.Part, request.TotalParts);
-            return WithLoans(payments, request.FlowId);
+            return WithLoans(payments, context.RequestHeaders.SelectCustom());
         }
 
         public override Task<Empty> UpdateRepayTimestamp(UpdateRepayTimestampRequest request, ServerCallContext context)
@@ -75,8 +76,8 @@ namespace PaymentsMicroservice
         public override async Task<GetTransactionsResult> GetTransactions(GetTransactionsRequest request, ServerCallContext context)
         {
             var ids = request.Ids.Any() ? request.Ids.ToArray() : paymentsRepository.GetIds();
-            var transactionsRequest = new FilterTransactionsRequest { FlowId = request.FlowId, Payments = { ids }, TimestampFrom = request.TimestampFrom, TimestampTo = request.TimestampTo };
-            var transactionsResponse = await transactionsClient.FilterAsync(transactionsRequest);
+            var transactionsRequest = new FilterTransactionsRequest { Payments = { ids }, TimestampFrom = request.TimestampFrom, TimestampTo = request.TimestampTo };
+            var transactionsResponse = await transactionsClient.FilterAsync(transactionsRequest, context.RequestHeaders.SelectCustom());
             return new GetTransactionsResult { Transactions = { transactionsResponse.Transactions } };
         }
 
@@ -94,15 +95,15 @@ namespace PaymentsMicroservice
             return Task.FromResult(new Empty());
         }
 
-        private async Task<GetPaymentsWithLoansResult> WithLoans(Repository.Payment[] payments, string flowId)
+        private async Task<GetPaymentsWithLoansResult> WithLoans(Repository.Payment[] payments, Metadata headers)
         {
             var mapped = payments.Where(payment => payment != null)
                             .Select(p => mapper.Map<Payment>(p))
                             .ToArray();
 
             var paymentsIds = payments.Select(p => p.Id);
-            var loansRequest = new GetLoansRequest { FlowId = flowId, Ids = { paymentsIds } };
-            var loansResult = await loansClient.GetByPaymentsAsync(loansRequest);
+            var loansRequest = new GetLoansRequest { Ids = { paymentsIds } };
+            var loansResult = await loansClient.GetByPaymentsAsync(loansRequest, headers);
 
             return new GetPaymentsWithLoansResult { Payments = { mapped }, Loans = { loansResult.Loans } };
         }

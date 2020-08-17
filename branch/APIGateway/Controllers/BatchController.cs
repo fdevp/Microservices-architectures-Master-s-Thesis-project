@@ -29,8 +29,7 @@ namespace APIGateway.Controllers
         public async Task<BatchData> Get([FromQuery(Name = "part")] int part, [FromQuery(Name = "total")] int total)
         {
             var request = new GetDataToProcessRequest { Part = part, TotalParts = total };
-            request.FlowId = HttpContext.Items["flowId"].ToString();
-            var response = await batchesBranchClient.GetAsync(request);
+            var response = await batchesBranchClient.GetAsync(request, HttpContext.CreateHeadersWithFlowId());
 
             var balances = response.Balances.Select(b => mapper.Map<BalanceDTO>(b)).ToArray();
             var loans = response.Loans.Select(l => mapper.Map<LoanDTO>(l)).ToArray();
@@ -51,14 +50,13 @@ namespace APIGateway.Controllers
             var transfers = data.Transfers.Select(t => mapper.Map<Transfer>(t));
             var request = new ProcessBatchRequest
             {
-                FlowId = HttpContext.Items["flowId"].ToString(),
                 RepayTimestamp = Timestamp.FromDateTime(data.RepayTimestamp),
                 Transfers = { transfers },
                 Messages = { messages },
                 RepaidInstalmentsIds = { data.RepaidInstalmentsIds }
             };
 
-            await batchesBranchClient.ProcessAsync(request);
+            await batchesBranchClient.ProcessAsync(request, HttpContext.CreateHeadersWithFlowId());
         }
     }
 }

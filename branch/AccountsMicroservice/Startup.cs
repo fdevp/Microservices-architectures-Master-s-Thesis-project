@@ -20,7 +20,6 @@ namespace AccountsMicroservice
     {
         public Startup(IConfiguration configuration)
         {
-            var nullts = TimestampExtensions.Null;
             Configuration = configuration;
         }
 

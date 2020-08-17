@@ -39,8 +39,7 @@ namespace APIGateway.Controllers
                 TimestampTo = data.TimestampTo.ToNullableTimestamp(),
                 UserId = data.UserId,
             };
-            request.FlowId = HttpContext.Items["flowId"].ToString();
-            var response = await reportsBranchClient.AggregateUserActivityAsync(request);
+            var response = await reportsBranchClient.AggregateUserActivityAsync(request, HttpContext.CreateHeadersWithFlowId());
             return ReportCsvSerializer.SerializerUserActivityReport(data.UserId, data.TimestampFrom, data.TimestampTo, data.Granularity, response);
         }
 
@@ -56,9 +55,8 @@ namespace APIGateway.Controllers
                 Aggregations = { data.Aggregations.Select(a => mapper.Map<Aggregation>(a)) },
                 Subject = mapper.Map<ReportSubject>(data.Subject),
             };
-            request.FlowId = HttpContext.Items["flowId"].ToString();
 
-            var response = await reportsBranchClient.AggregateOverallAsync(request);
+            var response = await reportsBranchClient.AggregateOverallAsync(request, HttpContext.CreateHeadersWithFlowId());
             return ReportCsvSerializer.SerializerOverallReport(data.Subject, data.TimestampFrom, data.TimestampTo, data.Granularity, response.Portions.ToArray());
         }
     }
