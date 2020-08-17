@@ -41,8 +41,8 @@ namespace TransactionsReadMicroservice
                 Payments = request.Payments.ToHashSet(),
                 Recipients = request.Recipients.ToHashSet(),
                 Senders = request.Senders.ToHashSet(),
-                TimestampFrom = request.TimestampFrom.ToDateTime(),
-                TimestampTo = request.TimestampTo.ToDateTime(),
+                TimestampFrom = request.TimestampFrom.ToNullableDateTime(),
+                TimestampTo = request.TimestampTo.ToNullableDateTime(),
             };
 
             var transactions = transactionsRepository.GetMany(filters, request.Top).Select(t => mapper.Map<Transaction>(t));

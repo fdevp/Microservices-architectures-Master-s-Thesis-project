@@ -78,7 +78,11 @@ namespace TransactionsReadMicroservice
 
         private Mapper CreateMapper()
         {
-            var config = new MapperConfiguration(cfg => cfg.CreateMap<Transaction, Repository.Transaction>().ReverseMap());
+            var config = new MapperConfiguration(cfg =>
+            {
+                cfg.AddGrpcConverters();
+                cfg.CreateMap<Transaction, Repository.Transaction>().ReverseMap();
+            });
             return new Mapper(config);
         }
     }

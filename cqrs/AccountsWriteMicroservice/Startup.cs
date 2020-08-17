@@ -69,7 +69,11 @@ namespace AccountsWriteMicroservice
 
         private Mapper CreateMapper()
         {
-            var config = new MapperConfiguration(cfg => cfg.CreateMap<Account, Repository.Account>().ReverseMap());
+            var config = new MapperConfiguration(cfg =>
+            {
+                cfg.AddGrpcConverters();
+                cfg.CreateMap<Account, Repository.Account>().ReverseMap();
+            });
             return new Mapper(config);
         }
 
