@@ -66,6 +66,7 @@ namespace CardsMicroservice
         {
             var config = new MapperConfiguration(cfg =>
             {
+                cfg.AddGrpcConverters();
                 cfg.CreateMap<Card, Repository.Card>().ReverseMap();
                 cfg.CreateMap<Block, Repository.Block>().ReverseMap();
             });

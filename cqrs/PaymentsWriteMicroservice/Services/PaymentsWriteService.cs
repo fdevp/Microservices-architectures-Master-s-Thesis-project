@@ -1,6 +1,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Microsoft.Extensions.Logging;
 using PaymentsWriteMicroservice.Repository;
@@ -30,14 +31,14 @@ namespace PaymentsWriteMicroservice
         }
         public override Task<CreatePaymentResult> Create(CreatePaymentRequest request, ServerCallContext context)
         {
-            var payment = paymentsRepository.Create(request.Amount, request.StartTimestamp, request.Interval, request.AccountId, request.Recipient);
+            var payment = paymentsRepository.Create(request.Amount, request.StartTimestamp.ToDateTime(), request.Interval.ToTimeSpan(), request.AccountId, request.Recipient);
             projectionChannel.Publish(request.FlowId.ToString(), new DataProjection<Repository.Payment, string> { Upsert = new[] { payment } });
             return Task.FromResult(new CreatePaymentResult { Payment = mapper.Map<Payment>(payment) });
         }
 
         public override Task<Empty> UpdateRepayTimestamp(UpdateRepayTimestampRequest request, ServerCallContext context)
         {
-            paymentsRepository.UpdateLastRepayTimestamp(request.Ids, request.RepayTimestamp);
+            paymentsRepository.UpdateLastRepayTimestamp(request.Ids, request.RepayTimestamp.ToDateTime());
             var updatedPayments = request.Ids.Select(id => paymentsRepository.Get(id)).ToArray();
             projectionChannel.Publish(request.FlowId.ToString(), new DataProjection<Repository.Payment, string> { Upsert = updatedPayments });
             return Task.FromResult(new Empty());

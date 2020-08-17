@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using LoansMicroservice;
 using Microsoft.Extensions.Logging;
@@ -54,13 +55,13 @@ namespace PaymentsMicroservice
 
         public override Task<Empty> UpdateRepayTimestamp(UpdateRepayTimestampRequest request, ServerCallContext context)
         {
-            paymentsRepository.UpdateLastRepayTimestamp(request.Ids, request.RepayTimestamp);
+            paymentsRepository.UpdateLastRepayTimestamp(request.Ids, request.RepayTimestamp.ToDateTime());
             return Task.FromResult(new Empty());
         }
 
         public override Task<CreatePaymentResult> Create(CreatePaymentRequest request, ServerCallContext context)
         {
-            var payment = paymentsRepository.Create(request.Amount, request.StartTimestamp, request.Interval, request.AccountId, request.Recipient);
+            var payment = paymentsRepository.Create(request.Amount, request.StartTimestamp.ToDateTime(), request.Interval.ToTimeSpan(), request.AccountId, request.Recipient);
             return Task.FromResult(new CreatePaymentResult { Payment = mapper.Map<Payment>(payment) });
         }
 

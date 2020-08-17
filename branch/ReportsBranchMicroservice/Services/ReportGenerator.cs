@@ -12,7 +12,7 @@ namespace ReportsBranchMicroservice
 
         public static IEnumerable<OverallReportPortion> AggregateOverall(OverallReportData data)
         {
-            var withTimestamps = data.Transactions.Select(t => new TransactionWithTimestamp { Timestamp = new DateTime(t.Timestamp), Transaction = t });
+            var withTimestamps = data.Transactions.Select(t => new TransactionWithTimestamp { Timestamp = t.Timestamp.ToDateTime(), Transaction = t });
             var periods = GroupByPeriods(data.Granularity, withTimestamps);
             var ordered = periods.OrderBy(p => p.Key);
             foreach (var period in ordered)
@@ -27,7 +27,7 @@ namespace ReportsBranchMicroservice
 
         public static AggregateUserActivityResponse AggregateUserActivity(UserActivityRaportData data)
         {
-            var withTimestamps = data.Transactions.Select(t => new TransactionWithTimestamp { Timestamp = new DateTime(t.Timestamp), Transaction = t });
+            var withTimestamps = data.Transactions.Select(t => new TransactionWithTimestamp { Timestamp = t.Timestamp.ToDateTime(), Transaction = t });
             var portions = GroupByPeriods(data.Granularity, withTimestamps);
             var ordered = portions.OrderBy(p => p.Key);
 

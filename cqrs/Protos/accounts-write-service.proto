@@ -2,7 +2,7 @@ syntax = "proto3";
 import "common/transaction.proto";
 import "common/account.proto";
 import "common/transfer.proto";
-import "common/empty.proto";
+import "google/protobuf/empty.proto";
 
 option csharp_namespace = "AccountsWriteMicroservice";
 
@@ -10,9 +10,9 @@ package AccountsMicroservice;
 
 service AccountsWrite {
   rpc Transfer (TransferRequest) returns (TransferResponse);
-  rpc BatchTransfer (BatchTransferRequest) returns (Empty);
-  rpc Setup(SetupRequest) returns (Empty);
-  rpc SetupAppend(SetupRequest) returns (Empty);
+  rpc BatchTransfer (BatchTransferRequest) returns (google.protobuf.Empty);
+  rpc Setup(SetupRequest) returns (google.protobuf.Empty);
+  rpc SetupAppend(SetupRequest) returns (google.protobuf.Empty);
 }
 
 message TransferRequest {

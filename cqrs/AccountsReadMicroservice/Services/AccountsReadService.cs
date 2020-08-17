@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AccountsReadMicroservice.Repository;
 using AutoMapper;
+using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Microsoft.Extensions.Logging;
 using SharedClasses;
@@ -71,7 +72,7 @@ namespace AccountsReadMicroservice
 
         private IEnumerable<UserReportPortion> AggregateUserTransactions(Repository.Account account, Transaction[] transactions, Granularity granularity)
         {
-            var withTimestamps = transactions.Select(t => new TransactionWithTimestamp { Timestamp = new DateTime(t.Timestamp), Transaction = t });
+            var withTimestamps = transactions.Select(t => new TransactionWithTimestamp { Timestamp = t.Timestamp.ToDateTime(), Transaction = t });
             var portions = Aggregations.GroupByPeriods(granularity, withTimestamps);
             var ordered = portions.OrderBy(p => p.Key);
             foreach (var portion in ordered)

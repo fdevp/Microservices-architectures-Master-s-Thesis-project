@@ -79,10 +79,8 @@ namespace APIGateway
                 cfg.ForAllPropertyMaps(
                     map => map.DestinationType.IsGenericType && map.DestinationType.GetGenericTypeDefinition() == typeof(RepeatedField<>),
                     (map, options) => options.UseDestinationValue());
-                cfg.CreateMap<DateTime, long>().ConvertUsing(new DateTimeTypeConverter());
-                cfg.CreateMap<long, DateTime>().ConvertUsing(new DateTimeTypeConverterReverse());
-                cfg.CreateMap<TimeSpan, long>().ConvertUsing(new TimeSpanTypeConverter());
-                cfg.CreateMap<long, TimeSpan>().ConvertUsing(new TimeSpanTypeConverterReverse());
+                
+                cfg.AddGrpcConverters();
 
                 cfg.CreateMap<Transaction, TransactionDTO>().ReverseMap()
                    .ForMember(dest => dest.PaymentId, opt => opt.MapFrom(src => src.PaymentId == null ? "" : src.PaymentId))

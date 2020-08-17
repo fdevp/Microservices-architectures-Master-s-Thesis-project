@@ -12,7 +12,7 @@ namespace TransactionsWriteMicroservice.Repository
         {
             var id = Guid.NewGuid().ToString();
             var timestamp = DateTime.UtcNow;
-            var transaction = new Repository.Transaction(id, title, amount, timestamp.Ticks, recipient, sender, paymentId, cardId);
+            var transaction = new Repository.Transaction(id, title, amount, timestamp, recipient, sender, paymentId, cardId);
             transactions.Add(id, transaction);
             return transaction;
         }

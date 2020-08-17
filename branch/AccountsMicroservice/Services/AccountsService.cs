@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AccountsMicroservice.Repository;
 using AutoMapper;
+using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Microsoft.Extensions.Logging;
 using TransactionsMicroservice;

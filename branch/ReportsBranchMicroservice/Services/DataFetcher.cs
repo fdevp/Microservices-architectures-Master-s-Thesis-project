@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AccountsMicroservice;
 using CardsMicroservice;
+using Google.Protobuf.WellKnownTypes;
 using PaymentsMicroservice;
 using static AccountsMicroservice.Accounts;
 using static CardsMicroservice.Cards;
@@ -58,35 +59,35 @@ namespace ReportsBranchMicroservice
             return response.Cards.ToArray();
         }
 
-        public async Task<Transaction[]> GetAccountsTransactions(string flowId, string[] accountsIds, long from, long to)
+        public async Task<Transaction[]> GetAccountsTransactions(string flowId, string[] accountsIds, Timestamp from, Timestamp to)
         {
             var request = new AccountsMicroservice.GetTransactionsRequest { FlowId = flowId, Ids = { accountsIds }, TimestampFrom = from, TimestampTo = to };
             var response = await accountsClient.GetTransactionsAsync(request);
             return response.Transactions.ToArray();
         }
 
-        public async Task<Transaction[]> GetCardsTransactions(string flowId, long from, long to)
+        public async Task<Transaction[]> GetCardsTransactions(string flowId, Timestamp from, Timestamp to)
         {
             var request = new CardsMicroservice.GetTransactionsRequest { FlowId = flowId, TimestampFrom = from, TimestampTo = to };
             var response = await cardsClient.GetTransactionsAsync(request);
             return response.Transactions.ToArray();
         }
 
-        public async Task<Transaction[]> GetLoansTransactions(string flowId, long from, long to)
+        public async Task<Transaction[]> GetLoansTransactions(string flowId, Timestamp from, Timestamp to)
         {
             var request = new LoansMicroservice.GetTransactionsRequest { FlowId = flowId, TimestampFrom = from, TimestampTo = to };
             var response = await loansClient.GetTransactionsAsync(request);
             return response.Transactions.ToArray();
         }
 
-        public async Task<Transaction[]> GetPaymentsTransactions(string flowId, long from, long to)
+        public async Task<Transaction[]> GetPaymentsTransactions(string flowId, Timestamp from, Timestamp to)
         {
             var request = new PaymentsMicroservice.GetTransactionsRequest { FlowId = flowId, TimestampFrom = from, TimestampTo = to };
             var response = await paymentsClient.GetTransactionsAsync(request);
             return response.Transactions.ToArray();
         }
 
-        public async Task<Transaction[]> GetTransactions(string flowId, long from, long to)
+        public async Task<Transaction[]> GetTransactions(string flowId, Timestamp from, Timestamp to)
         {
             var request = new TransactionsMicroservice.FilterTransactionsRequest { FlowId = flowId, TimestampFrom = from, TimestampTo = to };
             var response = await transactionsClient.FilterAsync(request);

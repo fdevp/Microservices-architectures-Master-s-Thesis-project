@@ -1,6 +1,6 @@
 syntax = "proto3";
-import "common/empty.proto";
 import "common/message.proto";
+import "google/protobuf/empty.proto";
 
 package UsersMicroservice;
 
@@ -8,9 +8,9 @@ option csharp_namespace = "UsersMicroservice";
 
 service Users {
   rpc Token (SignInRequest) returns (TokenReply);
-  rpc Logout (LogoutRequest) returns (Empty);
-  rpc BatchAddMessages (BatchAddMessagesRequest) returns (Empty);
-  rpc Setup(SetupRequest) returns (Empty);
+  rpc Logout (LogoutRequest) returns (google.protobuf.Empty);
+  rpc BatchAddMessages (BatchAddMessagesRequest) returns (google.protobuf.Empty);
+  rpc Setup(SetupRequest) returns (google.protobuf.Empty);
 }
 
 message User {

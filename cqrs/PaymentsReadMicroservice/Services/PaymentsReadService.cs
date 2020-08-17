@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using LoansReadMicroservice;
 using Microsoft.Extensions.Logging;
@@ -78,7 +79,7 @@ namespace PaymentsReadMicroservice
 
         private IEnumerable<UserReportPortion> AggregateUserTransactions(Repository.Payment payment, Transaction[] transactions, Granularity granularity)
         {
-            var withTimestamps = transactions.Select(t => new TransactionWithTimestamp { Timestamp = new DateTime(t.Timestamp), Transaction = t });
+            var withTimestamps = transactions.Select(t => new TransactionWithTimestamp { Timestamp = t.Timestamp.ToDateTime(), Transaction = t });
             var portions = Aggregations.GroupByPeriods(granularity, withTimestamps);
             var ordered = portions.OrderBy(p => p.Key);
             foreach (var portion in ordered)

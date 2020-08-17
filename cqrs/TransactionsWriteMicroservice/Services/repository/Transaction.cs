@@ -7,13 +7,13 @@ namespace TransactionsWriteMicroservice.Repository
         public string Id { get; }
         public string Title { get; }
         public float Amount { get; }
-        public long Timestamp { get; }
+        public DateTime Timestamp { get; }
         public string Recipient { get; }
         public string Sender { get; }
         public string PaymentId { get; }
         public string CardId { get; }
 
-        public Transaction(string id, string title, float amount, long timestamp, string recipient, string sender, string paymentId, string cardId)
+        public Transaction(string id, string title, float amount, DateTime timestamp, string recipient, string sender, string paymentId, string cardId)
         {
             Id = id;
             Title = title;

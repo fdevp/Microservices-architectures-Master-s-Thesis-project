@@ -7,7 +7,7 @@ namespace TransactionsReadMicroservice.Repository
         public string Id { get; set; }
         public string Title { get; set; }
         public float Amount { get; set; }
-        public long Timestamp { get; set; }
+        public DateTime Timestamp { get; set; }
         public string Recipient { get; set; }
         public string Sender { get; set; }
         public string PaymentId { get; set; }

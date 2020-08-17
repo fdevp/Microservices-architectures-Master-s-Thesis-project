@@ -43,8 +43,8 @@ namespace ReportsBranchMicroservice
 
             var data = new OverallReportData
             {
-                From = GetDateTime(request.TimestampFrom),
-                To = GetDateTime(request.TimestampTo),
+                From = request.TimestampFrom.ToDateTime(),
+                To = request.TimestampTo.ToDateTime(),
                 Granularity = request.Granularity,
                 Subject = request.Subject,
                 Aggregations = request.Aggregations.ToArray(),
@@ -61,8 +61,8 @@ namespace ReportsBranchMicroservice
             var accountsIds = accounts.Select(a => a.Id).ToArray();
             var data = new UserActivityRaportData
             {
-                From = GetDateTime(request.TimestampFrom),
-                To = GetDateTime(request.TimestampTo),
+                From = request.TimestampFrom.ToDateTime(),
+                To = request.TimestampTo.ToDateTime(),
                 Granularity = request.Granularity,
                 Accounts = accounts,
                 UserId = request.UserId
@@ -81,7 +81,5 @@ namespace ReportsBranchMicroservice
 
             return ReportGenerator.AggregateUserActivity(data);
         }
-
-        private DateTime? GetDateTime(long ticks) => ticks > 0 ? new DateTime(ticks) : null as DateTime?;
     }
 }

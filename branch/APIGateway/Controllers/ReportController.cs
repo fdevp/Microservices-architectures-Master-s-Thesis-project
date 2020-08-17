@@ -4,9 +4,11 @@ using System.Threading.Tasks;
 using APIGateway.Models;
 using APIGateway.Reports;
 using AutoMapper;
+using Google.Protobuf.WellKnownTypes;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using ReportsBranchMicroservice;
+using SharedClasses;
 using static ReportsBranchMicroservice.ReportsBranch;
 
 namespace APIGateway.Controllers
@@ -33,8 +35,8 @@ namespace APIGateway.Controllers
             var request = new AggregateUserActivityRequest
             {
                 Granularity = mapper.Map<Granularity>(data.Granularity),
-                TimestampFrom = data.TimestampFrom.HasValue ? data.TimestampFrom.Value.Ticks : 0,
-                TimestampTo = data.TimestampTo.HasValue ? data.TimestampTo.Value.Ticks : 0,
+                TimestampFrom = data.TimestampFrom.ToNullableTimestamp(),
+                TimestampTo = data.TimestampTo.ToNullableTimestamp(),
                 UserId = data.UserId,
             };
             request.FlowId = HttpContext.Items["flowId"].ToString();
@@ -49,8 +51,8 @@ namespace APIGateway.Controllers
             var request = new AggregateOverallRequest
             {
                 Granularity = mapper.Map<Granularity>(data.Granularity),
-                TimestampFrom = data.TimestampFrom.HasValue ? data.TimestampFrom.Value.Ticks : 0,
-                TimestampTo = data.TimestampTo.HasValue ? data.TimestampTo.Value.Ticks : 0,
+                TimestampFrom = data.TimestampFrom.ToNullableTimestamp(),
+                TimestampTo = data.TimestampTo.ToNullableTimestamp(),
                 Aggregations = { data.Aggregations.Select(a => mapper.Map<Aggregation>(a)) },
                 Subject = mapper.Map<ReportSubject>(data.Subject),
             };
