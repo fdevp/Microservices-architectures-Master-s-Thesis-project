@@ -7,6 +7,7 @@ using CardsWriteMicroservice.Repository;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Microsoft.Extensions.Logging;
+using SharedClasses;
 using SharedClasses.Messaging;
 using static AccountsWriteMicroservice.AccountsWrite;
 
@@ -46,16 +47,12 @@ namespace CardsWriteMicroservice
                 Amount = request.Amount,
                 Title = title
             };
-            var transferRequest = new AccountsWriteMicroservice.TransferRequest
-            {
-                FlowId = request.FlowId,
-                Transfer = transfer,
-            };
+            var transferRequest = new AccountsWriteMicroservice.TransferRequest { Transfer = transfer, };
 
-            var transferResponse = await accountsClient.TransferAsync(transferRequest);
+            var transferResponse = await accountsClient.TransferAsync(transferRequest, context.RequestHeaders.SelectCustom());
             var block = cardsRepository.CreateBlock(card.Id, transferResponse.Transaction.Id, blockRequestTime);
             var upsert = new CardsUpsert { Block = block };
-            projectionChannel.Publish(request.FlowId.ToString(), new DataProjection<CardsUpsert, string> { Upsert = new[] { upsert } });
+            projectionChannel.Publish(context.RequestHeaders.GetFlowId(), new DataProjection<CardsUpsert, string> { Upsert = new[] { upsert } });
 
             return new TransferResponse { Transaction = transferResponse.Transaction };
         }

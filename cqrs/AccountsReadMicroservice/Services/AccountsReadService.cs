@@ -63,7 +63,7 @@ namespace AccountsReadMicroservice
                 Recipients = { accountsIds },
                 TimestampFrom = request.TimestampFrom,
                 TimestampTo = request.TimestampTo
-            });
+            }, context.RequestHeaders.SelectCustom());
             var transactions = transactionsResponse.Transactions.ToArray();
             var aggregated = accounts.SelectMany(a => AggregateUserTransactions(a, transactions, request.Granularity));
 

@@ -56,7 +56,7 @@ namespace LoansReadMicroservice
         public override async Task<AggregateOverallResponse> AggregateOverall(AggregateOverallRequest request, ServerCallContext context)
         {
             var paymentsIds = loansRepository.GetPaymentsIds();
-            var transactionsResponse = await transactionsReadClient.FilterAsync(new FilterTransactionsRequest { Payments = { paymentsIds }, TimestampTo = request.TimestampTo, TimestampFrom = request.TimestampFrom });
+            var transactionsResponse = await transactionsReadClient.FilterAsync(new FilterTransactionsRequest { Payments = { paymentsIds }, TimestampTo = request.TimestampTo, TimestampFrom = request.TimestampFrom }, context.RequestHeaders.SelectCustom());
             var aggregations = Aggregations.CreateOverallCsvReport(new OverallReportData { Aggregations = request.Aggregations.ToArray(), Granularity = request.Granularity, Transactions = transactionsResponse.Transactions.ToArray() });
             return new AggregateOverallResponse { Portions = { aggregations } };
         }
@@ -65,7 +65,7 @@ namespace LoansReadMicroservice
         {
             var loans = loansRepository.GetByAccounts(request.AccountsIds);
             var paymentsIds = loans.Select(l => l.PaymentId).ToArray();
-            var transactionsResponse = await transactionsReadClient.FilterAsync(new FilterTransactionsRequest { Payments = { paymentsIds }, TimestampFrom = request.TimestampFrom, TimestampTo = request.TimestampTo });
+            var transactionsResponse = await transactionsReadClient.FilterAsync(new FilterTransactionsRequest { Payments = { paymentsIds }, TimestampFrom = request.TimestampFrom, TimestampTo = request.TimestampTo }, context.RequestHeaders.SelectCustom());
             var transactions = transactionsResponse.Transactions.ToArray();
             var aggregated = loans.SelectMany(l => AggregateUserTransactions(l, transactions.Where(t => t.PaymentId == l.PaymentId).ToArray(), request.Granularity));
             return new AggregateUserActivityResponse { Portions = { aggregated } };

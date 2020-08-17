@@ -30,8 +30,7 @@ namespace APIGateway.Controllers
         public async Task Transfer(CardTransfer data)
         {
             var request = mapper.Map<TransferRequest>(data);
-            request.FlowId = HttpContext.Items["flowId"].ToString();
-            await cardsWriteClient.TransferAsync(request);
+            await cardsWriteClient.TransferAsync(request, HttpContext.CreateHeadersWithFlowId());
         }
 
 

@@ -62,7 +62,7 @@ namespace PaymentsReadMicroservice
         public override async Task<AggregateOverallResponse> AggregateOverall(AggregateOverallRequest request, ServerCallContext context)
         {
             var paymentsIds = paymentsRepository.GetIds();
-            var transactionsResponse = await transactionsClient.FilterAsync(new FilterTransactionsRequest { Payments = { paymentsIds }, TimestampTo = request.TimestampTo, TimestampFrom = request.TimestampFrom });
+            var transactionsResponse = await transactionsClient.FilterAsync(new FilterTransactionsRequest { Payments = { paymentsIds }, TimestampTo = request.TimestampTo, TimestampFrom = request.TimestampFrom }, context.RequestHeaders.SelectCustom());
             var aggregations = Aggregations.CreateOverallCsvReport(new OverallReportData { Aggregations = request.Aggregations.ToArray(), Granularity = request.Granularity, Transactions = transactionsResponse.Transactions.ToArray() });
             return new AggregateOverallResponse { Portions = { aggregations } };
         }
@@ -71,7 +71,7 @@ namespace PaymentsReadMicroservice
         {
             var payments = paymentsRepository.GetByAccounts(request.AccountsIds);
             var paymentsIds = payments.Select(p => p.Id).ToArray();
-            var transactionsResponse = await transactionsClient.FilterAsync(new FilterTransactionsRequest { Payments = { paymentsIds }, TimestampFrom = request.TimestampFrom, TimestampTo = request.TimestampTo });
+            var transactionsResponse = await transactionsClient.FilterAsync(new FilterTransactionsRequest { Payments = { paymentsIds }, TimestampFrom = request.TimestampFrom, TimestampTo = request.TimestampTo }, context.RequestHeaders.SelectCustom());
             var transactions = transactionsResponse.Transactions.ToArray();
             var aggregated = payments.SelectMany(p => AggregateUserTransactions(p, transactions.Where(t => t.PaymentId == p.Id).ToArray(), request.Granularity));
             return new AggregateUserActivityResponse { Portions = { aggregated } };

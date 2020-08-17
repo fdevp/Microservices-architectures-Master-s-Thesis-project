@@ -7,6 +7,7 @@ using AutoMapper;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Microsoft.Extensions.Logging;
+using SharedClasses;
 using SharedClasses.Messaging;
 using TransactionsWriteMicroservice;
 using static TransactionsWriteMicroservice.TransactionsWrite;
@@ -39,12 +40,12 @@ namespace AccountsWriteMicroservice
             if (!accountsRepository.CanTransfer(request.Transfer.AccountId, request.Transfer.Recipient, request.Transfer.Amount))
                 throw new ArgumentException("Cannot transfer founds.");
 
-            var transfer = CreateRequest(request.FlowId, request.Transfer);
-            var result = await transactionsClient.CreateAsync(transfer);
+            var transfer = CreateRequest(request.Transfer);
+            var result = await transactionsClient.CreateAsync(transfer, context.RequestHeaders.SelectCustom());
 
             accountsRepository.Transfer(request.Transfer.AccountId, request.Transfer.Recipient, request.Transfer.Amount);
             var affectedAccounts = new[] { accountsRepository.Get(request.Transfer.AccountId), accountsRepository.Get(request.Transfer.Recipient) };
-            projectionChannel.Publish(request.FlowId.ToString(), new DataProjection<Repository.Account, string> { Upsert = affectedAccounts });
+            projectionChannel.Publish(context.RequestHeaders.GetFlowId(), new DataProjection<Repository.Account, string> { Upsert = affectedAccounts });
 
             return new TransferResponse { Transaction = result.Transaction };
         }
@@ -54,16 +55,15 @@ namespace AccountsWriteMicroservice
             if (request.Transfers.Any(r => !accountsRepository.CanTransfer(r.AccountId, r.Recipient, r.Amount)))
                 throw new ArgumentException("Cannot transfer founds.");
 
-            var transferRequests = request.Transfers.Select(r => CreateRequest(request.FlowId, r));
+            var transferRequests = request.Transfers.Select(r => CreateRequest(r));
             var batchAddTransactionsRequest = new BatchCreateTransactionRequest
             {
-                FlowId = request.FlowId,
                 Requests = { transferRequests }
             };
-            var result = await transactionsClient.BatchCreateAsync(batchAddTransactionsRequest);
+            var result = await transactionsClient.BatchCreateAsync(batchAddTransactionsRequest, context.RequestHeaders.SelectCustom());
 
             var affectedAccounts = ApplyBatchToRepository(request);
-            projectionChannel.Publish(request.FlowId.ToString(), new DataProjection<Repository.Account, string> { Upsert = affectedAccounts.ToArray() });
+            projectionChannel.Publish(context.RequestHeaders.GetFlowId(), new DataProjection<Repository.Account, string> { Upsert = affectedAccounts.ToArray() });
 
             return new Empty();
         }
@@ -81,14 +81,13 @@ namespace AccountsWriteMicroservice
             return accounts.Select(a => a.Value);
         }
 
-        private CreateTransactionRequest CreateRequest(string flowId, Transfer request)
+        private CreateTransactionRequest CreateRequest(Transfer request)
         {
             var account = accountsRepository.Get(request.AccountId);
             var recipient = accountsRepository.Get(request.Recipient);
 
             var transcation = new CreateTransactionRequest
             {
-                FlowId = flowId,
                 Sender = request.AccountId,
                 Recipient = request.Recipient,
                 Title = request.Title,

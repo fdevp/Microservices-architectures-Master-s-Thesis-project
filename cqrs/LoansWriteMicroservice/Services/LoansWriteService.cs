@@ -8,6 +8,7 @@ using Grpc.Core;
 using LoansWriteMicroservice.Repository;
 using Microsoft.Extensions.Logging;
 using PaymentsWriteMicroservice;
+using SharedClasses;
 using SharedClasses.Messaging;
 using static PaymentsWriteMicroservice.PaymentsWrite;
 
@@ -36,16 +37,12 @@ namespace LoansWriteMicroservice
 
             if (paymentsToFinish.Any())
             {
-                var cancelPaymentsRequest = new CancelPaymentsRequest
-                {
-                    FlowId = request.FlowId,
-                    Ids = { paymentsToFinish }
-                };
-                await paymentsClient.CancelAsync(cancelPaymentsRequest);
+                var cancelPaymentsRequest = new CancelPaymentsRequest { Ids = { paymentsToFinish } };
+                await paymentsClient.CancelAsync(cancelPaymentsRequest, context.RequestHeaders.SelectCustom());
             }
 
             var repaidInstalments = request.Ids.Select(id => loansRepository.Get(id)).ToArray();
-            projectionChannel.Publish(request.FlowId.ToString(), new DataProjection<Repository.Loan, string> { Upsert = repaidInstalments });
+            projectionChannel.Publish(context.RequestHeaders.GetFlowId(), new DataProjection<Repository.Loan, string> { Upsert = repaidInstalments });
             return new Empty();
         }
 

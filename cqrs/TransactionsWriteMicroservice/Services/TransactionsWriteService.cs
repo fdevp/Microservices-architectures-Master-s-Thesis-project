@@ -6,6 +6,7 @@ using AutoMapper;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Microsoft.Extensions.Logging;
+using SharedClasses;
 using SharedClasses.Messaging;
 using TransactionsWriteMicroservice.Repository;
 
@@ -28,14 +29,14 @@ namespace TransactionsWriteMicroservice
         public override Task<CreateTransactionResult> Create(CreateTransactionRequest request, ServerCallContext context)
         {
             var transaction = transactionsRepository.Create(request.Title, request.Amount, request.Recipient, request.Sender, request.PaymentId, request.CardId);
-            projectionChannel.Publish(request.FlowId.ToString(), new DataProjection<Repository.Transaction, string> { Upsert = new[] { transaction } });
+            projectionChannel.Publish(context.RequestHeaders.GetFlowId(), new DataProjection<Repository.Transaction, string> { Upsert = new[] { transaction } });
             return Task.FromResult(new CreateTransactionResult { Transaction = mapper.Map<Transaction>(transaction) });
         }
 
         public override Task<Empty> BatchCreate(BatchCreateTransactionRequest request, ServerCallContext context)
         {
             var transactions = request.Requests.Select(r => transactionsRepository.Create(r.Title, r.Amount, r.Recipient, r.Sender, r.PaymentId, r.CardId));
-            projectionChannel.Publish(request.FlowId.ToString(), new DataProjection<Repository.Transaction, string> { Upsert = transactions.ToArray() });
+            projectionChannel.Publish(context.RequestHeaders.GetFlowId(), new DataProjection<Repository.Transaction, string> { Upsert = transactions.ToArray() });
             var response = transactions.Select(transaction => mapper.Map<Transaction>(transaction))
                 .ToArray();
             return Task.FromResult(new Empty());

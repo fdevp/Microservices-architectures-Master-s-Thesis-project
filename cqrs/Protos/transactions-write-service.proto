@@ -13,13 +13,12 @@ service TransactionsWrite {
 }
 
 message CreateTransactionRequest {
-  string flowId = 1;
-  string title = 2;
-  float amount = 3;
-  string recipient = 4;
-  string sender = 5;
-  string paymentId = 6;
-  string cardId = 7;
+  string title = 1;
+  float amount = 2;
+  string recipient = 3;
+  string sender = 4;
+  string paymentId = 5;
+  string cardId = 6;
 }
 
 message CreateTransactionResult {
@@ -27,8 +26,7 @@ message CreateTransactionResult {
 }
 
 message BatchCreateTransactionRequest {
-  string flowId = 1;
-  repeated CreateTransactionRequest requests = 2;
+  repeated CreateTransactionRequest requests = 1;
 }
 
 message SetupRequest {

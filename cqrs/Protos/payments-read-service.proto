@@ -16,8 +16,7 @@ service PaymentsRead {
 }
 
 message GetPaymentsRequest {
-  string flowId = 1;
-  repeated string ids = 2;
+  repeated string ids = 1;
 }
 
 message GetPaymentsResult {
@@ -25,15 +24,13 @@ message GetPaymentsResult {
 }
 
 message GetPartRequest {
-  string flowId = 1;
-  int32 part = 2;
-  int32 totalParts = 3;
+  int32 part = 1;
+  int32 totalParts = 2;
 }
 
 message AggregateUserActivityRequest {
-  string flowId = 1;
-  repeated string accountsIds = 2;
-  google.protobuf.Timestamp timestampFrom = 3;
-  google.protobuf.Timestamp timestampTo = 4;
-  Granularity granularity = 5;
+  repeated string accountsIds = 1;
+  google.protobuf.Timestamp timestampFrom = 2;
+  google.protobuf.Timestamp timestampTo = 3;
+  Granularity granularity = 4;
 }

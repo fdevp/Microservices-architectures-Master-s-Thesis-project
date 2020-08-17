@@ -31,7 +31,7 @@ namespace APIGateway.Controllers
         {
             var flowId = HttpContext.Items["flowId"].ToString();
             var granularity = mapper.Map<Granularity>(request.Granularity);
-            var portions = await reportDataFetcher.GetUserActivityPortions(flowId, request.UserId, request.TimestampFrom.ToNullableTimestamp(), request.TimestampTo.ToNullableTimestamp(), granularity);
+            var portions = await reportDataFetcher.GetUserActivityPortions(HttpContext.CreateHeadersWithFlowId(), request.UserId, request.TimestampFrom.ToNullableTimestamp(), request.TimestampTo.ToNullableTimestamp(), granularity);
             var csv = ReportCsvSerializer.SerializerUserActivityReport(request.UserId, request.TimestampFrom, request.TimestampTo, request.Granularity, portions);
             return csv;
         }
@@ -49,7 +49,7 @@ namespace APIGateway.Controllers
                 TimestampTo = request.TimestampTo.ToNullableTimestamp(),
                 Aggregations = { request.Aggregations.Select(a => mapper.Map<Aggregation>(a)) }
             };
-            var data = await reportDataFetcher.GetOverallReportPortions(cqrsRequest, request.Subject);
+            var data = await reportDataFetcher.GetOverallReportPortions(cqrsRequest, HttpContext.CreateHeadersWithFlowId(), request.Subject);
             var csv = ReportCsvSerializer.SerializerOverallReport(request.Subject,
               request.TimestampFrom,
               request.TimestampTo,

@@ -53,7 +53,7 @@ namespace CardsReadMicroservice
         public override async Task<AggregateOverallResponse> AggregateOverall(AggregateOverallRequest request, ServerCallContext context)
         {
             var cardsIds = cardsRepository.GetCardsIds();
-            var transactionsResponse = await transactionsReadClient.FilterAsync(new FilterTransactionsRequest { Cards = { cardsIds }, TimestampTo = request.TimestampTo, TimestampFrom = request.TimestampFrom });
+            var transactionsResponse = await transactionsReadClient.FilterAsync(new FilterTransactionsRequest { Cards = { cardsIds }, TimestampTo = request.TimestampTo, TimestampFrom = request.TimestampFrom }, context.RequestHeaders.SelectCustom());
             var aggregations = Aggregations.CreateOverallCsvReport(new OverallReportData { Aggregations = request.Aggregations.ToArray(), Granularity = request.Granularity, Transactions = transactionsResponse.Transactions.ToArray() });
             return new AggregateOverallResponse { Portions = { aggregations } };
         }

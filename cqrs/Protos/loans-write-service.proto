@@ -13,8 +13,7 @@ service LoansWrite {
 }
 
 message BatchRepayInstalmentsRequest {
-  string flowId = 1;
-  repeated string ids = 2;
+  repeated string ids = 1;
 }
 
 message SetupRequest {

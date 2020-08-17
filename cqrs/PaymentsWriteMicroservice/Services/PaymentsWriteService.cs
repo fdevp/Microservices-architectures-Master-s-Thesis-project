@@ -5,6 +5,7 @@ using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Microsoft.Extensions.Logging;
 using PaymentsWriteMicroservice.Repository;
+using SharedClasses;
 using SharedClasses.Messaging;
 using static LoansWriteMicroservice.LoansWrite;
 using static TransactionsWriteMicroservice.TransactionsWrite;
@@ -32,7 +33,7 @@ namespace PaymentsWriteMicroservice
         public override Task<CreatePaymentResult> Create(CreatePaymentRequest request, ServerCallContext context)
         {
             var payment = paymentsRepository.Create(request.Amount, request.StartTimestamp.ToDateTime(), request.Interval.ToTimeSpan(), request.AccountId, request.Recipient);
-            projectionChannel.Publish(request.FlowId.ToString(), new DataProjection<Repository.Payment, string> { Upsert = new[] { payment } });
+            projectionChannel.Publish(context.RequestHeaders.GetFlowId(), new DataProjection<Repository.Payment, string> { Upsert = new[] { payment } });
             return Task.FromResult(new CreatePaymentResult { Payment = mapper.Map<Payment>(payment) });
         }
 
@@ -40,7 +41,7 @@ namespace PaymentsWriteMicroservice
         {
             paymentsRepository.UpdateLastRepayTimestamp(request.Ids, request.RepayTimestamp.ToDateTime());
             var updatedPayments = request.Ids.Select(id => paymentsRepository.Get(id)).ToArray();
-            projectionChannel.Publish(request.FlowId.ToString(), new DataProjection<Repository.Payment, string> { Upsert = updatedPayments });
+            projectionChannel.Publish(context.RequestHeaders.GetFlowId(), new DataProjection<Repository.Payment, string> { Upsert = updatedPayments });
             return Task.FromResult(new Empty());
         }
 
@@ -49,7 +50,7 @@ namespace PaymentsWriteMicroservice
             foreach (var id in request.Ids)
                 paymentsRepository.Cancel(id);
             var cancelledPayments = request.Ids.Select(id => paymentsRepository.Get(id)).ToArray();
-            projectionChannel.Publish(request.FlowId.ToString(), new DataProjection<Repository.Payment, string> { Upsert = cancelledPayments });
+            projectionChannel.Publish(context.RequestHeaders.GetFlowId(), new DataProjection<Repository.Payment, string> { Upsert = cancelledPayments });
             return Task.FromResult(new Empty());
         }
 

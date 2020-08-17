@@ -15,5 +15,7 @@ namespace SharedClasses
             newMetadata.Add("flowid", flowId);
             return newMetadata;
         }
+
+        public static string GetFlowId(this Metadata metadata) => metadata.FirstOrDefault(h => h.Key == "flowid")?.Value;
     }
 }

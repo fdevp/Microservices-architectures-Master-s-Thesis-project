@@ -16,8 +16,7 @@ service AccountsWrite {
 }
 
 message TransferRequest {
-  string flowId = 1;
-  Transfer transfer = 2;
+  Transfer transfer = 1;
 }
 
 message TransferResponse {
@@ -25,8 +24,7 @@ message TransferResponse {
 }
 
 message BatchTransferRequest {
-  string flowId = 1;
-  repeated Transfer transfers = 2;
+  repeated Transfer transfers = 1;
 }
 
 message SetupRequest {
