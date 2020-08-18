@@ -73,18 +73,19 @@ namespace PaymentsReadMicroservice
             var paymentsIds = payments.Select(p => p.Id).ToArray();
             var transactionsResponse = await transactionsClient.FilterAsync(new FilterTransactionsRequest { Payments = { paymentsIds }, TimestampFrom = request.TimestampFrom, TimestampTo = request.TimestampTo }, context.RequestHeaders.SelectCustom());
             var transactions = transactionsResponse.Transactions.ToArray();
-            var aggregated = payments.SelectMany(p => AggregateUserTransactions(p, transactions.Where(t => t.PaymentId == p.Id).ToArray(), request.Granularity));
+            var aggregated = payments.SelectMany(p => AggregateUserTransactions(p, transactions, request.Granularity));
             return new AggregateUserActivityResponse { Portions = { aggregated } };
         }
 
-        private IEnumerable<UserReportPortion> AggregateUserTransactions(Repository.Payment payment, Transaction[] transactions, Granularity granularity)
+        private IEnumerable<UserReportPortion> AggregateUserTransactions(Repository.Payment payment, Transaction[] allTransactions, Granularity granularity)
         {
+            var transactions = allTransactions.Where(t => t.PaymentId == payment.Id).ToArray();
             var withTimestamps = transactions.Select(t => new TransactionWithTimestamp { Timestamp = t.Timestamp.ToDateTime(), Transaction = t });
             var portions = Aggregations.GroupByPeriods(granularity, withTimestamps);
             var ordered = portions.OrderBy(p => p.Key);
             foreach (var portion in ordered)
             {
-                var debits = portion.Where(p => p.Transaction.PaymentId == payment.Id).Sum(p => (float?)p.Transaction.Amount) ?? 0;
+                var debits = portion.Sum(p => (float?)p.Transaction.Amount) ?? 0;
                 yield return new UserReportPortion { Period = portion.Key, Debits = debits, Element = payment.Id };
             }
         }

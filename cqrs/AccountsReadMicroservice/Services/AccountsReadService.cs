@@ -70,8 +70,9 @@ namespace AccountsReadMicroservice
             return new AggregateUserActivityResponse { Portions = { aggregated } };
         }
 
-        private IEnumerable<UserReportPortion> AggregateUserTransactions(Repository.Account account, Transaction[] transactions, Granularity granularity)
+        private IEnumerable<UserReportPortion> AggregateUserTransactions(Repository.Account account, Transaction[] allTransactions, Granularity granularity)
         {
+            var transactions = allTransactions.Where(t => t.Sender == account.Id || t.Recipient == account.Id);
             var withTimestamps = transactions.Select(t => new TransactionWithTimestamp { Timestamp = t.Timestamp.ToDateTime(), Transaction = t });
             var portions = Aggregations.GroupByPeriods(granularity, withTimestamps);
             var ordered = portions.OrderBy(p => p.Key);
