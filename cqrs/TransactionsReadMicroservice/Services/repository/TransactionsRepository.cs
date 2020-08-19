@@ -7,16 +7,16 @@ namespace TransactionsReadMicroservice.Repository
 {
     public class TransactionsRepository
     {
-        private ConcurrentDictionary<string, Transaction> transactions = new ConcurrentDictionary<string, Transaction>();
+        private ConcurrentDictionary<string, Models.Transaction> transactions = new ConcurrentDictionary<string, Models.Transaction>();
 
-        public Transaction Get(string id)
+        public Models.Transaction Get(string id)
         {
             if (transactions.ContainsKey(id))
                 return transactions[id];
             return null;
         }
 
-        public Transaction[] GetMany(Filters filters, int top)
+        public Models.Transaction[] GetMany(Filters filters, int top)
         {
             var selected = transactions.Values.Where(t => SelectTransaction(t, filters));
             if (top > 0)
@@ -24,7 +24,7 @@ namespace TransactionsReadMicroservice.Repository
             return selected.ToArray();
         }
 
-        public void Upsert(Transaction[] update)
+        public void Upsert(Models.Transaction[] update)
         {
             foreach (var transaction in update)
             {
@@ -40,7 +40,7 @@ namespace TransactionsReadMicroservice.Repository
             }
         }
 
-        private bool SelectTransaction(Transaction transaction, Filters filters)
+        private bool SelectTransaction(Models.Transaction transaction, Filters filters)
         {
 			 if (filters.TimestampFrom.HasValue && transaction.Timestamp < filters.TimestampFrom)
                 return false;

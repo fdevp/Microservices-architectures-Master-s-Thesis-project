@@ -1,4 +1,4 @@
-namespace AccountsReadMicroservice.Repository
+namespace Models
 {
     public class Account
     {

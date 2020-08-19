@@ -1,4 +1,4 @@
-namespace PaymentsReadMicroservice.Repository
+namespace Models
 {
     public enum PaymentStatus
     {

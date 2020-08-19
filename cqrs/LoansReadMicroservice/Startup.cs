@@ -49,7 +49,7 @@ namespace LoansReadMicroservice
             configuration.GetSection("RabbitMq").Bind(config);
 
             var logger = services.BuildServiceProvider().GetService<ILogger<RabbitMqPublisher>>();
-            var rabbitMq = new RabbitMqChannelFactory().CreateReadChannel<Repository.Loan, string>(config, "LoansRead", logger);
+            var rabbitMq = new RabbitMqChannelFactory().CreateReadChannel<Models.Loan, string>(config, "LoansRead", logger);
 
             rabbitMq.Received += (sender, projection) =>
             {
@@ -86,7 +86,7 @@ namespace LoansReadMicroservice
             var config = new MapperConfiguration(cfg =>
             {
                 cfg.AddGrpcConverters();
-                cfg.CreateMap<Loan, Repository.Loan>().ReverseMap();
+                cfg.CreateMap<Loan, Models.Loan>().ReverseMap();
             });
             return new Mapper(config);
         }

@@ -68,7 +68,7 @@ namespace CardsReadMicroservice
             return new AggregateUserActivityResponse { Portions = { aggregated } };
         }
 
-        private IEnumerable<UserReportPortion> AggregateUserTransactions(Repository.Card card, Transaction[] allTransactions, Granularity granularity)
+        private IEnumerable<UserReportPortion> AggregateUserTransactions(Models.Card card, Transaction[] allTransactions, Granularity granularity)
         {
             var transactions = allTransactions.Where(t => t.CardId == card.Id).ToArray();
             var withTimestamps = transactions.Select(t => new TransactionWithTimestamp { Timestamp = t.Timestamp.ToDateTime(), Transaction = t });

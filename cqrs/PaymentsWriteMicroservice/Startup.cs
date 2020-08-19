@@ -72,8 +72,8 @@ namespace PaymentsWriteMicroservice
             var config = new MapperConfiguration(cfg =>
             {
                 cfg.AddGrpcConverters();
-                cfg.CreateMap<PaymentStatus, Repository.PaymentStatus>().ReverseMap();
-                cfg.CreateMap<Payment, Repository.Payment>().ReverseMap();
+                cfg.CreateMap<PaymentStatus, Models.PaymentStatus>().ReverseMap();
+                cfg.CreateMap<Payment, Models.Payment>().ReverseMap();
             });
             return new Mapper(config);
         }

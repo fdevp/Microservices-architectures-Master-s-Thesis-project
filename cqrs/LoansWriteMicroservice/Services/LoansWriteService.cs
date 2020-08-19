@@ -42,23 +42,23 @@ namespace LoansWriteMicroservice
             }
 
             var repaidInstalments = request.Ids.Select(id => loansRepository.Get(id)).ToArray();
-            projectionChannel.Publish(context.RequestHeaders.GetFlowId(), new DataProjection<Repository.Loan, string> { Upsert = repaidInstalments });
+            projectionChannel.Publish(context.RequestHeaders.GetFlowId(), new DataProjection<Models.Loan, string> { Upsert = repaidInstalments });
             return new Empty();
         }
 
         public override Task<Empty> Setup(SetupRequest request, ServerCallContext context)
         {
-            var loans = request.Loans.Select(l => mapper.Map<Repository.Loan>(l));
+            var loans = request.Loans.Select(l => mapper.Map<Models.Loan>(l));
             loansRepository.Setup(loans);
-            projectionChannel.Publish(null, new DataProjection<Repository.Loan, string> { Upsert = loans.ToArray() });
+            projectionChannel.Publish(null, new DataProjection<Models.Loan, string> { Upsert = loans.ToArray() });
             return Task.FromResult(new Empty());
         }
 
         public override Task<Empty> SetupAppend(SetupRequest request, ServerCallContext context)
         {
-            var loans = request.Loans.Select(l => mapper.Map<Repository.Loan>(l));
+            var loans = request.Loans.Select(l => mapper.Map<Models.Loan>(l));
             loansRepository.SetupAppend(loans);
-            projectionChannel.Publish(null, new DataProjection<Repository.Loan, string> { Upsert = loans.ToArray() });
+            projectionChannel.Publish(null, new DataProjection<Models.Loan, string> { Upsert = loans.ToArray() });
             return Task.FromResult(new Empty());
         }
 

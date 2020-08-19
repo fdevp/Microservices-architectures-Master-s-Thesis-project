@@ -6,16 +6,16 @@ namespace AccountsWriteMicroservice.Repository
 {
     public class AccountsRepository
     {
-        private Dictionary<string, Account> accounts = new Dictionary<string, Account>();
+        private Dictionary<string, Models.Account> accounts = new Dictionary<string, Models.Account>();
 
-        public Account Get(string id)
+        public Models.Account Get(string id)
         {
             if (accounts.ContainsKey(id))
                 return accounts[id];
             return null;
         }
 
-        public Account[] GetByUser(string userId)
+        public Models.Account[] GetByUser(string userId)
         {
             return accounts.Values.Where(a=>a.UserId == userId).ToArray();
         }
@@ -47,20 +47,19 @@ namespace AccountsWriteMicroservice.Repository
         private void ChangeBalance(string id, float amount)
         {
             var account = accounts[id];
-            var newBalance = account.Balance + amount;
-            account.SetBalance(newBalance);
+            account.Balance = account.Balance + amount;
         }
 
-        public void Setup(IEnumerable<Repository.Account> accounts)
+        public void Setup(IEnumerable<Models.Account> accounts)
         {
             this.accounts = accounts.ToDictionary(a => a.Id, a => a);
         }
 
-        public void SetupAppend(IEnumerable<Repository.Account> accounts)
+        public void SetupAppend(IEnumerable<Models.Account> accounts)
         {
             if (this.accounts == null)
             {
-                this.accounts = new Dictionary<string, Account>();
+                this.accounts = new Dictionary<string, Models.Account>();
             }
 
             foreach (var account in accounts)

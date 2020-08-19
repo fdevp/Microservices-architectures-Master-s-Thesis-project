@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using PaymentsReadMicroservice;
 using PaymentsWriteMicroservice;
+using SharedClasses;
 using UsersMicroservice;
 using static AccountsReadMicroservice.AccountsRead;
 using static AccountsWriteMicroservice.AccountsWrite;
@@ -60,7 +61,7 @@ namespace APIGateway.Controllers
         }
 
         [HttpGet]
-        public async Task<BatchData> Get([FromQuery(Name = "part")] int part, [FromQuery(Name = "total")] int total)
+        public async Task<BatchData> Get([FromQuery(Name = "part")] int part, [FromQuery(Name = "total")] int total, [FromQuery(Name = "timestamp")] DateTime timestamp)
         {
             var flowId = HttpContext.Items["flowId"].ToString();
 
@@ -68,7 +69,12 @@ namespace APIGateway.Controllers
             RepeatedField<Payment> payments = new RepeatedField<Payment>();
             RepeatedField<AccountBalance> balances = new RepeatedField<AccountBalance>();
 
-            var paymentsResponse = await paymentsReadClient.GetPartAsync(new GetPartRequest { Part = part, TotalParts = total }, HttpContext.CreateHeadersWithFlowId());
+            var paymentsResponse = await paymentsReadClient.GetPartAsync(new GetPartRequest
+            {
+                Part = part,
+                TotalParts = total,
+                Timestamp = timestamp.ToNullableTimestamp()
+            }, HttpContext.CreateHeadersWithFlowId());
             payments = paymentsResponse.Payments;
 
             var parallelTasks = new List<Task>();
@@ -122,9 +128,8 @@ namespace APIGateway.Controllers
 
                 parallelTasks.Add(Task.Run(async () =>
                 {
-                    var paymentIds = transfers.Select(t => t.PaymentId);
-                    var request = new UpdateProcessingTimestampRequest { Ids = { paymentIds }, ProcessingTimestamp = Timestamp.FromDateTime(data.ProcessingTimestamp) };
-                    await paymentsWriteClient.UpdateProcessingTimestampAsync(request, HttpContext.CreateHeadersWithFlowId());
+                    var request = new UpdateLatestProcessingTimestampRequest { Ids = { data.ProcessedPaymentsIds }, LatestProcessingTimestamp = Timestamp.FromDateTime(data.ProcessingTimestamp) };
+                    await paymentsWriteClient.UpdateLatestProcessingTimestampAsync(request, HttpContext.CreateHeadersWithFlowId());
                 }));
             }
 

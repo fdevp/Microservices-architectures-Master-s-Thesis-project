@@ -6,9 +6,9 @@ namespace PaymentsReadMicroservice.Repository
 {
     public class PaymentsRepository
     {
-        private Dictionary<string, Payment> payments = new Dictionary<string, Payment>();
+        private Dictionary<string, Models.Payment> payments = new Dictionary<string, Models.Payment>();
 
-        public Payment Get(string id)
+        public Models.Payment Get(string id)
         {
             if (payments.ContainsKey(id))
                 return payments[id];
@@ -17,22 +17,21 @@ namespace PaymentsReadMicroservice.Repository
 
         public string[] GetIds() => payments.Select(p => p.Value.Id).ToArray();
 
-        public Payment[] Get(int part, int totalParts)
+        public Models.Payment[] Get(int part, int totalParts, DateTime dateTime)
         {
-            var datetime = DateTime.UtcNow;
             return payments.Values
-                .Where((element, index) => element.ProcessingTimestamp + element.Interval >= datetime)
+                .Where((element, index) => element.LatestProcessingTimestamp + element.Interval < dateTime)
                 .Where((element, index) => ((index % totalParts) + 1) == part)
                 .ToArray();
         }
 
-        public Payment[] GetByAccounts(IEnumerable<string> accountIds)
+        public Models.Payment[] GetByAccounts(IEnumerable<string> accountIds)
         {
             var accountsSet = accountIds.ToHashSet();
             return payments.Values.Where(p => accountsSet.Contains(p.AccountId)).ToArray();
         }
 
-        public void Upsert(Payment[] update)
+        public void Upsert(Models.Payment[] update)
         {
             foreach (var payment in update)
             {

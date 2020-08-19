@@ -1,4 +1,4 @@
-namespace CardsReadMicroservice.Repository
+namespace Models
 {
     public class Card
     {

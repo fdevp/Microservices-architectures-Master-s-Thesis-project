@@ -26,6 +26,7 @@ message GetPaymentsResult {
 message GetPartRequest {
   int32 part = 1;
   int32 totalParts = 2;
+  google.protobuf.Timestamp timestamp = 3;
 }
 
 message AggregateUserActivityRequest {

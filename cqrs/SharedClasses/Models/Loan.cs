@@ -1,4 +1,4 @@
-namespace LoansReadMicroservice.Repository
+namespace Models
 {
     public class Loan
     {

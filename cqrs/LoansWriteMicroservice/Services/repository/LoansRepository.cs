@@ -5,32 +5,32 @@ namespace LoansWriteMicroservice.Repository
 {
     public class LoansRepository
     {
-        private Dictionary<string, Loan> loans = new Dictionary<string, Loan>();
+        private Dictionary<string, Models.Loan> loans = new Dictionary<string, Models.Loan>();
 
-        public Loan Get(string id)
+        public Models.Loan Get(string id)
         {
             if (loans.ContainsKey(id))
                 return loans[id];
             return null;
         }
 
-        public Loan[] GetByPayment(IEnumerable<string> paymentIds)
+        public Models.Loan[] GetByPayment(IEnumerable<string> paymentIds)
         {
             var payments = paymentIds.ToHashSet();
-            return loans.Values.Where(l=> payments.Contains(l.PaymentId)).ToArray();
+            return loans.Values.Where(l => payments.Contains(l.PaymentId)).ToArray();
         }
 
         public bool RepayInstalment(string id)
         {
             var loan = loans[id];
             var amount = InstalmentAmount(loan);
-            loan.Repay(amount);
+            loan.PaidAmount += amount;
             if (loan.PaidAmount >= loan.TotalAmount)
                 return true;
             return false;
         }
 
-        private float InstalmentAmount(Loan loan)
+        private float InstalmentAmount(Models.Loan loan)
         {
             var regularAmount = loan.TotalAmount / loan.Instalments;
             var toRepay = loan.TotalAmount - loan.PaidAmount;
@@ -39,16 +39,16 @@ namespace LoansWriteMicroservice.Repository
             return regularAmount;
         }
 
-        public void Setup(IEnumerable<Repository.Loan> loans)
+        public void Setup(IEnumerable<Models.Loan> loans)
         {
             this.loans = loans.ToDictionary(l => l.Id, l => l);
         }
 
-        public void SetupAppend(IEnumerable<Repository.Loan> loans)
+        public void SetupAppend(IEnumerable<Models.Loan> loans)
         {
             if (this.loans == null)
             {
-                this.loans = new Dictionary<string, Loan>();
+                this.loans = new Dictionary<string, Models.Loan>();
             }
 
             foreach (var loan in loans)

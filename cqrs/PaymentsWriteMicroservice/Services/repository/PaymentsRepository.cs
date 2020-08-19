@@ -6,35 +6,45 @@ namespace PaymentsWriteMicroservice.Repository
 {
     public class PaymentsRepository
     {
-        private Dictionary<string, Payment> payments = new Dictionary<string, Payment>();
+        private Dictionary<string, Models.Payment> payments = new Dictionary<string, Models.Payment>();
 
-        public Payment Get(string id)
+        public Models.Payment Get(string id)
         {
             if (payments.ContainsKey(id))
                 return payments[id];
             return null;
         }
 
-        public Payment[] Get(int part, int totalParts)
+        public Models.Payment[] Get(int part, int totalParts)
         {
             return payments.Values.Where((element, index) => ((index % totalParts) + 1) == part).ToArray();
         }
 
-        public Payment[] GetByAccounts(IEnumerable<string> accountIds)
+        public Models.Payment[] GetByAccounts(IEnumerable<string> accountIds)
         {
             var accountsSet = accountIds.ToHashSet();
             return payments.Values.Where(p => accountsSet.Contains(p.AccountId)).ToArray();
         }
 
-        public void UpdateLastRepayTimestamp(IEnumerable<string> paymentsIds, DateTime repayTimestamp)
+        public void UpdateLastRepayTimestamp(IEnumerable<string> paymentsIds, DateTime latestProcessingTimestmap)
         {
             foreach (var id in paymentsIds)
-                payments[id].UpdateLatestProcessingTimestamp(repayTimestamp);
+                payments[id].LatestProcessingTimestamp = latestProcessingTimestmap;
         }
 
-        public Payment Create(float amount, DateTime startTimestamp, TimeSpan interval, string accountId, string recipient)
+        public Models.Payment Create(float amount, DateTime startTimestamp, TimeSpan interval, string accountId, string recipient)
         {
-            var payment = new Repository.Payment(Guid.NewGuid().ToString(), amount, startTimestamp, null, interval, PaymentStatus.ACTIVE, accountId, recipient);
+            var payment = new Models.Payment
+            {
+                Id = Guid.NewGuid().ToString(),
+                Amount = amount,
+                StartTimestamp = startTimestamp,
+                LatestProcessingTimestamp = null,
+                Interval = interval,
+                Status = Models.PaymentStatus.ACTIVE,
+                AccountId = accountId,
+                Recipient = recipient
+            };
             payments.Add(payment.Id, payment);
             return payment;
         }
@@ -42,19 +52,19 @@ namespace PaymentsWriteMicroservice.Repository
         public void Cancel(string id)
         {
             if (payments.ContainsKey(id))
-                payments[id].Cancel();
+                payments[id].Status = Models.PaymentStatus.CANCELLED;
         }
 
-        public void Setup(IEnumerable<Repository.Payment> payments)
+        public void Setup(IEnumerable<Models.Payment> payments)
         {
             this.payments = payments.ToDictionary(p => p.Id, p => p);
         }
 
-        public void SetupAppend(IEnumerable<Repository.Payment> payments)
+        public void SetupAppend(IEnumerable<Models.Payment> payments)
         {
             if (this.payments == null)
             {
-                this.payments = new Dictionary<string, Payment>();
+                this.payments = new Dictionary<string, Models.Payment>();
             }
 
             foreach (var payment in payments)

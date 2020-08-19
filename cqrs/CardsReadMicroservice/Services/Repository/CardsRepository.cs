@@ -1,15 +1,16 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Models;
 
 namespace CardsReadMicroservice.Repository
 {
     public class CardsRepository
     {
-        private Dictionary<string, Card> cards = new Dictionary<string, Card>();
-        private Dictionary<string, Block> blocks = new Dictionary<string, Block>();
+        private Dictionary<string, Models.Card> cards = new Dictionary<string, Models.Card>();
+        private Dictionary<string, Models.Block> blocks = new Dictionary<string, Models.Block>();
 
-        public Card GetCard(string id)
+        public Models.Card GetCard(string id)
         {
             if (cards.ContainsKey(id))
                 return cards[id];
@@ -18,13 +19,13 @@ namespace CardsReadMicroservice.Repository
 
         public string[] GetCardsIds() => cards.Select(c => c.Value.Id).ToArray();
 
-        public Card[] GetByAccounts(IEnumerable<string> accountIds)
+        public Models.Card[] GetByAccounts(IEnumerable<string> accountIds)
         {
             var accountsSet = accountIds.ToHashSet();
             return cards.Values.Where(c => accountsSet.Contains(c.AccountId)).ToArray();
         }
 
-        public Block[] GetBlocks(string cardId)
+        public Models.Block[] GetBlocks(string cardId)
         {
             return blocks.Values.Where(b => b.CardId == cardId).ToArray();
         }

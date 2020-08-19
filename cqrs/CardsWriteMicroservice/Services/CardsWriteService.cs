@@ -7,6 +7,7 @@ using CardsWriteMicroservice.Repository;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Microsoft.Extensions.Logging;
+using Models;
 using SharedClasses;
 using SharedClasses.Messaging;
 using static AccountsWriteMicroservice.AccountsWrite;
@@ -59,8 +60,8 @@ namespace CardsWriteMicroservice
 
         public override Task<Empty> Setup(SetupRequest request, ServerCallContext context)
         {
-            var cards = request.Cards.Select(c => mapper.Map<Repository.Card>(c));
-            var blocks = request.Blocks.Select(b => mapper.Map<Repository.Block>(b));
+            var cards = request.Cards.Select(c => mapper.Map<Models.Card>(c));
+            var blocks = request.Blocks.Select(b => mapper.Map<Models.Block>(b));
             cardsRepository.Setup(cards, blocks);
 
             var upsert = cards.Select(c => new CardsUpsert { Card = c });

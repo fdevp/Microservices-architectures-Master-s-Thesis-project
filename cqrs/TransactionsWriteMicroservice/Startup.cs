@@ -66,7 +66,7 @@ namespace TransactionsWriteMicroservice
             var config = new MapperConfiguration(cfg =>
             {
                 cfg.AddGrpcConverters();
-                cfg.CreateMap<Transaction, Repository.Transaction>().ReverseMap();
+                cfg.CreateMap<Transaction, Models.Transaction>().ReverseMap();
             });
             return new Mapper(config);
         }

@@ -45,7 +45,7 @@ namespace AccountsWriteMicroservice
 
             accountsRepository.Transfer(request.Transfer.AccountId, request.Transfer.Recipient, request.Transfer.Amount);
             var affectedAccounts = new[] { accountsRepository.Get(request.Transfer.AccountId), accountsRepository.Get(request.Transfer.Recipient) };
-            projectionChannel.Publish(context.RequestHeaders.GetFlowId(), new DataProjection<Repository.Account, string> { Upsert = affectedAccounts });
+            projectionChannel.Publish(context.RequestHeaders.GetFlowId(), new DataProjection<Models.Account, string> { Upsert = affectedAccounts });
 
             return new TransferResponse { Transaction = result.Transaction };
         }
@@ -63,14 +63,14 @@ namespace AccountsWriteMicroservice
             var result = await transactionsClient.BatchCreateAsync(batchAddTransactionsRequest, context.RequestHeaders.SelectCustom());
 
             var affectedAccounts = ApplyBatchToRepository(request);
-            projectionChannel.Publish(context.RequestHeaders.GetFlowId(), new DataProjection<Repository.Account, string> { Upsert = affectedAccounts.ToArray() });
+            projectionChannel.Publish(context.RequestHeaders.GetFlowId(), new DataProjection<Models.Account, string> { Upsert = affectedAccounts.ToArray() });
 
             return new Empty();
         }
 
-        private IEnumerable<Repository.Account> ApplyBatchToRepository(BatchTransferRequest request)
+        private IEnumerable<Models.Account> ApplyBatchToRepository(BatchTransferRequest request)
         {
-            var accounts = new Dictionary<string, Repository.Account>();
+            var accounts = new Dictionary<string, Models.Account>();
             foreach (var t in request.Transfers)
             {
                 accountsRepository.Transfer(t.AccountId, t.Recipient, t.Amount);
@@ -99,17 +99,17 @@ namespace AccountsWriteMicroservice
 
         public override Task<Empty> Setup(SetupRequest request, ServerCallContext context)
         {
-            var accounts = request.Accounts.Select(a => mapper.Map<Repository.Account>(a));
+            var accounts = request.Accounts.Select(a => mapper.Map<Models.Account>(a));
             accountsRepository.Setup(accounts);
-            projectionChannel.Publish(null, new DataProjection<Repository.Account, string> { Upsert = accounts.ToArray() });
+            projectionChannel.Publish(null, new DataProjection<Models.Account, string> { Upsert = accounts.ToArray() });
             return Task.FromResult(new Empty());
         }
 
         public override Task<Empty> SetupAppend(SetupRequest request, ServerCallContext context)
         {
-            var accounts = request.Accounts.Select(a => mapper.Map<Repository.Account>(a));
+            var accounts = request.Accounts.Select(a => mapper.Map<Models.Account>(a));
             accountsRepository.SetupAppend(accounts);
-            projectionChannel.Publish(null, new DataProjection<Repository.Account, string> { Upsert = accounts.ToArray() });
+            projectionChannel.Publish(null, new DataProjection<Models.Account, string> { Upsert = accounts.ToArray() });
             return Task.FromResult(new Empty());
         }
     }

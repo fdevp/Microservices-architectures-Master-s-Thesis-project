@@ -1,6 +1,6 @@
 using System;
 
-namespace TransactionsReadMicroservice.Repository
+namespace Models
 {
     public class Transaction
     {

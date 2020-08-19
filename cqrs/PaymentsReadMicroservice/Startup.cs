@@ -54,7 +54,7 @@ namespace PaymentsReadMicroservice
             configuration.GetSection("RabbitMq").Bind(config);
 
             var logger = services.BuildServiceProvider().GetService<ILogger<RabbitMqPublisher>>();
-            var rabbitMq = new RabbitMqChannelFactory().CreateReadChannel<Repository.Payment, string>(config, "PaymentsRead", logger);
+            var rabbitMq = new RabbitMqChannelFactory().CreateReadChannel<Models.Payment, string>(config, "PaymentsRead", logger);
 
             rabbitMq.Received += (sender, projection) =>
             {
@@ -91,8 +91,8 @@ namespace PaymentsReadMicroservice
             var config = new MapperConfiguration(cfg =>
             {
                 cfg.AddGrpcConverters();
-                cfg.CreateMap<PaymentStatus, Repository.PaymentStatus>().ReverseMap();
-                cfg.CreateMap<Payment, Repository.Payment>().ReverseMap();
+                cfg.CreateMap<PaymentStatus, Models.PaymentStatus>().ReverseMap();
+                cfg.CreateMap<Payment, Models.Payment>().ReverseMap();
             });
             return new Mapper(config);
         }

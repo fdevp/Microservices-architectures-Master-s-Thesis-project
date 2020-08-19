@@ -49,7 +49,7 @@ namespace AccountsReadMicroservice
             configuration.GetSection("RabbitMq").Bind(config);
 
             var logger = services.BuildServiceProvider().GetService<ILogger<RabbitMqPublisher>>();
-            var rabbitMq = new RabbitMqChannelFactory().CreateReadChannel<Repository.Account, string>(config, "AccountsRead", logger);
+            var rabbitMq = new RabbitMqChannelFactory().CreateReadChannel<Models.Account, string>(config, "AccountsRead", logger);
 
             rabbitMq.Received += (sender, projection) =>
             {
@@ -86,7 +86,7 @@ namespace AccountsReadMicroservice
             var config = new MapperConfiguration(cfg =>
             {
                 cfg.AddGrpcConverters();
-                cfg.CreateMap<Account, Repository.Account>().ReverseMap();
+                cfg.CreateMap<Account, Models.Account>().ReverseMap();
             });
             return new Mapper(config);
         }

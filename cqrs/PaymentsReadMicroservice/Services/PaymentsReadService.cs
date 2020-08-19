@@ -44,7 +44,7 @@ namespace PaymentsReadMicroservice
 
         public override Task<GetPaymentsResult> GetPart(GetPartRequest request, ServerCallContext context)
         {
-            var payments = paymentsRepository.Get(request.Part, request.TotalParts);
+            var payments = paymentsRepository.Get(request.Part, request.TotalParts, request.Timestamp.ToDateTime());
             var mapped = payments.Where(payment => payment != null)
                 .Select(p => mapper.Map<Payment>(p))
                 .ToArray();
@@ -77,7 +77,7 @@ namespace PaymentsReadMicroservice
             return new AggregateUserActivityResponse { Portions = { aggregated } };
         }
 
-        private IEnumerable<UserReportPortion> AggregateUserTransactions(Repository.Payment payment, Transaction[] allTransactions, Granularity granularity)
+        private IEnumerable<UserReportPortion> AggregateUserTransactions(Models.Payment payment, Transaction[] allTransactions, Granularity granularity)
         {
             var transactions = allTransactions.Where(t => t.PaymentId == payment.Id).ToArray();
             var withTimestamps = transactions.Select(t => new TransactionWithTimestamp { Timestamp = t.Timestamp.ToDateTime(), Transaction = t });

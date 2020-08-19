@@ -1,4 +1,4 @@
-namespace CardsWriteMicroservice
+namespace Models
 {
     public class CardsRemove
     {
