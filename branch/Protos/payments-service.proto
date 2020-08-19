@@ -16,7 +16,7 @@ service Payments {
   rpc GetByAccounts (GetPaymentsRequest) returns (GetPaymentsWithLoansResult);
   rpc GetTransactions (GetTransactionsRequest) returns (GetTransactionsResult);
   rpc Create (CreatePaymentRequest) returns (CreatePaymentResult);
-  rpc UpdateRepayTimestamp (UpdateRepayTimestampRequest) returns (google.protobuf.Empty);
+  rpc UpdateLatestProcessingTimestamp (UpdateLatestProcessingTimestampRequest) returns (google.protobuf.Empty);
   rpc Cancel (CancelPaymentsRequest) returns (google.protobuf.Empty);
   rpc Setup(SetupRequest) returns (google.protobuf.Empty);
   rpc SetupAppend(SetupRequest) returns (google.protobuf.Empty);
@@ -33,6 +33,7 @@ message GetPaymentsResult {
 message GetPartRequest {
   int32 part = 1;
   int32 totalParts = 2;
+  google.protobuf.Timestamp timestamp = 3;
 }
 
 message GetPaymentsWithLoansResult 
@@ -59,9 +60,9 @@ message CreatePaymentRequest {
   string recipient = 5;
 }
 
-message UpdateRepayTimestampRequest {
+message UpdateLatestProcessingTimestampRequest {
   repeated string ids = 1;
-  google.protobuf.Timestamp repayTimestamp = 2;
+  google.protobuf.Timestamp latestProcessingTimestamp = 2;
 }
 
 message CreatePaymentResult {

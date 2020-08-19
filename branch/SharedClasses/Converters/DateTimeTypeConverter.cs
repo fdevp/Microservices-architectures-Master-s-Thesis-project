@@ -20,4 +20,20 @@ namespace SharedClasses
             return source.ToDateTime();
         }
     }
+
+    public class NullableDateTimeTypeConverter : ITypeConverter<DateTime?, Timestamp>
+    {
+        public Timestamp Convert(DateTime? source, Timestamp destination, ResolutionContext context)
+        {
+            return source.ToNullableTimestamp();
+        }
+    }
+
+    public class NullableDateTimeTypeConverterReverse : ITypeConverter<Timestamp, DateTime?>
+    {
+        public DateTime? Convert(Timestamp source, DateTime? destination, ResolutionContext context)
+        {
+            return source.ToNullableDateTime();
+        }
+    }
 }

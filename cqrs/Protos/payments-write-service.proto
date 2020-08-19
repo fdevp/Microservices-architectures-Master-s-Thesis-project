@@ -11,7 +11,7 @@ package PaymentsWriteMicroservice;
 service PaymentsWrite {
   rpc Create (CreatePaymentRequest) returns (CreatePaymentResult);
   rpc Cancel (CancelPaymentsRequest) returns (google.protobuf.Empty);
-  rpc UpdateRepayTimestamp (UpdateRepayTimestampRequest) returns (google.protobuf.Empty);
+  rpc UpdateLatestProcessingTimestamp (UpdateLatestProcessingTimestampRequest) returns (google.protobuf.Empty);
   rpc Setup(SetupRequest) returns (google.protobuf.Empty);
   rpc SetupAppend(SetupRequest) returns (google.protobuf.Empty);
 }
@@ -24,9 +24,9 @@ message CreatePaymentRequest {
   string recipient = 5;
 }
 
-message UpdateRepayTimestampRequest {
+message UpdateLatestProcessingTimestampRequest {
   repeated string ids = 1;
-  google.protobuf.Timestamp repayTimestamp = 2;
+  google.protobuf.Timestamp latestProcessingTimestamp = 2;
 }
 
 message CreatePaymentResult {

@@ -19,6 +19,7 @@ service BatchesBranch {
 message GetDataToProcessRequest {
   int32 part = 1;
   int32 totalParts = 2;
+  google.protobuf.Timestamp timestamp = 3;
 }
 
 message GetDataToProcessResponse {
@@ -28,8 +29,9 @@ message GetDataToProcessResponse {
 }
 
 message ProcessBatchRequest {
-  google.protobuf.Timestamp repayTimestamp = 1;
-  repeated Message messages = 2;
-  repeated Transfer transfers = 3;
-  repeated string repaidInstalmentsIds = 4;
+  google.protobuf.Timestamp processingTimestamp = 1;
+  repeated string ProcessedPaymentsIds = 2;
+  repeated Message messages = 3;
+  repeated Transfer transfers = 4;
+  repeated string repaidInstalmentsIds = 5;
 }

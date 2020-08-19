@@ -5,6 +5,7 @@ using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
@@ -48,10 +49,10 @@ namespace Requester.RunningModes
                 logger.Information($"Service='Automat' ScenarioId='{scenarioId}' Method='automat token' Processing='{scenarioPartTimer.ElapsedMilliseconds}'");
 
                 scenarioPartTimer.Restart();
-                var data = GetData(index, scenarioId);
+                var data = GetData(index, scenarioId, currentTime);
                 logger.Information($"Service='Automat' ScenarioId='{scenarioId}' Method='automat getbatch' Processing='{scenarioPartTimer.ElapsedMilliseconds}'");
 
-                var toPay = data.Payments.Where(p => p.LastRepayTimestamp + p.Interval < DateTime.UtcNow);
+                var toPay = data.Payments.Where(p => p.LatestProcessingTimestamp + p.Interval < DateTime.UtcNow);
 
                 var balancesDict = data.Balances.ToDictionary(k => k.Id, v => v);
                 var loansDict = data.Loans.ToDictionary(k => k.PaymentId, v => v);
@@ -71,9 +72,9 @@ namespace Requester.RunningModes
                 var transfers = withSufficientBalance.Select(p => CreateTransfer(p, loansDict.ContainsKey(p.Id) ? loansDict[p.Id] : null)).ToArray();
                 var messages = withInsufficientBalance.Select(p => CreateMessage(p, balancesDict[p.AccountId])).ToArray();
                 var repaidInstalments = data.Loans.Where(l => paidIds.Contains(l.PaymentId)).Select(l => l.Id).ToArray();
+                var processedIds = toPay.Select(p => p.Id).ToArray();
 
-
-                var batchProcess = new BatchProcess { RepayTimestamp = currentTime, Transfers = transfers, Messages = messages, RepaidInstalmentsIds = repaidInstalments };
+                var batchProcess = new BatchProcess { ProcessingTimestamp = currentTime, Transfers = transfers, Messages = messages, RepaidInstalmentsIds = repaidInstalments, ProcessedPaymentsIds = processedIds };
 
                 scenarioPartTimer.Restart();
                 SendData(batchProcess, scenarioId);
@@ -85,7 +86,8 @@ namespace Requester.RunningModes
 
                 logger.Information($"Service='Automat' ScenarioId='{scenarioId}' Method='automat scenario' Processing='{scenarioTimer.ElapsedMilliseconds}'");
 
-                Thread.Sleep(automatSettings.SleepTime);
+                //Thread.Sleep(automatSettings.SleepTime);
+                Thread.Sleep(TimeSpan.FromSeconds(10));
                 currentTime += scenarioTimer.Elapsed;
             }
         }
@@ -98,9 +100,9 @@ namespace Requester.RunningModes
             var result = httpClient.PostAsync("batch", content).Result;
         }
 
-        private BatchData GetData(int index, string scenarioId)
+        private BatchData GetData(int index, string scenarioId, DateTime dateTime)
         {
-            var url = $"Batch?part={index + 1}&total={automatSettings.TotalCount}";
+            var url = $"Batch?part={index + 1}&total={automatSettings.TotalCount}&timestamp={dateTime.ToString("s", CultureInfo.InvariantCulture)}";
             var request = new HttpRequestMessage(HttpMethod.Get, url);
             request.Headers.Add("flowId", scenarioId);
             var result = httpClient.SendAsync(request).Result;

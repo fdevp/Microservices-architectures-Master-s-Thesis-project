@@ -47,8 +47,7 @@ namespace AccountsMicroservice.Repository
         private void ChangeBalance(string id, float amount)
         {
             var account = accounts[id];
-            var newBalance = account.Balance + amount;
-            account.SetBalance(newBalance);
+            account.Balance = account.Balance + amount;
         }
 
         public void Setup(IEnumerable<Repository.Account> accounts)

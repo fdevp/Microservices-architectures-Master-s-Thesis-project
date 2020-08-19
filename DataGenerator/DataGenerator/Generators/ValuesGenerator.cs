@@ -74,9 +74,9 @@ namespace DataGenerator
                         AccountId = account.Id,
                         Amount = amountRnd.Next(),
                         StartTimestamp = startTimestamp,
-                        LastRepayTimestamp = lastRepayTimestamp,
+                        LatestProcessingTimestamp = lastRepayTimestamp,
                         Interval = interval,
-                        Status = status,
+                        Status = (int)status,
                         Recipient = recipientRnd.Next(account.Id)
                     };
                 }
@@ -117,8 +117,8 @@ namespace DataGenerator
                         Amount = totalAmount / instalments,
                         Interval = interval,
                         StartTimestamp = start,
-                        LastRepayTimestamp = lastRepayTimestamp,
-                        Status = PaymentStatus.ACTIVE,
+                        LatestProcessingTimestamp = lastRepayTimestamp,
+                        Status = (int)PaymentStatus.ACTIVE,
                         Recipient = recipient
                     };
 

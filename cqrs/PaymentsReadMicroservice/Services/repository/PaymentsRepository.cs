@@ -19,7 +19,11 @@ namespace PaymentsReadMicroservice.Repository
 
         public Payment[] Get(int part, int totalParts)
         {
-            return payments.Values.Where((element, index) => ((index % totalParts) + 1) == part).ToArray();
+            var datetime = DateTime.UtcNow;
+            return payments.Values
+                .Where((element, index) => element.ProcessingTimestamp + element.Interval >= datetime)
+                .Where((element, index) => ((index % totalParts) + 1) == part)
+                .ToArray();
         }
 
         public Payment[] GetByAccounts(IEnumerable<string> accountIds)

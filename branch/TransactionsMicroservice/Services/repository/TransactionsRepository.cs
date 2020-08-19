@@ -13,7 +13,17 @@ namespace TransactionsMicroservice.Repository
         {
             var id = Guid.NewGuid().ToString();
             var timestamp = DateTime.UtcNow;
-            var transaction = new Repository.Transaction(id, title, amount, timestamp, recipient, sender, paymentId, cardId);
+            var transaction = new Repository.Transaction
+            {
+                Id = id,
+                Title = title,
+                Amount = amount,
+                Timestamp = timestamp,
+                Recipient = recipient,
+                Sender = sender,
+                PaymentId = paymentId,
+                CardId = cardId
+            };
             transactions.TryAdd(id, transaction);
             return transaction;
         }

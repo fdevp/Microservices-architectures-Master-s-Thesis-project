@@ -15,17 +15,20 @@ namespace PaymentsMicroservice.Repository
             return null;
         }
 
-        public Payment[] Get(int part, int totalParts)
+        public Payment[] Get(int part, int totalParts, DateTime dateTime)
         {
-            return payments.Values.Where((element, index) => ((index % totalParts) + 1) == part).ToArray();
+            return payments.Values
+                .Where((element, index) => element.LatestProcessingTimestamp + element.Interval <= dateTime)
+                .Where((element, index) => ((index % totalParts) + 1) == part)
+                .ToArray();
         }
 
         public string[] GetIds() => payments.Values.Select(p => p.Id).ToArray();
 
-        public void UpdateLastRepayTimestamp(IEnumerable<string> paymentsIds, DateTime repayTimestamp)
+        public void UpdateProcessingTimestamp(IEnumerable<string> paymentsIds, DateTime processingTimestamp)
         {
-            foreach(var id in paymentsIds)
-                payments[id].UpdateLastRepayTimestamp(repayTimestamp);
+            foreach (var id in paymentsIds)
+               payments[id].LatestProcessingTimestamp = processingTimestamp; 
         }
 
         public Payment[] GetByAccounts(IEnumerable<string> accountIds)
@@ -36,7 +39,17 @@ namespace PaymentsMicroservice.Repository
 
         public Payment Create(float amount, DateTime startTimestamp, TimeSpan interval, string accountId, string recipient)
         {
-            var payment = new Repository.Payment(Guid.NewGuid().ToString(), amount, startTimestamp, null, interval, PaymentStatus.ACTIVE, accountId, recipient);
+            var payment = new Repository.Payment
+            {
+                Id = Guid.NewGuid().ToString(),
+                Amount = amount,
+                StartTimestamp = startTimestamp,
+                LatestProcessingTimestamp = null,
+                Interval = interval,
+                Status = PaymentStatus.ACTIVE,
+                AccountId = accountId,
+                Recipient = recipient
+            };
             payments.Add(payment.Id, payment);
             return payment;
         }

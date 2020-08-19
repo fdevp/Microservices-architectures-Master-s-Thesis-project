@@ -95,7 +95,7 @@ namespace APIGateway.Controllers
                 publishingRouter.Publish(Queues.Accounts, transfersEvent, flowId);
 
                 var paymentsIds = data.Transfers.Select(t => t.PaymentId);
-                var repayTimestampEvent = new UpdateRepayTimestampEvent { Ids = paymentsIds.ToArray(), Timestamp = data.RepayTimestamp };
+                var repayTimestampEvent = new UpdateProcessingTimestampEvent { Ids = paymentsIds.ToArray(), Timestamp = data.ProcessingTimestamp };
                 publishingRouter.Publish(Queues.Payments, repayTimestampEvent, flowId);
             }
 

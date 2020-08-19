@@ -29,7 +29,7 @@ namespace PaymentsWriteMicroservice.Repository
         public void UpdateLastRepayTimestamp(IEnumerable<string> paymentsIds, DateTime repayTimestamp)
         {
             foreach (var id in paymentsIds)
-                payments[id].UpdateLastRepayTimestamp(repayTimestamp);
+                payments[id].UpdateLatestProcessingTimestamp(repayTimestamp);
         }
 
         public Payment Create(float amount, DateTime startTimestamp, TimeSpan interval, string accountId, string recipient)

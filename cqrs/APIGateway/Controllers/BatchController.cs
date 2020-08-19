@@ -123,8 +123,8 @@ namespace APIGateway.Controllers
                 parallelTasks.Add(Task.Run(async () =>
                 {
                     var paymentIds = transfers.Select(t => t.PaymentId);
-                    var request = new UpdateRepayTimestampRequest { Ids = { paymentIds }, RepayTimestamp = Timestamp.FromDateTime(data.RepayTimestamp) };
-                    await paymentsWriteClient.UpdateRepayTimestampAsync(request, HttpContext.CreateHeadersWithFlowId());
+                    var request = new UpdateProcessingTimestampRequest { Ids = { paymentIds }, ProcessingTimestamp = Timestamp.FromDateTime(data.ProcessingTimestamp) };
+                    await paymentsWriteClient.UpdateProcessingTimestampAsync(request, HttpContext.CreateHeadersWithFlowId());
                 }));
             }
 

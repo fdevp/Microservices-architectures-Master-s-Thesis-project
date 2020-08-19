@@ -50,13 +50,13 @@ namespace PaymentsMicroservice
 
         public override Task<GetPaymentsWithLoansResult> GetPart(GetPartRequest request, ServerCallContext context)
         {
-            var payments = paymentsRepository.Get(request.Part, request.TotalParts);
+            var payments = paymentsRepository.Get(request.Part, request.TotalParts, request.Timestamp.ToDateTime());
             return WithLoans(payments, context.RequestHeaders.SelectCustom());
         }
 
-        public override Task<Empty> UpdateRepayTimestamp(UpdateRepayTimestampRequest request, ServerCallContext context)
+        public override Task<Empty> UpdateLatestProcessingTimestamp(UpdateLatestProcessingTimestampRequest request, ServerCallContext context)
         {
-            paymentsRepository.UpdateLastRepayTimestamp(request.Ids, request.RepayTimestamp.ToDateTime());
+            paymentsRepository.UpdateProcessingTimestamp(request.Ids, request.LatestProcessingTimestamp.ToDateTime());
             return Task.FromResult(new Empty());
         }
 

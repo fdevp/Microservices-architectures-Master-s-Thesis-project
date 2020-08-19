@@ -40,7 +40,7 @@ namespace BatchesBranchMicroservice
 
         public override async Task<GetDataToProcessResponse> Get(GetDataToProcessRequest request, ServerCallContext context)
         {
-            var paymentsAndLoansRequest = new GetPartRequest { Part = request.Part, TotalParts = request.TotalParts };
+            var paymentsAndLoansRequest = new GetPartRequest { Part = request.Part, TotalParts = request.TotalParts, Timestamp = request.Timestamp };
             var paymentsAndLoans = await paymentsClient.GetPartAsync(paymentsAndLoansRequest, context.RequestHeaders.SelectCustom());
 
             var paymentAccounts = paymentsAndLoans.Payments.Select(p => p.AccountId).Distinct();
@@ -72,11 +72,10 @@ namespace BatchesBranchMicroservice
                     Transfers = { request.Transfers }
                 }, context.RequestHeaders.SelectCustom())));
 
-                var paymentIds = request.Transfers.Select(t => t.PaymentId);
-                tasks.Add(Task.Run(async () => await paymentsClient.UpdateRepayTimestampAsync(new UpdateRepayTimestampRequest
+                tasks.Add(Task.Run(async () => await paymentsClient.UpdateLatestProcessingTimestampAsync(new UpdateLatestProcessingTimestampRequest
                 {
-                    Ids = { paymentIds },
-                    RepayTimestamp = request.RepayTimestamp
+                    Ids = { request.ProcessedPaymentsIds },
+                    LatestProcessingTimestamp = request.ProcessingTimestamp
                 }, context.RequestHeaders.SelectCustom())));
             }
 

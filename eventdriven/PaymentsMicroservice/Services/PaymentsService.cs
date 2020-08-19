@@ -50,11 +50,11 @@ namespace PaymentsMicroservice
         }
 
 
-        [EventHandlingMethod(typeof(UpdateRepayTimestampEvent))]
-        public Task UpdateRepayTimestamp(MessageContext context, UpdateRepayTimestampEvent inputEvent)
+        [EventHandlingMethod(typeof(UpdateProcessingTimestampEvent))]
+        public Task UpdateRepayTimestamp(MessageContext context, UpdateProcessingTimestampEvent inputEvent)
         {
             foreach (var id in inputEvent.Ids)
-                paymentsRepository.UpdateLastRepayTimestamp(inputEvent.Ids, inputEvent.Timestamp);
+                paymentsRepository.UpdateProcessingTimestamp(inputEvent.Ids, inputEvent.Timestamp);
             return Task.CompletedTask;
         }
 
