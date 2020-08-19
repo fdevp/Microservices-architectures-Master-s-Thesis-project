@@ -20,8 +20,8 @@ namespace PaymentsReadMicroservice.Repository
         public Models.Payment[] Get(int part, int totalParts, DateTime dateTime)
         {
             return payments.Values
-                .Where((element, index) => element.LatestProcessingTimestamp + element.Interval < dateTime)
                 .Where((element, index) => ((index % totalParts) + 1) == part)
+                .Where((element, index) => element.LatestProcessingTimestamp + element.Interval < dateTime)
                 .ToArray();
         }
 

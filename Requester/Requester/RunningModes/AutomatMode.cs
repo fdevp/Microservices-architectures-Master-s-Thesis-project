@@ -86,8 +86,7 @@ namespace Requester.RunningModes
 
                 logger.Information($"Service='Automat' ScenarioId='{scenarioId}' Method='automat scenario' Processing='{scenarioTimer.ElapsedMilliseconds}'");
 
-                //Thread.Sleep(automatSettings.SleepTime);
-                Thread.Sleep(TimeSpan.FromSeconds(10));
+                Thread.Sleep(automatSettings.SleepTime);
                 currentTime += scenarioTimer.Elapsed;
             }
         }

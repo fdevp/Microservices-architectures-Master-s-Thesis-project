@@ -18,9 +18,9 @@ namespace PaymentsMicroservice.Repository
         public Payment[] Get(int part, int totalParts, DateTime dateTime)
         {
             return payments.Values
-                .Where((element, index) => element.LatestProcessingTimestamp + element.Interval <= dateTime)
                 .Where((element, index) => ((index % totalParts) + 1) == part)
-                .ToArray();
+                .Where((element, index) => element.LatestProcessingTimestamp + element.Interval <= dateTime)
+                .ToArray();    
         }
 
         public string[] GetIds() => payments.Values.Select(p => p.Id).ToArray();

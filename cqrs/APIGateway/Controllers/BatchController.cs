@@ -128,7 +128,7 @@ namespace APIGateway.Controllers
 
                 parallelTasks.Add(Task.Run(async () =>
                 {
-                    var request = new UpdateLatestProcessingTimestampRequest { Ids = { data.ProcessedPaymentsIds }, LatestProcessingTimestamp = Timestamp.FromDateTime(data.ProcessingTimestamp) };
+                    var request = new UpdateLatestProcessingTimestampRequest { Ids = { data.ProcessedPaymentsIds }, LatestProcessingTimestamp = data.ProcessingTimestamp.ToNullableTimestamp()};
                     await paymentsWriteClient.UpdateLatestProcessingTimestampAsync(request, HttpContext.CreateHeadersWithFlowId());
                 }));
             }
