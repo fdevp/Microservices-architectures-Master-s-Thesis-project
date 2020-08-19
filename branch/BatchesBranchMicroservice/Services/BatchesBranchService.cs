@@ -71,7 +71,10 @@ namespace BatchesBranchMicroservice
                 {
                     Transfers = { request.Transfers }
                 }, context.RequestHeaders.SelectCustom())));
+            }
 
+            if (request.ProcessedPaymentsIds.Count > 0)
+            {
                 tasks.Add(Task.Run(async () => await paymentsClient.UpdateLatestProcessingTimestampAsync(new UpdateLatestProcessingTimestampRequest
                 {
                     Ids = { request.ProcessedPaymentsIds },

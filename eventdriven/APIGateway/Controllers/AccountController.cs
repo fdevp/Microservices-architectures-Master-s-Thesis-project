@@ -75,11 +75,11 @@ namespace APIGateway.Controllers
 
          [HttpPost]
         [Route("setup")]
-        public Task Setup(LoansSetup setup)
+        public Task Setup(AccountsSetup setup)
         {
-            for (int i = 0; i < setup.loans.Length; i += 10000)
+            for (int i = 0; i < setup.Accounts.Length; i += 10000)
             {
-                var portion = setup.loans.Skip(i).Take(10000).ToArray();
+                var portion = setup.Accounts.Skip(i).Take(10000).ToArray();
                 var accountsEvent = new SetupAppendAccountsEvent { Accounts = portion.Select(a => mapper.Map<Account>(a)).ToArray() };
                 this.publishingRouter.Publish(Queues.Accounts, accountsEvent, null);
             }

@@ -3,7 +3,7 @@ using SharedClasses.Models;
 
 namespace SharedClasses.Events.Payments
 {
-    public class UpdateProcessingTimestampEvent
+    public class UpdateLatestProcessingTimestampEvent
     {
         public string[] Ids { get; set; }
         public DateTime Timestamp { get; set; }

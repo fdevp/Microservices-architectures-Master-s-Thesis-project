@@ -10,7 +10,7 @@ namespace APIGateway.Models
         public string Recipient { get; set; }
         public float Amount { get; set; }
         public DateTime StartTimestamp { get; set; }
-        public DateTime LastRepayTimestamp { get; set; }
+        public DateTime LatestProcessingTimestamp { get; set; }
         public TimeSpan Interval { get; set; }
     }
 }

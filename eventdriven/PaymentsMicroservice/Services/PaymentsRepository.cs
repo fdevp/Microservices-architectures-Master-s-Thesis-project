@@ -16,12 +16,11 @@ namespace PaymentsMicroservice.Repository
             return null;
         }
 
-        public Payment[] Get(int part, int totalParts)
+        public Payment[] Get(int part, int totalParts, DateTime dateTime)
         {
-            var datetime = DateTime.UtcNow;
             return payments.Values
-                .Where((element, index) => element.ProcessingTimestamp + element.Interval >= datetime)
                 .Where((element, index) => ((index % totalParts) + 1) == part)
+                .Where((element, index) => element.LatestProcessingTimestamp + element.Interval < dateTime)
                 .ToArray();
         }
 
@@ -33,10 +32,10 @@ namespace PaymentsMicroservice.Repository
             return payments.Values.Where(p => accountsSet.Contains(p.AccountId)).ToArray();
         }
 
-        public void UpdateProcessingTimestamp(IEnumerable<string> paymentsIds, DateTime processingTimestamp)
+        public void UpdateLatestProcessingTimestamp(IEnumerable<string> paymentsIds, DateTime processingTimestamp)
         {
             foreach (var id in paymentsIds)
-                payments[id].ProcessingTimestamp = processingTimestamp;
+                payments[id].LatestProcessingTimestamp = processingTimestamp;
         }
 
         public Payment Create(float amount, DateTime startTimestamp, TimeSpan interval, string accountId, string recipient)

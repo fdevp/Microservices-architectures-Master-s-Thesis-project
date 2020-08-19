@@ -125,12 +125,15 @@ namespace APIGateway.Controllers
                 {
                     await accountsWriteClient.BatchTransferAsync(new BatchTransferRequest { Transfers = { transfers } }, HttpContext.CreateHeadersWithFlowId());
                 }));
+            }
 
+            if (data.ProcessedPaymentsIds.Length > 0)
+            {
                 parallelTasks.Add(Task.Run(async () =>
-                {
-                    var request = new UpdateLatestProcessingTimestampRequest { Ids = { data.ProcessedPaymentsIds }, LatestProcessingTimestamp = data.ProcessingTimestamp.ToNullableTimestamp()};
-                    await paymentsWriteClient.UpdateLatestProcessingTimestampAsync(request, HttpContext.CreateHeadersWithFlowId());
-                }));
+                                {
+                                    var request = new UpdateLatestProcessingTimestampRequest { Ids = { data.ProcessedPaymentsIds }, LatestProcessingTimestamp = data.ProcessingTimestamp.ToNullableTimestamp() };
+                                    await paymentsWriteClient.UpdateLatestProcessingTimestampAsync(request, HttpContext.CreateHeadersWithFlowId());
+                                }));
             }
 
             if (instalments.Length > 0)
