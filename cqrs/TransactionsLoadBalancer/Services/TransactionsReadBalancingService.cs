@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Grpc.Core;
 using Microsoft.Extensions.Logging;
+using SharedClasses;
 using TransactionsReadMicroservice;
 using static TransactionsReadMicroservice.TransactionsRead;
 
@@ -23,7 +24,7 @@ namespace TransactionsLoadBalancer
         public override async Task<GetTransactionsResult> Get(GetTransactionsRequest request, ServerCallContext context)
         {
             var groupedIds = request.Ids.GroupBy(id => GetServiceIndex(id)).ToArray();
-            var tasks = groupedIds.Select(g => services[g.Key].GetAsync(new GetTransactionsRequest { FlowId = request.FlowId, Ids = { g } }).ResponseAsync);
+            var tasks = groupedIds.Select(g => services[g.Key].GetAsync(new GetTransactionsRequest { Ids = { g } }, context.RequestHeaders.SelectCustom()).ResponseAsync);
 
             var results = await Task.WhenAll(tasks);
             var transactions = results.SelectMany(r => r.Transactions);
@@ -32,7 +33,7 @@ namespace TransactionsLoadBalancer
 
         public override async Task<GetTransactionsResult> Filter(FilterTransactionsRequest request, ServerCallContext context)
         {
-            var tasks = services.Select(s => s.FilterAsync(request).ResponseAsync);
+            var tasks = services.Select(s => s.FilterAsync(request, context.RequestHeaders.SelectCustom()).ResponseAsync);
             var results = await Task.WhenAll(tasks);
             return new GetTransactionsResult { Transactions = { results.SelectMany(r => r.Transactions) } };
         }

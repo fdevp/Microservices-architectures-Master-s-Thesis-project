@@ -18,7 +18,7 @@ namespace SharedClasses.Messaging
 
         public EventsAwaiter(string serviceName, ILogger logger)
         {
-            timeout = TimeSpan.FromSeconds(15);
+            timeout = TimeSpan.FromSeconds(120);
             this.serviceName = serviceName;
             this.logger = logger;
         }

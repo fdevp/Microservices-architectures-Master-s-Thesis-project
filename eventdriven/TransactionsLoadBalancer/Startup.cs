@@ -10,6 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Serilog;
+using SharedClasses.Balancing;
 using SharedClasses.Messaging;
 using SharedClasses.Messaging.RabbitMq;
 
@@ -37,6 +38,7 @@ namespace TransactionsLoadBalancer
             var config = new RabbitMqConfig();
             Configuration.GetSection("RabbitMq").Bind(config);
             var factory = RabbitMqFactory.Create(config);
+            var loggerServiceProvider = services.BuildServiceProvider();
 
             var publishers = new Dictionary<string, IPublisher>();
             publishers.Add(Queues.APIGateway, factory.CreatePublisher(Queues.APIGateway));
@@ -44,7 +46,8 @@ namespace TransactionsLoadBalancer
             publishers.Add(Queues.Cards, factory.CreatePublisher(Queues.Cards));
             publishers.Add(Queues.Loans, factory.CreatePublisher(Queues.Loans));
             publishers.Add(Queues.Payments, factory.CreatePublisher(Queues.Payments));
-            services.AddSingleton(new PublishingRouter(publishers));
+            var publishingRouter = new PublishingRouter(publishers);
+            services.AddSingleton(publishingRouter);
 
             var balancingQueues = Configuration.GetSection("Queues").GetChildren().Select(v => v.Value).Distinct();
             services.AddSingleton(new BalancingQueues(balancingQueues));
@@ -52,14 +55,15 @@ namespace TransactionsLoadBalancer
                 publishers.Add(queue, factory.CreatePublisher(queue));
 
             var consumer = factory.CreateConsumer(Queues.Transactions);
-            var eventsAwaiter = new EventsAwaiter("TransactionsLoadBalancer");
+            var eventsAwaiter = new EventsAwaiter("TransactionsLoadBalancer", loggerServiceProvider.GetService<ILogger<EventsAwaiter>>());
             eventsAwaiter.BindConsumer(consumer);
             services.AddSingleton(eventsAwaiter);
+            services.AddSingleton<TransactionsBalancingService>();
 
             var servicesProvider = services.BuildServiceProvider();
             var logger = servicesProvider.GetService<ILogger<IConsumer>>();
             var transactionsService = servicesProvider.GetService<TransactionsBalancingService>();
-            var consumingRouter = ConsumingRouter<TransactionsBalancingService>.Create(transactionsService, "TransactionsLoadBalancer", logger);
+            var consumingRouter = ConsumingRouter<TransactionsBalancingService>.Create(transactionsService, publishingRouter, "TransactionsLoadBalancer", logger);
             consumingRouter.LinkConsumer(consumer);
         }
 

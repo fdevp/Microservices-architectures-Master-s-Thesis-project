@@ -83,7 +83,7 @@ namespace TransactionsMicroservice
             if (inputEvent.Subject == ReportSubject.Loans)
             {
                 var accountsIds = transactions.Select(t => t.Sender).ToArray();
-                var loans = await reportsDataFetcher.GetLoans(context.FlowId + "_l", accountsIds);
+                var loans = await reportsDataFetcher.GetLoans(context.FlowId, accountsIds);
                 var loansPayments = loans.Select(l => l.PaymentId).ToHashSet();
                 transactions = transactions.Where(t => loansPayments.Contains(t.PaymentId)).ToArray();
             }
@@ -129,9 +129,9 @@ namespace TransactionsMicroservice
 
             var parallelTasks = new List<Task>();
             parallelTasks.Add(Task.Run(() => data.Transactions = transactionsRepository.GetMany(filters, null)));
-            parallelTasks.Add(Task.Run(async () => data.Payments = await reportsDataFetcher.GetPayments(context.FlowId + "_p", accountsIds)));
-            parallelTasks.Add(Task.Run(async () => data.Loans = await reportsDataFetcher.GetLoans(context.FlowId + "_l", accountsIds)));
-            parallelTasks.Add(Task.Run(async () => data.Cards = await reportsDataFetcher.GetCards(context.FlowId + "_c", accountsIds)));
+            parallelTasks.Add(Task.Run(async () => data.Payments = await reportsDataFetcher.GetPayments(context.FlowId, accountsIds)));
+            parallelTasks.Add(Task.Run(async () => data.Loans = await reportsDataFetcher.GetLoans(context.FlowId, accountsIds)));
+            parallelTasks.Add(Task.Run(async () => data.Cards = await reportsDataFetcher.GetCards(context.FlowId, accountsIds)));
             await Task.WhenAll(parallelTasks);
 
             var portions = ReportGenerator.AggregateUserActivity(data);

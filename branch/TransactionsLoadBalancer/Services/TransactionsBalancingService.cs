@@ -2,8 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Microsoft.Extensions.Logging;
+using SharedClasses;
 using TransactionsMicroservice;
 using static TransactionsMicroservice.Transactions;
 
@@ -23,7 +25,7 @@ namespace TransactionsLoadBalancer
         public override async Task<GetTransactionsResult> Get(GetTransactionsRequest request, ServerCallContext context)
         {
             var groupedIds = request.Ids.GroupBy(id => GetServiceIndex(id)).ToArray();
-            var tasks = groupedIds.Select(g => services[g.Key].GetAsync(new GetTransactionsRequest { FlowId = request.FlowId, Ids = { g } }).ResponseAsync);
+            var tasks = groupedIds.Select(g => services[g.Key].GetAsync(new GetTransactionsRequest { Ids = { g } }, context.RequestHeaders.SelectCustom()).ResponseAsync);
 
             var results = await Task.WhenAll(tasks);
             var transactions = results.SelectMany(r => r.Transactions);
@@ -32,22 +34,22 @@ namespace TransactionsLoadBalancer
 
         public override async Task<CreateTransactionResult> Create(CreateTransactionRequest request, ServerCallContext context)
         {
-            var service = services[GetServiceIndex(request.FlowId)];
-            var result = await service.CreateAsync(request);
+            var service = services[GetServiceIndex(context.RequestHeaders.GetFlowId())];
+            var result = await service.CreateAsync(request, context.RequestHeaders.SelectCustom());
             return result;
         }
 
         public override async Task<BatchCreateTransactionResult> BatchCreate(BatchCreateTransactionRequest request, ServerCallContext context)
         {
             var groupedRequests = request.Requests.GroupBy(r => GetServiceIndex(Guid.NewGuid()));
-            var tasks = groupedRequests.Select(g => services[g.Key].BatchCreateAsync(new BatchCreateTransactionRequest { FlowId = request.FlowId, Requests = { g } }).ResponseAsync);
+            var tasks = groupedRequests.Select(g => services[g.Key].BatchCreateAsync(new BatchCreateTransactionRequest { Requests = { g } }, context.RequestHeaders.SelectCustom()).ResponseAsync);
             var results = await Task.WhenAll(tasks);
             return new BatchCreateTransactionResult { Transactions = { results.SelectMany(r => r.Transactions) } };
         }
 
         public override async Task<GetTransactionsResult> Filter(FilterTransactionsRequest request, ServerCallContext context)
         {
-            var tasks = services.Select(s => s.FilterAsync(request).ResponseAsync);
+            var tasks = services.Select(s => s.FilterAsync(request, context.RequestHeaders.SelectCustom()).ResponseAsync);
             var results = await Task.WhenAll(tasks);
             return new GetTransactionsResult { Transactions = { results.SelectMany(r => r.Transactions) } };
         }

@@ -39,6 +39,7 @@ namespace TransactionsMicroservice
             var config = new RabbitMqConfig();
             Configuration.GetSection("RabbitMq").Bind(config);
             var factory = RabbitMqFactory.Create(config);
+            services.AddSingleton(config);
 
             var publishers = new Dictionary<string, IPublisher>();
             publishers.Add(Queues.APIGateway, factory.CreatePublisher(Queues.APIGateway));
@@ -46,10 +47,11 @@ namespace TransactionsMicroservice
             publishers.Add(Queues.Cards, factory.CreatePublisher(Queues.Cards));
             publishers.Add(Queues.Loans, factory.CreatePublisher(Queues.Loans));
             publishers.Add(Queues.Payments, factory.CreatePublisher(Queues.Payments));
+            publishers.Add(Queues.Transactions, factory.CreatePublisher(Queues.Transactions));
             var publishingRouter = new PublishingRouter(publishers);
             services.AddSingleton(publishingRouter);
 
-            var consumer = factory.CreateConsumer(Queues.Transactions);
+            var consumer = factory.CreateConsumer(config.Queue);
             var eventsAwaiter = new EventsAwaiter("Transactions", loggerServicesProvier.GetService<ILogger<EventsAwaiter>>());
             eventsAwaiter.BindConsumer(consumer);
             services.AddSingleton(eventsAwaiter);
