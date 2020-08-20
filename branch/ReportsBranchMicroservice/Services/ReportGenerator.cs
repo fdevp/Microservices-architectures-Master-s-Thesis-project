@@ -10,36 +10,39 @@ namespace ReportsBranchMicroservice
     public static class ReportGenerator
     {
 
-        public static IEnumerable<OverallReportPortion> AggregateOverall(OverallReportData data)
+        public static string AggregateOverall(OverallReportData data)
         {
             var withTimestamps = data.Transactions.Select(t => new TransactionWithTimestamp { Timestamp = t.Timestamp.ToDateTime(), Transaction = t });
             var periods = GroupByPeriods(data.Granularity, withTimestamps);
             var ordered = periods.OrderBy(p => p.Key);
+
+            var portions = new List<OverallReportPortion>();
             foreach (var period in ordered)
             {
                 foreach (var aggregation in data.Aggregations)
                 {
                     var value = Aggregate(period, aggregation);
-                    yield return new OverallReportPortion { Period = period.Key, Value = value, Aggregation = aggregation };
+                    portions.Add(new OverallReportPortion { Period = period.Key, Value = value, Aggregation = aggregation });
                 }
             }
+
+            return ReportCsvSerializer.SerializerOverallReport(data, portions.ToArray());
         }
 
-        public static AggregateUserActivityResponse AggregateUserActivity(UserActivityRaportData data)
+        public static string AggregateUserActivity(UserActivityRaportData data)
         {
             var withTimestamps = data.Transactions.Select(t => new TransactionWithTimestamp { Timestamp = t.Timestamp.ToDateTime(), Transaction = t });
 
-            var aggregated = new AggregateUserActivityResponse();
-            aggregated.AccountsPortions.AddRange(data.Accounts.SelectMany(a => AggregateUserAccountsTransactions(a, withTimestamps, data.Granularity)));
+            var accountsPortion = data.Accounts.SelectMany(a => AggregateUserAccountsTransactions(a, withTimestamps, data.Granularity)).ToArray();
 
             var cardsTransactions = withTimestamps.Where(t => t.Transaction.CardId != null);
-            aggregated.CardsPortions.AddRange(data.Cards.SelectMany(c => AggregateUserCardTransactions(c, cardsTransactions, data.Granularity)));
+            var cardsPortion = data.Cards.SelectMany(c => AggregateUserCardTransactions(c, cardsTransactions, data.Granularity)).ToArray();
 
             var paymentsTransactions = withTimestamps.Where(t => t.Transaction.PaymentId != null);
-            aggregated.PaymentsPortions.AddRange(data.Payments.SelectMany(p => AggregateUserPaymentsTransactions(p, paymentsTransactions, data.Granularity)));
-            aggregated.LoansPortions.AddRange(data.Loans.SelectMany(l => AggregateUserLoansTransactions(l, paymentsTransactions, data.Granularity)));
+            var paymentsPortion = data.Payments.SelectMany(p => AggregateUserPaymentsTransactions(p, paymentsTransactions, data.Granularity)).ToArray();
+            var loansPortion = data.Loans.SelectMany(l => AggregateUserLoansTransactions(l, paymentsTransactions, data.Granularity)).ToArray();
 
-            return aggregated;
+            return ReportCsvSerializer.SerializerUserActivityReport(data, accountsPortion, cardsPortion, paymentsPortion, loansPortion);
         }
 
         private static IEnumerable<IGrouping<string, TransactionWithTimestamp>> GroupByPeriods(Granularity granularity, IEnumerable<TransactionWithTimestamp> transactions)

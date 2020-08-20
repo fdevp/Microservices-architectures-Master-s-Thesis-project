@@ -1,20 +1,19 @@
 using System;
 using System.Linq;
 using System.Text;
-using APIGateway.Models;
 using ReportsBranchMicroservice;
 
-namespace APIGateway.Reports
+namespace ReportsBranchMicroservice
 {
     public static class ReportCsvSerializer
     {
-        public static string SerializerOverallReport(Models.ReportSubject subject, DateTime? from, DateTime? to, ReportGranularity granularity, OverallReportPortion[] portions)
+        public static string SerializerOverallReport(OverallReportData data, OverallReportPortion[] portions)
         {
             var sb = new StringBuilder();
-            sb.AppendLine($"Raport całościowy dla; {subject}");
-            sb.AppendLine($"Zakres od; {from?.ToString() ?? "-"}");
-            sb.AppendLine($"Zakres do; {to?.ToString() ?? "-"}");
-            sb.AppendLine($"Granularność; {granularity}");
+            sb.AppendLine($"Raport całościowy dla; {data.Subject}");
+            sb.AppendLine($"Zakres od; {data.From?.ToString() ?? "-"}");
+            sb.AppendLine($"Zakres do; {data.To?.ToString() ?? "-"}");
+            sb.AppendLine($"Granularność; {data.Granularity}");
 
             var groupedPortions = portions.GroupBy(p => p.Period);
             var ordered = groupedPortions.OrderBy(p => p.Key);
@@ -29,18 +28,22 @@ namespace APIGateway.Reports
             return sb.ToString();
         }
 
-        public static string SerializerUserActivityReport(string userId, DateTime? from, DateTime? to, ReportGranularity granularity, AggregateUserActivityResponse portions)
+        public static string SerializerUserActivityReport(UserActivityRaportData data,
+            UserReportPortion[] accountsPortions,
+            UserReportPortion[] cardsPortions,
+            UserReportPortion[] paymentsPortions,
+            UserReportPortion[] loansPortions)
         {
             var sb = new StringBuilder();
-            sb.AppendLine($"Raport aktywności użytkownika; {userId}");
-            sb.AppendLine($"Zakres od; {from?.ToString() ?? "-"}");
-            sb.AppendLine($"Zakres do; {to?.ToString() ?? "-"}");
-            sb.AppendLine($"Granularność; {granularity}");
+            sb.AppendLine($"Raport aktywności użytkownika; {data.UserId}");
+            sb.AppendLine($"Zakres od; {data.From?.ToString() ?? "-"}");
+            sb.AppendLine($"Zakres do; {data.To?.ToString() ?? "-"}");
+            sb.AppendLine($"Granularność; {data.Granularity}");
 
-            sb.WriteAccountsData(portions.AccountsPortions.ToArray());
-            sb.WriteCardsData(portions.CardsPortions.ToArray());
-            sb.WritePaymentsData(portions.PaymentsPortions.ToArray());
-            sb.WriteLoansData(portions.LoansPortions.ToArray());
+            sb.WriteAccountsData(accountsPortions.ToArray());
+            sb.WriteCardsData(cardsPortions.ToArray());
+            sb.WritePaymentsData(paymentsPortions.ToArray());
+            sb.WriteLoansData(loansPortions.ToArray());
 
             return sb.ToString();
         }

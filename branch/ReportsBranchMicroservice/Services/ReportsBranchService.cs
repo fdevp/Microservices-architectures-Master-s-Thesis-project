@@ -53,8 +53,8 @@ namespace ReportsBranchMicroservice
                 Transactions = transactions
             };
 
-            var portions = ReportGenerator.AggregateOverall(data);
-            return new AggregateOverallResponse { Portions = { portions } };
+            var report = ReportGenerator.AggregateOverall(data);
+            return new AggregateOverallResponse { Report = report };
         }
 
         public override async Task<AggregateUserActivityResponse> AggregateUserActivity(AggregateUserActivityRequest request, ServerCallContext context)
@@ -82,7 +82,8 @@ namespace ReportsBranchMicroservice
             parallelTasks.Add(Task.Run(async () => data.Cards = await dataFetcher.GetCards(headers, accountsIds)));
             await Task.WhenAll(parallelTasks);
 
-            return ReportGenerator.AggregateUserActivity(data);
+            var report = ReportGenerator.AggregateUserActivity(data);
+            return new AggregateUserActivityResponse { Report = report };
         }
     }
 }

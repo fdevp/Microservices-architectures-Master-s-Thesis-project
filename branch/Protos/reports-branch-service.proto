@@ -19,10 +19,7 @@ message AggregateUserActivityRequest {
 }
 
 message AggregateUserActivityResponse {
-  repeated UserReportPortion accountsPortions = 1;
-  repeated UserReportPortion paymentsPortions = 2;
-  repeated UserReportPortion loansPortions = 3;
-  repeated UserReportPortion cardsPortions = 4;
+  string report = 1;
 }
 
 message AggregateOverallRequest {
@@ -34,5 +31,5 @@ message AggregateOverallRequest {
 }
 
 message AggregateOverallResponse {
-  repeated OverallReportPortion portions = 1;
+  string report = 1;
 }

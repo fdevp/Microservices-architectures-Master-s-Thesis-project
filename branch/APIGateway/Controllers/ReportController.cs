@@ -2,9 +2,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using APIGateway.Models;
-using APIGateway.Reports;
 using AutoMapper;
-using Google.Protobuf.WellKnownTypes;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using ReportsBranchMicroservice;
@@ -40,7 +38,7 @@ namespace APIGateway.Controllers
                 UserId = data.UserId,
             };
             var response = await reportsBranchClient.AggregateUserActivityAsync(request, HttpContext.CreateHeadersWithFlowId());
-            return ReportCsvSerializer.SerializerUserActivityReport(data.UserId, data.TimestampFrom, data.TimestampTo, data.Granularity, response);
+            return response.Report;
         }
 
         [HttpPost]
@@ -57,7 +55,7 @@ namespace APIGateway.Controllers
             };
 
             var response = await reportsBranchClient.AggregateOverallAsync(request, HttpContext.CreateHeadersWithFlowId());
-            return ReportCsvSerializer.SerializerOverallReport(data.Subject, data.TimestampFrom, data.TimestampTo, data.Granularity, response.Portions.ToArray());
+            return response.Report;
         }
     }
 }
