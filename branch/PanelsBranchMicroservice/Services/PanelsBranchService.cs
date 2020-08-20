@@ -8,6 +8,7 @@ using Google.Protobuf.Collections;
 using Grpc.Core;
 using Microsoft.Extensions.Logging;
 using PaymentsMicroservice;
+using SharedClasses;
 using TransactionsMicroservice;
 using static AccountsMicroservice.Accounts;
 using static CardsMicroservice.Cards;
@@ -51,7 +52,7 @@ namespace PanelsBranchMicroservice
             RepeatedField<Card> cards = new RepeatedField<Card>();
             RepeatedField<Transaction> transactions = new RepeatedField<Transaction>();
 
-            var accountsResponse = await accountsClient.GetUserAccountsAsync(new GetUserAccountsRequest { FlowId = request.FlowId, UserId = request.UserId });
+            var accountsResponse = await accountsClient.GetUserAccountsAsync(new GetUserAccountsRequest { UserId = request.UserId }, context.RequestHeaders.SelectCustom());
             var accountsIds = accountsResponse.Accounts.Select(a => a.Id).ToArray();
             accounts = accountsResponse.Accounts;
 
@@ -60,19 +61,21 @@ namespace PanelsBranchMicroservice
                 var parallelTasks = new List<Task>();
                 parallelTasks.Add(Task.Run(async () =>
                 {
-                    var transactionsResponse = await transactionsClient.FilterAsync(new FilterTransactionsRequest { FlowId = request.FlowId, Senders = { accountsIds }, Top = PanelTransactionsCount });
+                    var transactionsResponse = await transactionsClient.FilterAsync(
+                        new FilterTransactionsRequest { Senders = { accountsIds }, Top = PanelTransactionsCount }
+                    , context.RequestHeaders.SelectCustom());
                 }));
 
                 parallelTasks.Add(Task.Run(async () =>
                 {
-                    var paymentsAndLoans = await paymentsClient.GetByAccountsAsync(new GetPaymentsRequest { FlowId = request.FlowId, Ids = { accountsIds } });
+                    var paymentsAndLoans = await paymentsClient.GetByAccountsAsync(new GetPaymentsRequest { Ids = { accountsIds } }, context.RequestHeaders.SelectCustom());
                     loans = paymentsAndLoans.Loans;
                     payments = paymentsAndLoans.Payments;
                 }));
 
                 parallelTasks.Add(Task.Run(async () =>
                 {
-                    var cardsResponse = await cardsClient.GetByAccountsAsync(new GetCardsRequest { FlowId = request.FlowId, Ids = { accountsIds } });
+                    var cardsResponse = await cardsClient.GetByAccountsAsync(new GetCardsRequest { Ids = { accountsIds } }, context.RequestHeaders.SelectCustom());
                     cards = cardsResponse.Cards;
                 }));
 

@@ -1,8 +1,8 @@
 syntax = "proto3";
 import "common/transaction.proto";
 import "common/card.proto";
-import "common/empty.proto";
 import "common/block.proto";
+import "google/protobuf/empty.proto";
 
 option csharp_namespace = "CardsWriteMicroservice";
 
@@ -10,14 +10,13 @@ package CardsMicroservice;
 
 service CardsWrite {
   rpc Transfer (TransferRequest) returns (TransferResponse);
-  rpc Setup(SetupRequest) returns (Empty);
+  rpc Setup(SetupRequest) returns (google.protobuf.Empty);
 }
 
 message TransferRequest {
-  string flowId = 1;
-  string cardId = 2;
-  string recipient = 3;
-  float amount = 4;
+  string cardId = 1;
+  string recipient = 2;
+  float amount = 3;
 }
 
 message TransferResponse {

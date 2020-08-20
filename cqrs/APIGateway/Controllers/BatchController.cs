@@ -7,12 +7,14 @@ using AccountsWriteMicroservice;
 using APIGateway.Models;
 using AutoMapper;
 using Google.Protobuf.Collections;
+using Google.Protobuf.WellKnownTypes;
 using LoansReadMicroservice;
 using LoansWriteMicroservice;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using PaymentsReadMicroservice;
 using PaymentsWriteMicroservice;
+using SharedClasses;
 using UsersMicroservice;
 using static AccountsReadMicroservice.AccountsRead;
 using static AccountsWriteMicroservice.AccountsWrite;
@@ -59,7 +61,7 @@ namespace APIGateway.Controllers
         }
 
         [HttpGet]
-        public async Task<BatchData> Get([FromQuery(Name = "part")] int part, [FromQuery(Name = "total")] int total)
+        public async Task<BatchData> Get([FromQuery(Name = "part")] int part, [FromQuery(Name = "total")] int total, [FromQuery(Name = "timestamp")] DateTime timestamp)
         {
             var flowId = HttpContext.Items["flowId"].ToString();
 
@@ -67,20 +69,25 @@ namespace APIGateway.Controllers
             RepeatedField<Payment> payments = new RepeatedField<Payment>();
             RepeatedField<AccountBalance> balances = new RepeatedField<AccountBalance>();
 
-            var paymentsResponse = await paymentsReadClient.GetPartAsync(new GetPartRequest { FlowId = flowId, Part = part, TotalParts = total });
+            var paymentsResponse = await paymentsReadClient.GetPartAsync(new GetPartRequest
+            {
+                Part = part,
+                TotalParts = total,
+                Timestamp = timestamp.ToNullableTimestamp()
+            }, HttpContext.CreateHeadersWithFlowId());
             payments = paymentsResponse.Payments;
 
             var parallelTasks = new List<Task>();
             parallelTasks.Add(Task.Run(async () =>
             {
                 var paymentsIds = payments.Select(p => p.Id);
-                var loansResponse = await loansReadClient.GetByPaymentsAsync(new GetLoansRequest { FlowId = flowId, Ids = { paymentsIds } });
+                var loansResponse = await loansReadClient.GetByPaymentsAsync(new GetLoansRequest { Ids = { paymentsIds } }, HttpContext.CreateHeadersWithFlowId());
                 loans = loansResponse.Loans;
             }));
             parallelTasks.Add(Task.Run(async () =>
             {
                 var accountsIds = payments.Select(p => p.AccountId).Distinct();
-                var balancesResponse = await accountsReadClient.GetBalancesAsync(new GetBalancesRequest { FlowId = flowId, Ids = { accountsIds } });
+                var balancesResponse = await accountsReadClient.GetBalancesAsync(new GetBalancesRequest { Ids = { accountsIds } }, HttpContext.CreateHeadersWithFlowId());
                 balances = balancesResponse.Balances;
             }));
 
@@ -108,7 +115,7 @@ namespace APIGateway.Controllers
             {
                 parallelTasks.Add(Task.Run(async () =>
                 {
-                    await usersClient.BatchAddMessagesAsync(new BatchAddMessagesRequest { FlowId = flowId, Messages = { messages } });
+                    await usersClient.BatchAddMessagesAsync(new BatchAddMessagesRequest { Messages = { messages } }, HttpContext.CreateHeadersWithFlowId());
                 }));
             }
 
@@ -116,22 +123,24 @@ namespace APIGateway.Controllers
             {
                 parallelTasks.Add(Task.Run(async () =>
                 {
-                    await accountsWriteClient.BatchTransferAsync(new BatchTransferRequest { FlowId = flowId, Transfers = { transfers } });
+                    await accountsWriteClient.BatchTransferAsync(new BatchTransferRequest { Transfers = { transfers } }, HttpContext.CreateHeadersWithFlowId());
                 }));
+            }
 
+            if (data.ProcessedPaymentsIds.Length > 0)
+            {
                 parallelTasks.Add(Task.Run(async () =>
-                {
-                    var paymentIds = transfers.Select(t => t.PaymentId);
-                    var request = new UpdateRepayTimestampRequest { FlowId = flowId, Ids = { paymentIds }, RepayTimestamp = data.RepayTimestamp.Ticks };
-                    await paymentsWriteClient.UpdateRepayTimestampAsync(request);
-                }));
+                                {
+                                    var request = new UpdateLatestProcessingTimestampRequest { Ids = { data.ProcessedPaymentsIds }, LatestProcessingTimestamp = data.ProcessingTimestamp.ToNullableTimestamp() };
+                                    await paymentsWriteClient.UpdateLatestProcessingTimestampAsync(request, HttpContext.CreateHeadersWithFlowId());
+                                }));
             }
 
             if (instalments.Length > 0)
             {
                 parallelTasks.Add(Task.Run(async () =>
                 {
-                    await loansWriteClient.BatchRepayInstalmentsAsync(new BatchRepayInstalmentsRequest { FlowId = flowId, Ids = { instalments } });
+                    await loansWriteClient.BatchRepayInstalmentsAsync(new BatchRepayInstalmentsRequest { Ids = { instalments } }, HttpContext.CreateHeadersWithFlowId());
                 }));
             }
 

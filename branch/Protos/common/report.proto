@@ -12,7 +12,7 @@ enum Aggregation {
   AVG = 0;
   MIN = 1;
   MAX = 2;
-  MEDIAN = 3;
+  SUM = 3;
   COUNT = 4;
 }
 
@@ -21,4 +21,17 @@ enum ReportSubject {
   LOANS = 1;
   CARDS = 2;
   TRANSACTIONS = 3;
+}
+
+message OverallReportPortion {
+  string period = 1;
+  Aggregation aggregation = 2;
+  float value = 3;
+}
+
+message UserReportPortion {
+  string element = 1;
+  string period = 2;
+  float incomes = 3;
+  float debits = 4;
 }

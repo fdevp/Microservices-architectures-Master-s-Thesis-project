@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using LoansReadMicroservice;
 using Microsoft.Extensions.Logging;
@@ -43,7 +44,7 @@ namespace PaymentsReadMicroservice
 
         public override Task<GetPaymentsResult> GetPart(GetPartRequest request, ServerCallContext context)
         {
-            var payments = paymentsRepository.Get(request.Part, request.TotalParts);
+            var payments = paymentsRepository.Get(request.Part, request.TotalParts, request.Timestamp.ToDateTime());
             var mapped = payments.Where(payment => payment != null)
                 .Select(p => mapper.Map<Payment>(p))
                 .ToArray();
@@ -61,7 +62,7 @@ namespace PaymentsReadMicroservice
         public override async Task<AggregateOverallResponse> AggregateOverall(AggregateOverallRequest request, ServerCallContext context)
         {
             var paymentsIds = paymentsRepository.GetIds();
-            var transactionsResponse = await transactionsClient.FilterAsync(new FilterTransactionsRequest { Payments = { paymentsIds }, TimestampTo = request.TimestampTo, TimestampFrom = request.TimestampFrom });
+            var transactionsResponse = await transactionsClient.FilterAsync(new FilterTransactionsRequest { Payments = { paymentsIds }, TimestampTo = request.TimestampTo, TimestampFrom = request.TimestampFrom }, context.RequestHeaders.SelectCustom());
             var aggregations = Aggregations.CreateOverallCsvReport(new OverallReportData { Aggregations = request.Aggregations.ToArray(), Granularity = request.Granularity, Transactions = transactionsResponse.Transactions.ToArray() });
             return new AggregateOverallResponse { Portions = { aggregations } };
         }
@@ -70,20 +71,21 @@ namespace PaymentsReadMicroservice
         {
             var payments = paymentsRepository.GetByAccounts(request.AccountsIds);
             var paymentsIds = payments.Select(p => p.Id).ToArray();
-            var transactionsResponse = await transactionsClient.FilterAsync(new FilterTransactionsRequest { Payments = { paymentsIds }, TimestampFrom = request.TimestampFrom, TimestampTo = request.TimestampTo });
+            var transactionsResponse = await transactionsClient.FilterAsync(new FilterTransactionsRequest { Payments = { paymentsIds }, TimestampFrom = request.TimestampFrom, TimestampTo = request.TimestampTo }, context.RequestHeaders.SelectCustom());
             var transactions = transactionsResponse.Transactions.ToArray();
-            var aggregated = payments.SelectMany(p => AggregateUserTransactions(p, transactions.Where(t => t.PaymentId == p.Id).ToArray(), request.Granularity));
+            var aggregated = payments.SelectMany(p => AggregateUserTransactions(p, transactions, request.Granularity));
             return new AggregateUserActivityResponse { Portions = { aggregated } };
         }
 
-        private IEnumerable<UserReportPortion> AggregateUserTransactions(Repository.Payment payment, Transaction[] transactions, Granularity granularity)
+        private IEnumerable<UserReportPortion> AggregateUserTransactions(Models.Payment payment, Transaction[] allTransactions, Granularity granularity)
         {
-            var withTimestamps = transactions.Select(t => new TransactionWithTimestamp { Timestamp = new DateTime(t.Timestamp), Transaction = t });
+            var transactions = allTransactions.Where(t => t.PaymentId == payment.Id).ToArray();
+            var withTimestamps = transactions.Select(t => new TransactionWithTimestamp { Timestamp = t.Timestamp.ToDateTime(), Transaction = t });
             var portions = Aggregations.GroupByPeriods(granularity, withTimestamps);
             var ordered = portions.OrderBy(p => p.Key);
             foreach (var portion in ordered)
             {
-                var debits = portion.Where(p => p.Transaction.PaymentId == payment.Id).Sum(p => (float?)p.Transaction.Amount) ?? 0;
+                var debits = portion.Sum(p => (float?)p.Transaction.Amount) ?? 0;
                 yield return new UserReportPortion { Period = portion.Key, Debits = debits, Element = payment.Id };
             }
         }

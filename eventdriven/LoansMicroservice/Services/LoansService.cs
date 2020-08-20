@@ -64,8 +64,11 @@ namespace LoansMicroservice
         public Task BatchRepayInstalments(MessageContext context, BatchRepayInstalmentsEvent inputEvent)
         {
             var paymentsToFinish = RepayInstalments(inputEvent);
-            var cancelPaymentsEvent = new CancelPaymentsEvent { Ids = paymentsToFinish.ToArray() };
-            publishingRouter.Publish(Queues.Payments, cancelPaymentsEvent, context.FlowId);
+            if (paymentsToFinish.Any())
+            {
+                var cancelPaymentsEvent = new CancelPaymentsEvent { Ids = paymentsToFinish.ToArray() };
+                publishingRouter.Publish(Queues.Payments, cancelPaymentsEvent, context.FlowId);
+            }
             return Task.CompletedTask;
         }
 
@@ -77,7 +80,7 @@ namespace LoansMicroservice
         }
 
         [EventHandlingMethod(typeof(SetupAppendLoansEvent))]
-        public Task SetupAppend(MessageContext context, SetupLoansEvent inputEvent)
+        public Task SetupAppend(MessageContext context, SetupAppendLoansEvent inputEvent)
         {
             loansRepository.SetupAppend(inputEvent.Loans);
             return Task.CompletedTask;

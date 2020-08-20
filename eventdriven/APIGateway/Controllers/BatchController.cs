@@ -37,7 +37,7 @@ namespace APIGateway.Controllers
         }
 
         [HttpGet]
-        public async Task<BatchData> Get([FromQuery(Name = "part")] int part, [FromQuery(Name = "total")] int total)
+        public async Task<BatchData> Get([FromQuery(Name = "part")] int part, [FromQuery(Name = "total")] int total, [FromQuery(Name = "timestamp")] DateTime timestamp)
         {
             var flowId = HttpContext.Items["flowId"].ToString();
 
@@ -46,7 +46,7 @@ namespace APIGateway.Controllers
             AccountBalance[] balances = null;
 
             var paymentsFlowId = flowId + "_p";
-            var paymentsEvent = new GetPartPaymentsEvent { Part = part, TotalParts = total };
+            var paymentsEvent = new GetPartPaymentsEvent { Part = part, TotalParts = total, Timestamp = timestamp };
             var paymentsResponse = await eventsAwaiter.AwaitResponse<SelectedPaymentsEvent>(paymentsFlowId, () => publishingRouter.Publish(Queues.Payments, paymentsEvent, paymentsFlowId, Queues.APIGateway));
             payments = paymentsResponse.Payments;
 
@@ -93,10 +93,12 @@ namespace APIGateway.Controllers
             {
                 var transfersEvent = new BatchTransferEvent { Transfers = data.Transfers };
                 publishingRouter.Publish(Queues.Accounts, transfersEvent, flowId);
+            }
 
-                var paymentsIds = data.Transfers.Select(t => t.PaymentId);
-                var repayTimestampEvent = new UpdateRepayTimestampEvent { Ids = paymentsIds.ToArray(), Timestamp = data.RepayTimestamp };
-                publishingRouter.Publish(Queues.Payments, repayTimestampEvent, flowId);
+            if (data.ProcessedPaymentsIds.Length > 0)
+            {
+                var processingTimestampEvent = new UpdateLatestProcessingTimestampEvent { Ids = data.ProcessedPaymentsIds, Timestamp = data.ProcessingTimestamp };
+                publishingRouter.Publish(Queues.Payments, processingTimestampEvent, flowId);
             }
 
             var instalments = data.RepaidInstalmentsIds;

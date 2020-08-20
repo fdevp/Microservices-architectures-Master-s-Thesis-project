@@ -1,4 +1,6 @@
 syntax = "proto3";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/duration.proto";
 
 enum PaymentStatus {
   ACTIVE = 0;
@@ -8,10 +10,10 @@ enum PaymentStatus {
 message Payment {
   string id = 1;
   float amount = 2;
-  int64 startTimestamp = 3;
-  int64 lastRepayTimestamp = 4;
+  google.protobuf.Timestamp startTimestamp = 3;
+  google.protobuf.Timestamp latestProcessingTimestamp = 4;
   PaymentStatus status = 5;
-  int64 interval = 6;
+  google.protobuf.Duration interval = 6;
   string accountId = 7;
   string recipient = 8;
 }

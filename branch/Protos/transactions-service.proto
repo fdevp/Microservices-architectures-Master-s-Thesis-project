@@ -1,6 +1,7 @@
 syntax = "proto3";
 import "common/transaction.proto";
-import "common/empty.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
 
 option csharp_namespace = "TransactionsMicroservice";
 package TransactionsMicroservice;
@@ -10,23 +11,21 @@ service Transactions {
   rpc Filter(FilterTransactionsRequest) returns (GetTransactionsResult);
   rpc Create (CreateTransactionRequest) returns (CreateTransactionResult);
   rpc BatchCreate (BatchCreateTransactionRequest) returns (BatchCreateTransactionResult);
-  rpc Setup(SetupRequest) returns (Empty);
-  rpc SetupAppend(SetupRequest) returns (Empty);
+  rpc Setup(SetupRequest) returns (google.protobuf.Empty);
+  rpc SetupAppend(SetupRequest) returns (google.protobuf.Empty);
 }
 
 message GetTransactionsRequest {
-  string flowId = 1;
-  repeated string ids = 2;
+  repeated string ids = 1;
 }
 
 message FilterTransactionsRequest {
-  string flowId = 1;
-  repeated string recipients = 2;
-  repeated string senders = 3;
-  repeated string payments = 4;
-  repeated string cards = 5;
-  int64 timestampFrom = 6;
-  int64 timestampTo = 7;
+  repeated string recipients = 1;
+  repeated string senders = 2;
+  repeated string payments = 3;
+  repeated string cards = 4;
+  google.protobuf.Timestamp timestampFrom = 5;
+  google.protobuf.Timestamp timestampTo = 6;
   int32 top = 8;
 }
 
@@ -35,13 +34,12 @@ message GetTransactionsResult {
 }
 
 message CreateTransactionRequest {
-  string flowId = 1;
-  string title = 2;
-  float amount = 3;
-  string recipient = 4;
-  string sender = 5;
-  string paymentId = 6;
-  string cardId = 7;
+  string title = 1;
+  float amount = 2;
+  string recipient = 3;
+  string sender = 4;
+  string paymentId = 5;
+  string cardId = 6;
 }
 
 message CreateTransactionResult {
@@ -49,7 +47,6 @@ message CreateTransactionResult {
 }
 
 message BatchCreateTransactionRequest {
-  string flowId = 1;
   repeated CreateTransactionRequest requests = 2;
 }
 

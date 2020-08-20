@@ -3,8 +3,10 @@ using System.Threading.Tasks;
 using APIGateway.Models;
 using APIGateway.Reports;
 using AutoMapper;
+using Google.Protobuf.WellKnownTypes;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using SharedClasses;
 
 namespace APIGateway.Controllers
 {
@@ -28,9 +30,9 @@ namespace APIGateway.Controllers
         public async Task<string> UserActivity(UserActivityReportRequest request)
         {
             var flowId = HttpContext.Items["flowId"].ToString();
-            var granularity =  mapper.Map<Granularity>(request.Granularity);
-            var portions = await reportDataFetcher.GetUserActivityPortions(flowId, request.UserId, request.TimestampFrom, request.TimestampTo, granularity);
-            var csv = ReportGenerator.CreateUserActivityCsvReport(request.UserId, request.TimestampFrom, request.TimestampTo, request.Granularity, portions);
+            var granularity = mapper.Map<Granularity>(request.Granularity);
+            var portions = await reportDataFetcher.GetUserActivityPortions(HttpContext.CreateHeadersWithFlowId(), request.UserId, request.TimestampFrom.ToNullableTimestamp(), request.TimestampTo.ToNullableTimestamp(), granularity);
+            var csv = ReportCsvSerializer.SerializerUserActivityReport(request.UserId, request.TimestampFrom, request.TimestampTo, request.Granularity, portions);
             return csv;
         }
 
@@ -41,13 +43,14 @@ namespace APIGateway.Controllers
             var flowId = HttpContext.Items["flowId"].ToString();
             var cqrsRequest = new AggregateOverallRequest
             {
+                FlowId = flowId,
                 Granularity = mapper.Map<Granularity>(request.Granularity),
-                TimestampFrom = request.TimestampFrom.HasValue ? request.TimestampFrom.Value.Ticks : 0,
-                TimestampTo = request.TimestampTo.HasValue ? request.TimestampTo.Value.Ticks : 0,
+                TimestampFrom = request.TimestampFrom.ToNullableTimestamp(),
+                TimestampTo = request.TimestampTo.ToNullableTimestamp(),
                 Aggregations = { request.Aggregations.Select(a => mapper.Map<Aggregation>(a)) }
             };
-            var data = await reportDataFetcher.GetOverallReportPortions(cqrsRequest, request.Subject);
-            var csv = ReportGenerator.CreateOverallCsvReport(request.Subject,
+            var data = await reportDataFetcher.GetOverallReportPortions(cqrsRequest, HttpContext.CreateHeadersWithFlowId(), request.Subject);
+            var csv = ReportCsvSerializer.SerializerOverallReport(request.Subject,
               request.TimestampFrom,
               request.TimestampTo,
               request.Granularity,

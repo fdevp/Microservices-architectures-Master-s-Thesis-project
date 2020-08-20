@@ -1,10 +1,13 @@
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using APIGateway.Models;
 using AutoMapper;
 using BatchesBranchMicroservice;
+using Google.Protobuf.WellKnownTypes;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using SharedClasses;
 using static BatchesBranchMicroservice.BatchesBranch;
 
 namespace APIGateway.Controllers
@@ -25,11 +28,10 @@ namespace APIGateway.Controllers
         }
 
         [HttpGet]
-        public async Task<BatchData> Get([FromQuery(Name = "part")] int part, [FromQuery(Name = "total")] int total)
+        public async Task<BatchData> Get([FromQuery(Name = "part")] int part, [FromQuery(Name = "total")] int total, [FromQuery(Name = "timestamp")] DateTime timestamp)
         {
-            var request = new GetDataToProcessRequest { Part = part, TotalParts = total };
-            request.FlowId = HttpContext.Items["flowId"].ToString();
-            var response = await batchesBranchClient.GetAsync(request);
+            var request = new GetDataToProcessRequest { Part = part, TotalParts = total, Timestamp = timestamp.ToNullableTimestamp() };
+            var response = await batchesBranchClient.GetAsync(request, HttpContext.CreateHeadersWithFlowId());
 
             var balances = response.Balances.Select(b => mapper.Map<BalanceDTO>(b)).ToArray();
             var loans = response.Loans.Select(l => mapper.Map<LoanDTO>(l)).ToArray();
@@ -50,14 +52,14 @@ namespace APIGateway.Controllers
             var transfers = data.Transfers.Select(t => mapper.Map<Transfer>(t));
             var request = new ProcessBatchRequest
             {
-                FlowId = HttpContext.Items["flowId"].ToString(),
-                RepayTimestamp = data.RepayTimestamp.Ticks,
+                ProcessingTimestamp = data.ProcessingTimestamp.ToNullableTimestamp(),
+                ProcessedPaymentsIds = { data.ProcessedPaymentsIds },
                 Transfers = { transfers },
                 Messages = { messages },
                 RepaidInstalmentsIds = { data.RepaidInstalmentsIds }
             };
 
-            await batchesBranchClient.ProcessAsync(request);
+            await batchesBranchClient.ProcessAsync(request, HttpContext.CreateHeadersWithFlowId());
         }
     }
 }

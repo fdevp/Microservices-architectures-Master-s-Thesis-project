@@ -15,17 +15,20 @@ namespace PaymentsMicroservice.Repository
             return null;
         }
 
-        public Payment[] Get(int part, int totalParts)
+        public Payment[] Get(int part, int totalParts, DateTime dateTime)
         {
-            return payments.Values.Where((element, index) => ((index % totalParts) + 1) == part).ToArray();
+            return payments.Values
+                .Where((element, index) => ((index % totalParts) + 1) == part)
+                .Where((element, index) => element.LatestProcessingTimestamp + element.Interval <= dateTime)
+                .ToArray();    
         }
 
         public string[] GetIds() => payments.Values.Select(p => p.Id).ToArray();
 
-        public void UpdateLastRepayTimestamp(IEnumerable<string> paymentsIds, long repayTimestamp)
+        public void UpdateProcessingTimestamp(IEnumerable<string> paymentsIds, DateTime processingTimestamp)
         {
-            foreach(var id in paymentsIds)
-                payments[id].UpdateLastRepayTimestamp(repayTimestamp);
+            foreach (var id in paymentsIds)
+               payments[id].LatestProcessingTimestamp = processingTimestamp; 
         }
 
         public Payment[] GetByAccounts(IEnumerable<string> accountIds)
@@ -34,9 +37,19 @@ namespace PaymentsMicroservice.Repository
             return payments.Values.Where(p => accountsSet.Contains(p.AccountId)).ToArray();
         }
 
-        public Payment Create(float amount, long startTimestamp, long interval, string accountId, string recipient)
+        public Payment Create(float amount, DateTime startTimestamp, TimeSpan interval, string accountId, string recipient)
         {
-            var payment = new Repository.Payment(Guid.NewGuid().ToString(), amount, startTimestamp, 0, interval, PaymentStatus.ACTIVE, accountId, recipient);
+            var payment = new Repository.Payment
+            {
+                Id = Guid.NewGuid().ToString(),
+                Amount = amount,
+                StartTimestamp = startTimestamp,
+                LatestProcessingTimestamp = null,
+                Interval = interval,
+                Status = PaymentStatus.ACTIVE,
+                AccountId = accountId,
+                Recipient = recipient
+            };
             payments.Add(payment.Id, payment);
             return payment;
         }

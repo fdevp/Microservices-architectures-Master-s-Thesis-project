@@ -49,7 +49,7 @@ namespace LoansReadMicroservice
             configuration.GetSection("RabbitMq").Bind(config);
 
             var logger = services.BuildServiceProvider().GetService<ILogger<RabbitMqPublisher>>();
-            var rabbitMq = new RabbitMqChannelFactory().CreateReadChannel<Repository.Loan, string>(config, "LoansRead", logger);
+            var rabbitMq = new RabbitMqChannelFactory().CreateReadChannel<Models.Loan, string>(config, "LoansRead", logger);
 
             rabbitMq.Received += (sender, projection) =>
             {
@@ -83,7 +83,11 @@ namespace LoansReadMicroservice
 
         private Mapper CreateMapper()
         {
-            var config = new MapperConfiguration(cfg => cfg.CreateMap<Loan, Repository.Loan>().ReverseMap());
+            var config = new MapperConfiguration(cfg =>
+            {
+                cfg.AddGrpcConverters();
+                cfg.CreateMap<Loan, Models.Loan>().ReverseMap();
+            });
             return new Mapper(config);
         }
 
@@ -96,7 +100,7 @@ namespace LoansReadMicroservice
             httpClientHandler.ServerCertificateCustomValidationCallback =
                 HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
             var httpClient = new HttpClient(httpClientHandler);
-            
+
             var paymentsChannel = GrpcChannel.ForAddress(addresses.PaymentsRead, new GrpcChannelOptions { HttpClient = httpClient, MaxReceiveMessageSize = 500 * 1024 * 1024 });
             services.AddSingleton(new PaymentsReadClient(paymentsChannel));
 

@@ -68,7 +68,11 @@ namespace LoansWriteMicroservice
 
         private Mapper CreateMapper()
         {
-            var config = new MapperConfiguration(cfg => cfg.CreateMap<Loan, Repository.Loan>().ReverseMap());
+            var config = new MapperConfiguration(cfg =>
+            {
+                cfg.AddGrpcConverters();
+                cfg.CreateMap<Loan, Models.Loan>().ReverseMap();
+            });
             return new Mapper(config);
         }
 

@@ -36,7 +36,7 @@ namespace PaymentsMicroservice
         [EventHandlingMethod(typeof(GetPartPaymentsEvent))]
         public Task GetPart(MessageContext context, GetPartPaymentsEvent inputEvent)
         {
-            var payments = paymentsRepository.Get(inputEvent.Part, inputEvent.TotalParts);
+            var payments = paymentsRepository.Get(inputEvent.Part, inputEvent.TotalParts, inputEvent.Timestamp);
             publishingRouter.Publish(context.ReplyTo, new SelectedPaymentsEvent { Payments = payments }, context.FlowId);
             return Task.CompletedTask;
         }
@@ -50,11 +50,10 @@ namespace PaymentsMicroservice
         }
 
 
-        [EventHandlingMethod(typeof(UpdateRepayTimestampEvent))]
-        public Task UpdateRepayTimestamp(MessageContext context, UpdateRepayTimestampEvent inputEvent)
+        [EventHandlingMethod(typeof(UpdateLatestProcessingTimestampEvent))]
+        public Task UpdateLatestProcessingTimestamp(MessageContext context, UpdateLatestProcessingTimestampEvent inputEvent)
         {
-            foreach (var id in inputEvent.Ids)
-                paymentsRepository.UpdateLastRepayTimestamp(inputEvent.Ids, inputEvent.Timestamp);
+            paymentsRepository.UpdateLatestProcessingTimestamp(inputEvent.Ids, inputEvent.Timestamp);
             return Task.CompletedTask;
         }
 
@@ -92,7 +91,7 @@ namespace PaymentsMicroservice
         }
 
         [EventHandlingMethod(typeof(SetupAppendPaymentsEvent))]
-        public Task SetupAppend(MessageContext context, SetupPaymentsEvent inputEvent)
+        public Task SetupAppend(MessageContext context, SetupAppendPaymentsEvent inputEvent)
         {
             paymentsRepository.SetupAppend(inputEvent.Payments);
             return Task.CompletedTask;

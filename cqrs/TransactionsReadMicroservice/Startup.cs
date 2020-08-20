@@ -44,7 +44,7 @@ namespace TransactionsReadMicroservice
             configuration.GetSection("RabbitMq").Bind(config);
 
             var logger = services.BuildServiceProvider().GetService<ILogger<RabbitMqPublisher>>();
-            var rabbitMq = new RabbitMqChannelFactory().CreateReadChannel<Repository.Transaction, string>(config, "TransactionsRead", logger);
+            var rabbitMq = new RabbitMqChannelFactory().CreateReadChannel<Models.Transaction, string>(config, "TransactionsRead", logger);
 
             rabbitMq.Received += (sender, projection) =>
             {
@@ -78,7 +78,11 @@ namespace TransactionsReadMicroservice
 
         private Mapper CreateMapper()
         {
-            var config = new MapperConfiguration(cfg => cfg.CreateMap<Transaction, Repository.Transaction>().ReverseMap());
+            var config = new MapperConfiguration(cfg =>
+            {
+                cfg.AddGrpcConverters();
+                cfg.CreateMap<Transaction, Models.Transaction>().ReverseMap();
+            });
             return new Mapper(config);
         }
     }

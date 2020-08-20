@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Google.Protobuf;
 using Grpc.Core;
 using Microsoft.Extensions.Logging;
+using SharedClasses;
 
 namespace ReportsBranchMicroservice
 {
@@ -19,23 +20,24 @@ namespace ReportsBranchMicroservice
             this.dataFetcher = dataFetcher;
         }
 
-        public override async Task<GenerateReportResponse> GenerateOverallReport(GenerateOverallReportRequest request, ServerCallContext context)
+        public override async Task<AggregateOverallResponse> AggregateOverall(AggregateOverallRequest request, ServerCallContext context)
         {
+            var headers = context.RequestHeaders.SelectCustom();
             Transaction[] transactions;
 
             switch (request.Subject)
             {
                 case ReportSubject.Cards:
-                    transactions = await dataFetcher.GetCardsTransactions(request.FlowId, request.TimestampFrom, request.TimestampTo);
+                    transactions = await dataFetcher.GetCardsTransactions(headers, request.TimestampFrom, request.TimestampTo);
                     break;
                 case ReportSubject.Loans:
-                    transactions = await dataFetcher.GetLoansTransactions(request.FlowId, request.TimestampFrom, request.TimestampTo);
+                    transactions = await dataFetcher.GetLoansTransactions(headers, request.TimestampFrom, request.TimestampTo);
                     break;
                 case ReportSubject.Payments:
-                    transactions = await dataFetcher.GetPaymentsTransactions(request.FlowId, request.TimestampFrom, request.TimestampTo);
+                    transactions = await dataFetcher.GetPaymentsTransactions(headers, request.TimestampFrom, request.TimestampTo);
                     break;
                 case ReportSubject.Transactions:
-                    transactions = await dataFetcher.GetTransactions(request.FlowId, request.TimestampFrom, request.TimestampTo);
+                    transactions = await dataFetcher.GetTransactions(headers, request.TimestampFrom, request.TimestampTo);
                     break;
                 default:
                     throw new InvalidOperationException("Unknown subject of report.");
@@ -43,45 +45,45 @@ namespace ReportsBranchMicroservice
 
             var data = new OverallReportData
             {
-                From = GetDateTime(request.TimestampFrom),
-                To = GetDateTime(request.TimestampTo),
+                From = request.TimestampFrom.ToDateTime(),
+                To = request.TimestampTo.ToDateTime(),
                 Granularity = request.Granularity,
                 Subject = request.Subject,
                 Aggregations = request.Aggregations.ToArray(),
                 Transactions = transactions
             };
-            var csv = ReportGenerator.CreateOverallCsvReport(data);
-            return new GenerateReportResponse { FlowId = request.FlowId, Report = csv };
+
+            var report = ReportGenerator.AggregateOverall(data);
+            return new AggregateOverallResponse { Report = report };
         }
 
-        public override async Task<GenerateReportResponse> GenerateUserActivityReport(GenerateUserActivityReportRequest request, ServerCallContext context)
+        public override async Task<AggregateUserActivityResponse> AggregateUserActivity(AggregateUserActivityRequest request, ServerCallContext context)
         {
-            var accounts = await dataFetcher.GetAccounts(request.FlowId, request.UserId);
+            var headers = context.RequestHeaders.SelectCustom();
+            var accounts = await dataFetcher.GetAccounts(headers, request.UserId);
             var accountsIds = accounts.Select(a => a.Id).ToArray();
             var data = new UserActivityRaportData
             {
-                From = GetDateTime(request.TimestampFrom),
-                To = GetDateTime(request.TimestampTo),
+                From = request.TimestampFrom.ToDateTime(),
+                To = request.TimestampTo.ToDateTime(),
                 Granularity = request.Granularity,
                 Accounts = accounts,
                 UserId = request.UserId
             };
 
             var parallelTasks = new List<Task>();
-            parallelTasks.Add(Task.Run(async () => data.Transactions = await dataFetcher.GetAccountsTransactions(request.FlowId, accountsIds, request.TimestampFrom, request.TimestampTo)));
+            parallelTasks.Add(Task.Run(async () => data.Transactions = await dataFetcher.GetAccountsTransactions(headers, accountsIds, request.TimestampFrom, request.TimestampTo)));
             parallelTasks.Add(Task.Run(async () =>
             {
-                var paymentsAndLoans = await dataFetcher.GetPaymentsWithLoans(request.FlowId, accountsIds);
+                var paymentsAndLoans = await dataFetcher.GetPaymentsWithLoans(headers, accountsIds);
                 data.Payments = paymentsAndLoans.Payments;
                 data.Loans = paymentsAndLoans.Loans;
             }));
-            parallelTasks.Add(Task.Run(async () => data.Cards = await dataFetcher.GetCards(request.FlowId, accountsIds)));
+            parallelTasks.Add(Task.Run(async () => data.Cards = await dataFetcher.GetCards(headers, accountsIds)));
             await Task.WhenAll(parallelTasks);
 
-            var csv = ReportGenerator.CreateUserActivityCsvReport(data);
-            return new GenerateReportResponse { FlowId = request.FlowId, Report = csv };
+            var report = ReportGenerator.AggregateUserActivity(data);
+            return new AggregateUserActivityResponse { Report = report };
         }
-
-        private DateTime? GetDateTime(long ticks) => ticks > 0 ? new DateTime(ticks) : null as DateTime?;
     }
 }

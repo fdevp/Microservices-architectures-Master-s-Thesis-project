@@ -3,7 +3,9 @@ import "common/transaction.proto";
 import "common/balance.proto";
 import "common/account.proto";
 import "common/transfer.proto";
-import "common/empty.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+
 
 option csharp_namespace = "AccountsMicroservice";
 
@@ -15,19 +17,17 @@ service Accounts {
   rpc GetBalances (GetBalancesRequest) returns (GetBalancesResponse);
   rpc GetTransactions (GetTransactionsRequest) returns (GetTransactionsResponse);
   rpc Transfer (TransferRequest) returns (TransferResponse);
-  rpc BatchTransfer (BatchTransferRequest) returns (BatchTransferResponse);
-  rpc Setup(SetupRequest) returns (Empty);
-  rpc SetupAppend(SetupRequest) returns (Empty);
+  rpc BatchTransfer (BatchTransferRequest) returns (google.protobuf.Empty);
+  rpc Setup(SetupRequest) returns (google.protobuf.Empty);
+  rpc SetupAppend(SetupRequest) returns (google.protobuf.Empty);
 }
 
 message GetAccountsRequest {
-  string flowId = 1;
-  repeated string ids = 2;
+  repeated string ids = 1;
 }
 
 message GetUserAccountsRequest {
-  string flowId = 1;
-  string userId = 2;
+  string userId = 1;
 }
 
 message GetAccountsResponse {
@@ -35,8 +35,7 @@ message GetAccountsResponse {
 }
 
 message GetBalancesRequest {
-  string flowId = 1;
-  repeated string ids = 2;
+  repeated string ids = 1;
 }
 
 message GetBalancesResponse {
@@ -44,10 +43,9 @@ message GetBalancesResponse {
 }
 
 message GetTransactionsRequest {
-  string flowId = 1;
-  repeated string ids = 2;
-  int64 timestampFrom = 3;
-  int64 timestampTo = 4;
+  repeated string ids = 1;
+  google.protobuf.Timestamp timestampFrom = 2;
+  google.protobuf.Timestamp timestampTo = 3;
 }
 
 message GetTransactionsResponse {
@@ -55,8 +53,7 @@ message GetTransactionsResponse {
 }
 
 message TransferRequest {
-  string flowId = 1;
-  Transfer transfer = 2;
+  Transfer transfer = 1;
 }
 
 message TransferResponse {
@@ -64,12 +61,7 @@ message TransferResponse {
 }
 
 message BatchTransferRequest {
-  string flowId = 1;
-  repeated Transfer transfers = 2;
-}
-
-message BatchTransferResponse {
-  repeated Transaction transactions = 1;
+  repeated Transfer transfers = 1;
 }
 
 message SetupRequest {

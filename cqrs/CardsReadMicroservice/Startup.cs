@@ -13,6 +13,7 @@ using Microsoft.Extensions.Configuration;
 using SharedClasses.Messaging;
 using static TransactionsReadMicroservice.TransactionsRead;
 using Serilog;
+using Models;
 
 namespace CardsReadMicroservice
 {
@@ -85,8 +86,9 @@ namespace CardsReadMicroservice
         {
             var config = new MapperConfiguration(cfg =>
             {
-                cfg.CreateMap<Card, Repository.Card>().ReverseMap();
-                cfg.CreateMap<Block, Repository.Block>().ReverseMap();
+                cfg.AddGrpcConverters();
+                cfg.CreateMap<Card, Models.Card>().ReverseMap();
+                cfg.CreateMap<Block, Models.Block>().ReverseMap();
             });
             return new Mapper(config);
         }

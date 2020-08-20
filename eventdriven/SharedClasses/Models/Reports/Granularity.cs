@@ -1,6 +1,6 @@
 namespace SharedClasses.Models
 {
-    public enum Granularity
+    public enum ReportGranularity
     {
         Day,
         Week,

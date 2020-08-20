@@ -8,7 +8,7 @@ namespace TransactionsMicroservice.Reports
         public string UserId { get; set; }
         public DateTime? From { get; set; }
         public DateTime? To { get; set; }
-        public Granularity Granularity { get; set; }
+        public ReportGranularity Granularity { get; set; }
         public Account[] Accounts { get; set; }
         public Payment[] Payments { get; set; }
         public Transaction[] Transactions { get; set; }

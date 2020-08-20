@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Microsoft.Extensions.Logging;
+using SharedClasses;
 using TransactionsMicroservice.Repository;
 
 namespace TransactionsMicroservice
@@ -54,8 +56,8 @@ namespace TransactionsMicroservice
                 Payments = request.Payments.ToHashSet(),
                 Recipients = request.Recipients.ToHashSet(),
                 Senders = request.Senders.ToHashSet(),
-                TimestampFrom = request.TimestampFrom,
-                TimestampTo = request.TimestampTo,
+                TimestampFrom = request.TimestampFrom.ToNullableDateTime(),
+                TimestampTo = request.TimestampTo.ToNullableDateTime(),
             };
 
             var transactions = transactionsRepository.GetMany(filters, request.Top).Select(t => mapper.Map<Transaction>(t));

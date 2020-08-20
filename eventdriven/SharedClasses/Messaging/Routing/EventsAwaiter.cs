@@ -4,19 +4,23 @@ using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Jil;
+using Microsoft.Extensions.Logging;
+using SharedClasses.Events;
 
 namespace SharedClasses.Messaging
 {
     public class EventsAwaiter
     {
         private readonly string serviceName;
-        private ConcurrentDictionary<string, Action<string>> Callbacks = new ConcurrentDictionary<string, Action<string>>();
+        private readonly ILogger logger;
+        private ConcurrentDictionary<string, Action<MqMessage>> Callbacks = new ConcurrentDictionary<string, Action<MqMessage>>();
         private TimeSpan timeout;
 
-        public EventsAwaiter(string serviceName)
+        public EventsAwaiter(string serviceName, ILogger logger)
         {
             timeout = TimeSpan.FromSeconds(15);
             this.serviceName = serviceName;
+            this.logger = logger;
         }
 
         public Task<T> AwaitResponse<T>(string flowId)
@@ -24,16 +28,16 @@ namespace SharedClasses.Messaging
             var cancellationToken = new CancellationTokenSource(timeout).Token;
             var tcs = new TaskCompletionSource<T>();
 
-            this.Callbacks.TryAdd(flowId, (message) =>
-            {
-                var data = JSON.Deserialize<T>(message, Options.ISO8601Utc);
-                tcs.SetResult(data);
-            });
+            this.Callbacks.TryAdd(flowId, (message) => Handle(tcs, message));
 
             cancellationToken.Register(() =>
             {
                 this.Callbacks.TryRemove(flowId, out var removed);
-                tcs.TrySetCanceled();
+                if (!tcs.Task.IsCompleted)
+                {
+					tcs.TrySetCanceled();
+                    logger.LogInformation($"Service='{serviceName}' FlowId='{flowId}' Type='Timeout'");
+                }
             });
 
             return tcs.Task;
@@ -56,17 +60,22 @@ namespace SharedClasses.Messaging
             if (message.FlowId != null)
             {
                 this.Callbacks.TryRemove(message.FlowId, out var callback);
+                callback?.Invoke(message);
+            }
+        }
 
-                Console.WriteLine($"Service='{serviceName}' FlowId='{message.FlowId}' Method='{message.Type}' Type='Start'");
-                var stopwatch = Stopwatch.StartNew();
-                try
-                {
-                    callback?.Invoke(message.Data);
-                }
-                finally
-                {
-                    Console.WriteLine($"Service='{serviceName}' FlowId='{message.FlowId}' Method='{message.Type}' Type='End'");
-                }
+        private void Handle<T>(TaskCompletionSource<T> tcs, MqMessage message)
+        {
+            var data = JSON.Deserialize<T>(message.Data, Options.ISO8601Utc);
+            if (message.Type == typeof(ErrorEvent).Name)
+            {
+                logger.LogInformation($"Service='{serviceName}' FlowId='{message.FlowId}' Method='{message.Type}' Type='Error'");
+                var msg = (data as ErrorEvent)?.Message;
+                tcs.SetException(new Exception(msg));
+            }
+            else
+            {
+                tcs.SetResult(data);
             }
         }
     }

@@ -48,20 +48,7 @@ namespace TransactionsMicroservice.Reports
         {
             var payload = new GetCardsByAccountsEvent { AccountsIds = accountsIds };
             var response = await eventsAwaiter.AwaitResponse<SelectedCardsEvent>(flowId, () => publishingRouter.Publish(Queues.Cards, payload, flowId, Queues.Transactions));
-            return response.Cards; ;
-        }
-
-        public async Task<Transaction[]> GetTransactions(string flowId, string queue, DateTime? from, DateTime? to)
-        {
-            var payload = new GetTransactionsEvent { TimestampFrom = from, TimestampTo = to };
-            var response = await eventsAwaiter.AwaitResponse<SelectedTransactionsEvent>(flowId, () => publishingRouter.Publish(queue, payload, flowId, Queues.Transactions));
-            return response.Transactions;
-        }
-
-        public async Task<Transaction[]> GetTransactions(string flowId, FilterTransactionsEvent payload)
-        {
-            var response = await eventsAwaiter.AwaitResponse<SelectedTransactionsEvent>(flowId, () => publishingRouter.Publish(Queues.Transactions, payload, flowId, Queues.Transactions));
-            return response.Transactions;
+            return response.Cards;
         }
     }
 }

@@ -1,6 +1,6 @@
 ﻿using DataGenerator.DTO;
 using DataGenerator.Rnd;
-using Jil;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -52,7 +52,7 @@ namespace DataGenerator
                 }
             }
 
-            return JSON.Serialize(actions);
+            return JsonConvert.SerializeObject(actions);
         }
 
         public static string BusinessUserScenario(SetupAll setup, int clients, int actionsPerGroup, int minTransactions, int maxTransacitons)
@@ -106,7 +106,7 @@ namespace DataGenerator
                 }
             }
 
-            return JSON.Serialize(groupActions);
+            return JsonConvert.SerializeObject(groupActions);
         }
 
         public static string UserActivityReportsScenario(SetupAll setup, int minUserReports, int maxUserReports, DateTime minDate, DateTime maxDate)
@@ -132,7 +132,7 @@ namespace DataGenerator
                 }
             }
 
-            var shuffled = actions.OrderBy(elem => Guid.NewGuid()).Select(a => JSON.Serialize(a));
+            var shuffled = actions.OrderBy(elem => Guid.NewGuid()).Select(a => JsonConvert.SerializeObject(a));
             return string.Join("|", shuffled);
         }
 
@@ -162,7 +162,7 @@ namespace DataGenerator
                 actions.Add(new OverallReportScenarioElement { Aggregations = aggregations, Subject = subject, Granularity = granularity, TimestampFrom = from, TimestampTo = to });
             }
 
-            var shuffled = actions.OrderBy(elem => Guid.NewGuid()).Select(a => JSON.Serialize(a));
+            var shuffled = actions.OrderBy(elem => Guid.NewGuid()).Select(a => JsonConvert.SerializeObject(a));
             return string.Join("|", shuffled);
         }
 
