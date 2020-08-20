@@ -28,29 +28,33 @@ namespace TransactionsMicroservice.Reports
 
         public async Task<Account[]> GetAccounts(string flowId, string userId)
         {
+            var portionFlowId = flowId + "_a";
             var payload = new GetUserAccountsEvent { UserId = userId };
-            var response = await eventsAwaiter.AwaitResponse<SelectedAccountsEvent>(flowId, () => publishingRouter.Publish(Queues.Accounts, payload, flowId + "_a", config.Queue));
+            var response = await eventsAwaiter.AwaitResponse<SelectedAccountsEvent>(portionFlowId, () => publishingRouter.Publish(Queues.Accounts, payload, portionFlowId, config.Queue));
             return response.Accounts;
         }
 
         public async Task<Payment[]> GetPayments(string flowId, string[] accountsIds)
         {
+            var portionFlowId = flowId + "_p";
             var payload = new GetPaymentsByAccountsEvent { AccountsIds = accountsIds };
-            var response = await eventsAwaiter.AwaitResponse<SelectedPaymentsEvent>(flowId, () => publishingRouter.Publish(Queues.Payments, payload, flowId + "_p", config.Queue));
+            var response = await eventsAwaiter.AwaitResponse<SelectedPaymentsEvent>(portionFlowId, () => publishingRouter.Publish(Queues.Payments, payload, portionFlowId, config.Queue));
             return response.Payments;
         }
 
         public async Task<Loan[]> GetLoans(string flowId, string[] accountsIds)
         {
+            var portionFlowId = flowId + "_l";
             var payload = new GetLoansByAccountsEvent { AccountsIds = accountsIds };
-            var response = await eventsAwaiter.AwaitResponse<SelectedLoansEvent>(flowId, () => publishingRouter.Publish(Queues.Loans, payload, flowId + "_l", config.Queue));
+            var response = await eventsAwaiter.AwaitResponse<SelectedLoansEvent>(portionFlowId, () => publishingRouter.Publish(Queues.Loans, payload, portionFlowId, config.Queue));
             return response.Loans;
         }
 
         public async Task<Card[]> GetCards(string flowId, string[] accountsIds)
         {
+            var portionFlowId = flowId + "_c";
             var payload = new GetCardsByAccountsEvent { AccountsIds = accountsIds };
-            var response = await eventsAwaiter.AwaitResponse<SelectedCardsEvent>(flowId, () => publishingRouter.Publish(Queues.Cards, payload, flowId + "_c", config.Queue));
+            var response = await eventsAwaiter.AwaitResponse<SelectedCardsEvent>(portionFlowId, () => publishingRouter.Publish(Queues.Cards, payload, portionFlowId, config.Queue));
             return response.Cards;
         }
     }
