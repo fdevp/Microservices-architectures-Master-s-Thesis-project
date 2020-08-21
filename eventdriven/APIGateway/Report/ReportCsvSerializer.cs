@@ -16,7 +16,8 @@ namespace APIGateway.Reports
             sb.AppendLine($"Zakres do; {to?.ToString() ?? "-"}");
             sb.AppendLine($"Granularność; {granularity}");
 
-            var groupedPortions = portions.GroupBy(p => p.Period);
+            var mergedPortions = ReportPortionsMerger.MergePortions(portions);
+            var groupedPortions = mergedPortions.GroupBy(p => p.Period);
             var ordered = groupedPortions.OrderBy(p => p.Key);
 
             foreach (var portion in ordered)
@@ -37,10 +38,17 @@ namespace APIGateway.Reports
             sb.AppendLine($"Zakres do; {to?.ToString() ?? "-"}");
             sb.AppendLine($"Granularność; {granularity}");
 
-            sb.WriteAccountsData(portions.AccountsPortions.ToArray());
-            sb.WriteCardsData(portions.CardsPortions.ToArray());
-            sb.WritePaymentsData(portions.PaymentsPortions.ToArray());
-            sb.WriteLoansData(portions.LoansPortions.ToArray());
+            var mergedAccountsPortions = ReportPortionsMerger.MergePortions(portions.AccountsPortions).ToArray();
+            sb.WriteAccountsData(mergedAccountsPortions.ToArray());
+
+            var mergedCardsPortions = ReportPortionsMerger.MergePortions(portions.CardsPortions).ToArray();
+            sb.WriteCardsData(mergedCardsPortions.ToArray());
+
+            var mergedPaymentsPortions = ReportPortionsMerger.MergePortions(portions.PaymentsPortions).ToArray();
+            sb.WritePaymentsData(mergedPaymentsPortions.ToArray());
+
+            var mergedLoansPortions = ReportPortionsMerger.MergePortions(portions.LoansPortions).ToArray();
+            sb.WriteLoansData(mergedLoansPortions.ToArray());
 
             return sb.ToString();
         }
@@ -69,7 +77,8 @@ namespace APIGateway.Reports
 
         private static void WriteLoansData(this StringBuilder sb, UserReportPortion[] portions)
         {
-            var groups = portions.GroupBy(p => p.Element);
+            var ordered = portions.OrderBy(p => p.Period);
+            var groups = ordered.GroupBy(p => p.Element);
             foreach (var group in groups)
             {
                 sb.AppendLine($"Kredyt {group.Key}:");
@@ -83,7 +92,8 @@ namespace APIGateway.Reports
 
         private static void WriteCardsData(this StringBuilder sb, UserReportPortion[] portions)
         {
-            var groups = portions.GroupBy(p => p.Element);
+            var ordered = portions.OrderBy(p => p.Period);
+            var groups = ordered.GroupBy(p => p.Element);
             foreach (var group in groups)
             {
                 sb.AppendLine($"Karta {group.Key}:");
@@ -97,7 +107,8 @@ namespace APIGateway.Reports
 
         private static void WritePaymentsData(this StringBuilder sb, UserReportPortion[] portions)
         {
-            var groups = portions.GroupBy(p => p.Element);
+            var ordered = portions.OrderBy(p => p.Period);
+            var groups = ordered.GroupBy(p => p.Element);
             foreach (var group in groups)
             {
                 sb.AppendLine($"Płatność {group.Key}:");
@@ -111,8 +122,8 @@ namespace APIGateway.Reports
 
         private static void WriteAccountsData(this StringBuilder sb, UserReportPortion[] portions)
         {
-
-            var groups = portions.GroupBy(p => p.Element);
+            var ordered = portions.OrderBy(p => p.Period);
+            var groups = ordered.GroupBy(p => p.Element);
             foreach (var group in groups)
             {
                 sb.AppendLine($"Konto {group.Key}:");
