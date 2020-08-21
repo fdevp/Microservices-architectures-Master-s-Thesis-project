@@ -14,10 +14,9 @@ namespace ReportsBranchMicroservice
         {
             var withTimestamps = data.Transactions.Select(t => new TransactionWithTimestamp { Timestamp = t.Timestamp.ToDateTime(), Transaction = t });
             var periods = GroupByPeriods(data.Granularity, withTimestamps);
-            var ordered = periods.OrderBy(p => p.Key);
 
             var portions = new List<OverallReportPortion>();
-            foreach (var period in ordered)
+            foreach (var period in periods)
             {
                 foreach (var aggregation in data.Aggregations)
                 {
@@ -89,8 +88,7 @@ namespace ReportsBranchMicroservice
         {
             var transactions = allTransactions.Where(t => t.Transaction.CardId == card.Id);
             var portions = GroupByPeriods(granularity, transactions);
-            var ordered = portions.OrderBy(p => p.Key);
-            foreach (var portion in ordered)
+            foreach (var portion in portions)
             {
                 var debits = portion.Sum(p => (float?)p.Transaction.Amount) ?? 0;
                 yield return new UserReportPortion { Period = portion.Key, Debits = debits, Element = card.Number };
@@ -101,8 +99,7 @@ namespace ReportsBranchMicroservice
         {
             var transactions = allTransactions.Where(t => t.Transaction.Sender == account.Id || t.Transaction.Recipient == account.Id);
             var portions = GroupByPeriods(granularity, transactions);
-            var ordered = portions.OrderBy(p => p.Key);
-            foreach (var portion in ordered)
+            foreach (var portion in portions)
             {
                 var incomes = portion.Where(p => p.Transaction.Recipient == account.Id).Sum(p => (float?)p.Transaction.Amount) ?? 0;
                 var debits = portion.Where(p => p.Transaction.Sender == account.Id).Sum(p => (float?)p.Transaction.Amount) ?? 0;
@@ -114,8 +111,7 @@ namespace ReportsBranchMicroservice
         {
             var transactions = allTransactions.Where(p => p.Transaction.PaymentId == loan.PaymentId);
             var portions = GroupByPeriods(granularity, transactions);
-            var ordered = portions.OrderBy(p => p.Key);
-            foreach (var portion in ordered)
+            foreach (var portion in portions)
             {
                 var debits = portion.Sum(p => (float?)p.Transaction.Amount) ?? 0;
                 yield return new UserReportPortion { Period = portion.Key, Debits = debits, Element = loan.Id };
@@ -126,8 +122,7 @@ namespace ReportsBranchMicroservice
         {
             var transactions = allTransactions.Where(p => p.Transaction.PaymentId == payment.Id);
             var portions = GroupByPeriods(granularity, transactions);
-            var ordered = portions.OrderBy(p => p.Key);
-            foreach (var portion in ordered)
+            foreach (var portion in portions)
             {
                 var debits = portion.Sum(p => (float?)p.Transaction.Amount) ?? 0;
                 yield return new UserReportPortion { Period = portion.Key, Debits = debits, Element = payment.Id };

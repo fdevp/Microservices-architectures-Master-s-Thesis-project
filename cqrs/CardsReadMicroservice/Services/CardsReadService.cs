@@ -73,8 +73,7 @@ namespace CardsReadMicroservice
             var transactions = allTransactions.Where(t => t.CardId == card.Id).ToArray();
             var withTimestamps = transactions.Select(t => new TransactionWithTimestamp { Timestamp = t.Timestamp.ToDateTime(), Transaction = t });
             var portions = Aggregations.GroupByPeriods(granularity, withTimestamps);
-            var ordered = portions.OrderBy(p => p.Key);
-            foreach (var portion in ordered)
+            foreach (var portion in portions)
             {
                 var debits = portion.Sum(p => (float?)p.Transaction.Amount) ?? 0;
                 yield return new UserReportPortion { Period = portion.Key, Debits = debits, Element = card.Number };

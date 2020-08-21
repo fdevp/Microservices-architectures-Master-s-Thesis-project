@@ -10,8 +10,7 @@ namespace SharedClasses
         {
             var withTimestamps = data.Transactions.Select(t => new TransactionWithTimestamp { Timestamp = t.Timestamp.ToDateTime(), Transaction = t });
             var periods = GroupByPeriods(data.Granularity, withTimestamps);
-            var ordered = periods.OrderBy(p => p.Key);
-            foreach (var period in ordered)
+            foreach (var period in periods)
             {
                 foreach (var aggregation in data.Aggregations)
                 {

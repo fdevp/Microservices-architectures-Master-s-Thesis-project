@@ -68,7 +68,8 @@ namespace APIGateway.Reports
 
         private static void WriteLoansData(this StringBuilder sb, UserReportPortion[] portions)
         {
-            var groups = portions.GroupBy(p => p.Element);
+            var ordered = portions.OrderBy(p => p.Period);
+            var groups = ordered.GroupBy(p => p.Element);
             foreach (var group in groups)
             {
                 sb.AppendLine($"Kredyt {group.Key}:");
@@ -82,7 +83,8 @@ namespace APIGateway.Reports
 
         private static void WriteCardsData(this StringBuilder sb, UserReportPortion[] portions)
         {
-            var groups = portions.GroupBy(p => p.Element);
+            var ordered = portions.OrderBy(p => p.Period);
+            var groups = ordered.GroupBy(p => p.Element);
             foreach (var group in groups)
             {
                 sb.AppendLine($"Karta {group.Key}:");
@@ -96,7 +98,8 @@ namespace APIGateway.Reports
 
         private static void WritePaymentsData(this StringBuilder sb, UserReportPortion[] portions)
         {
-            var groups = portions.GroupBy(p => p.Element);
+            var ordered = portions.OrderBy(p => p.Period);
+            var groups = ordered.GroupBy(p => p.Element);
             foreach (var group in groups)
             {
                 sb.AppendLine($"Płatność {group.Key}:");
@@ -110,8 +113,8 @@ namespace APIGateway.Reports
 
         private static void WriteAccountsData(this StringBuilder sb, UserReportPortion[] portions)
         {
-
-            var groups = portions.GroupBy(p => p.Element);
+            var ordered = portions.OrderBy(p => p.Period);
+            var groups = ordered.GroupBy(p => p.Element);
             foreach (var group in groups)
             {
                 sb.AppendLine($"Konto {group.Key}:");
