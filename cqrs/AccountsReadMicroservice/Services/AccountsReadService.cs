@@ -75,8 +75,7 @@ namespace AccountsReadMicroservice
             var transactions = allTransactions.Where(t => t.Sender == account.Id || t.Recipient == account.Id);
             var withTimestamps = transactions.Select(t => new TransactionWithTimestamp { Timestamp = t.Timestamp.ToDateTime(), Transaction = t });
             var portions = Aggregations.GroupByPeriods(granularity, withTimestamps);
-            var ordered = portions.OrderBy(p => p.Key);
-            foreach (var portion in ordered)
+            foreach (var portion in portions)
             {
                 var incomes = portion.Where(p => p.Transaction.Recipient == account.Id).Sum(p => (float?)p.Transaction.Amount) ?? 0;
                 var debits = portion.Where(p => p.Transaction.Sender == account.Id).Sum(p => (float?)p.Transaction.Amount) ?? 0;
