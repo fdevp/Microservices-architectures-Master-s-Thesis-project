@@ -2,6 +2,7 @@ syntax = "proto3";
 import "common/balance.proto";
 import "common/account.proto";
 import "common/report.proto";
+import "google/protobuf/timestamp.proto";
 
 option csharp_namespace = "AccountsReadMicroservice";
 
@@ -15,13 +16,11 @@ service AccountsRead {
 }
 
 message GetAccountsRequest {
-  string flowId = 1;
-  repeated string ids = 2;
+  repeated string ids = 1;
 }
 
 message GetUserAccountsRequest {
-  string flowId = 1;
-  string userId = 2;
+  string userId = 1;
 }
 
 message GetAccountsResponse {
@@ -29,8 +28,7 @@ message GetAccountsResponse {
 }
 
 message GetBalancesRequest {
-  string flowId = 1;
-  repeated string ids = 2;
+  repeated string ids = 1;
 }
 
 message GetBalancesResponse {
@@ -38,9 +36,8 @@ message GetBalancesResponse {
 }
 
 message AggregateUserActivityRequest {
-  string flowId = 1;
-  string userId = 2;
-  int64 timestampFrom = 3;
-  int64 timestampTo = 4;
-  Granularity granularity = 5;
+  string userId = 1;
+  google.protobuf.Timestamp timestampFrom = 2;
+  google.protobuf.Timestamp timestampTo = 3;
+  Granularity granularity = 4;
 }

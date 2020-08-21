@@ -22,17 +22,17 @@ namespace DataGenerator.Generators
             var totalPaymentsCount = activePayments.Count() + loansAndPayments.Count();
             var interval = (maxDate - minDate) / totalPaymentsCount;
             var date = minDate;
-            foreach(var payment in activePayments)
+            foreach (var payment in activePayments)
             {
-                payment.LastRepayTimestamp = date;
-                payment.StartTimestamp = date - payment.Interval;
+                payment.LatestProcessingTimestamp = date - payment.Interval;
+                payment.StartTimestamp = date - 2 * payment.Interval;
                 date += interval;
             }
-            
-            foreach(var pair in loansAndPayments)
+
+            foreach (var pair in loansAndPayments)
             {
-                pair.payment.LastRepayTimestamp = date;
-                pair.payment.StartTimestamp = date - ((pair.loan.PaidAmount / pair.loan.TotalAmount) * pair.loan.Instalments) * pair.payment.Interval;
+                pair.payment.LatestProcessingTimestamp = date - pair.payment.Interval;
+                pair.payment.StartTimestamp = date - ((pair.loan.PaidAmount / pair.loan.TotalAmount) * pair.loan.Instalments) * pair.payment.Interval - pair.payment.Interval;
                 date += interval;
             }
 

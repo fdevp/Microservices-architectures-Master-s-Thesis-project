@@ -4,8 +4,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using CardsWriteMicroservice.Repository;
+using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Microsoft.Extensions.Logging;
+using Models;
+using SharedClasses;
 using SharedClasses.Messaging;
 using static AccountsWriteMicroservice.AccountsWrite;
 
@@ -45,24 +48,20 @@ namespace CardsWriteMicroservice
                 Amount = request.Amount,
                 Title = title
             };
-            var transferRequest = new AccountsWriteMicroservice.TransferRequest
-            {
-                FlowId = request.FlowId,
-                Transfer = transfer,
-            };
+            var transferRequest = new AccountsWriteMicroservice.TransferRequest { Transfer = transfer, };
 
-            var transferResponse = await accountsClient.TransferAsync(transferRequest);
+            var transferResponse = await accountsClient.TransferAsync(transferRequest, context.RequestHeaders.SelectCustom());
             var block = cardsRepository.CreateBlock(card.Id, transferResponse.Transaction.Id, blockRequestTime);
             var upsert = new CardsUpsert { Block = block };
-            projectionChannel.Publish(request.FlowId.ToString(), new DataProjection<CardsUpsert, string> { Upsert = new[] { upsert } });
+            projectionChannel.Publish(context.RequestHeaders.GetFlowId(), new DataProjection<CardsUpsert, string> { Upsert = new[] { upsert } });
 
             return new TransferResponse { Transaction = transferResponse.Transaction };
         }
 
         public override Task<Empty> Setup(SetupRequest request, ServerCallContext context)
         {
-            var cards = request.Cards.Select(c => mapper.Map<Repository.Card>(c));
-            var blocks = request.Blocks.Select(b => mapper.Map<Repository.Block>(b));
+            var cards = request.Cards.Select(c => mapper.Map<Models.Card>(c));
+            var blocks = request.Blocks.Select(b => mapper.Map<Models.Block>(b));
             cardsRepository.Setup(cards, blocks);
 
             var upsert = cards.Select(c => new CardsUpsert { Card = c });

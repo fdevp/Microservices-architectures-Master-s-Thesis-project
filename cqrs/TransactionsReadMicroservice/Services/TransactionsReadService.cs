@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Microsoft.Extensions.Logging;
 using SharedClasses;
@@ -40,8 +41,8 @@ namespace TransactionsReadMicroservice
                 Payments = request.Payments.ToHashSet(),
                 Recipients = request.Recipients.ToHashSet(),
                 Senders = request.Senders.ToHashSet(),
-                TimestampFrom = request.TimestampFrom,
-                TimestampTo = request.TimestampTo,
+                TimestampFrom = request.TimestampFrom.ToNullableDateTime(),
+                TimestampTo = request.TimestampTo.ToNullableDateTime(),
             };
 
             var transactions = transactionsRepository.GetMany(filters, request.Top).Select(t => mapper.Map<Transaction>(t));
@@ -50,7 +51,7 @@ namespace TransactionsReadMicroservice
 
         public override Task<AggregateOverallResponse> AggregateOverall(AggregateOverallRequest request, Grpc.Core.ServerCallContext context)
         {
-            var filters = new Filters { TimestampFrom = request.TimestampFrom, TimestampTo = request.TimestampTo };
+            var filters = new Filters { TimestampFrom = request.TimestampFrom.ToDateTime(), TimestampTo = request.TimestampTo.ToDateTime() };
             var transactions = transactionsRepository.GetMany(filters, 0).Select(t => mapper.Map<Transaction>(t)).ToArray();
             var aggregations = Aggregations.CreateOverallCsvReport(new OverallReportData { Aggregations = request.Aggregations.ToArray(), Granularity = request.Granularity, Transactions = transactions });
             return Task.FromResult(new AggregateOverallResponse { Portions = { aggregations } });

@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using LoansWriteMicroservice.Repository;
 using Microsoft.Extensions.Logging;
 using PaymentsWriteMicroservice;
+using SharedClasses;
 using SharedClasses.Messaging;
 using static PaymentsWriteMicroservice.PaymentsWrite;
 
@@ -31,40 +33,43 @@ namespace LoansWriteMicroservice
 
         public override async Task<Empty> BatchRepayInstalments(BatchRepayInstalmentsRequest request, ServerCallContext context)
         {
-            var paymentsToFinish = new List<string>();
-            foreach (var id in request.Ids)
+            var paymentsToFinish = RepayInstalments(request);
+
+            if (paymentsToFinish.Any())
             {
-                var totalAmountPaid = loansRepository.RepayInstalment(id);
-                if (totalAmountPaid)
-                    paymentsToFinish.Add(loansRepository.Get(id).PaymentId);
+                var cancelPaymentsRequest = new CancelPaymentsRequest { Ids = { paymentsToFinish } };
+                await paymentsClient.CancelAsync(cancelPaymentsRequest, context.RequestHeaders.SelectCustom());
             }
 
-            var cancelPaymentsRequest = new CancelPaymentsRequest
-            {
-                FlowId = request.FlowId,
-                Ids = { paymentsToFinish }
-            };
-            await paymentsClient.CancelAsync(cancelPaymentsRequest);
-
             var repaidInstalments = request.Ids.Select(id => loansRepository.Get(id)).ToArray();
-            projectionChannel.Publish(request.FlowId.ToString(), new DataProjection<Repository.Loan, string> { Upsert = repaidInstalments });
+            projectionChannel.Publish(context.RequestHeaders.GetFlowId(), new DataProjection<Models.Loan, string> { Upsert = repaidInstalments });
             return new Empty();
         }
 
         public override Task<Empty> Setup(SetupRequest request, ServerCallContext context)
         {
-            var loans = request.Loans.Select(l => mapper.Map<Repository.Loan>(l));
+            var loans = request.Loans.Select(l => mapper.Map<Models.Loan>(l));
             loansRepository.Setup(loans);
-            projectionChannel.Publish(null, new DataProjection<Repository.Loan, string> { Upsert = loans.ToArray() });
+            projectionChannel.Publish(null, new DataProjection<Models.Loan, string> { Upsert = loans.ToArray() });
             return Task.FromResult(new Empty());
         }
 
         public override Task<Empty> SetupAppend(SetupRequest request, ServerCallContext context)
         {
-            var loans = request.Loans.Select(l => mapper.Map<Repository.Loan>(l));
+            var loans = request.Loans.Select(l => mapper.Map<Models.Loan>(l));
             loansRepository.SetupAppend(loans);
-            projectionChannel.Publish(null, new DataProjection<Repository.Loan, string> { Upsert = loans.ToArray() });
+            projectionChannel.Publish(null, new DataProjection<Models.Loan, string> { Upsert = loans.ToArray() });
             return Task.FromResult(new Empty());
+        }
+
+        private IEnumerable<string> RepayInstalments(BatchRepayInstalmentsRequest request)
+        {
+            foreach (var id in request.Ids)
+            {
+                var totalAmountPaid = loansRepository.RepayInstalment(id);
+                if (totalAmountPaid)
+                    yield return loansRepository.Get(id).PaymentId;
+            }
         }
     }
 }

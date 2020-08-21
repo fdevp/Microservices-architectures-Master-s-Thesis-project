@@ -1,6 +1,8 @@
-﻿using System.Net.Http;
+﻿using System;
+using System.Net.Http;
 using AccountsMicroservice.Repository;
 using AutoMapper;
+using Google.Protobuf.WellKnownTypes;
 using Grpc.Net.Client;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -65,7 +67,11 @@ namespace AccountsMicroservice
 
         private Mapper CreateMapper()
         {
-            var config = new MapperConfiguration(cfg => cfg.CreateMap<Account, Repository.Account>().ReverseMap());
+            var config = new MapperConfiguration(cfg =>
+            {
+                cfg.AddGrpcConverters();
+                cfg.CreateMap<Account, Repository.Account>().ReverseMap();
+            });
             return new Mapper(config);
         }
 

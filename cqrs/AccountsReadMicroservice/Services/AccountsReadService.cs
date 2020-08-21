@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AccountsReadMicroservice.Repository;
 using AutoMapper;
+using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Microsoft.Extensions.Logging;
 using SharedClasses;
@@ -62,19 +63,19 @@ namespace AccountsReadMicroservice
                 Recipients = { accountsIds },
                 TimestampFrom = request.TimestampFrom,
                 TimestampTo = request.TimestampTo
-            });
+            }, context.RequestHeaders.SelectCustom());
             var transactions = transactionsResponse.Transactions.ToArray();
             var aggregated = accounts.SelectMany(a => AggregateUserTransactions(a, transactions, request.Granularity));
 
             return new AggregateUserActivityResponse { Portions = { aggregated } };
         }
 
-        private IEnumerable<UserReportPortion> AggregateUserTransactions(Repository.Account account, Transaction[] transactions, Granularity granularity)
+        private IEnumerable<UserReportPortion> AggregateUserTransactions(Models.Account account, Transaction[] allTransactions, Granularity granularity)
         {
-            var withTimestamps = transactions.Select(t => new TransactionWithTimestamp { Timestamp = new DateTime(t.Timestamp), Transaction = t });
+            var transactions = allTransactions.Where(t => t.Sender == account.Id || t.Recipient == account.Id);
+            var withTimestamps = transactions.Select(t => new TransactionWithTimestamp { Timestamp = t.Timestamp.ToDateTime(), Transaction = t });
             var portions = Aggregations.GroupByPeriods(granularity, withTimestamps);
-            var ordered = portions.OrderBy(p => p.Key);
-            foreach (var portion in ordered)
+            foreach (var portion in portions)
             {
                 var incomes = portion.Where(p => p.Transaction.Recipient == account.Id).Sum(p => (float?)p.Transaction.Amount) ?? 0;
                 var debits = portion.Where(p => p.Transaction.Sender == account.Id).Sum(p => (float?)p.Transaction.Amount) ?? 0;

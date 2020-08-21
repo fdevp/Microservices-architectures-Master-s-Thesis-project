@@ -1,6 +1,7 @@
 syntax = "proto3";
 import "common/transaction.proto";
 import "common/report.proto";
+import "google/protobuf/timestamp.proto";
 
 option csharp_namespace = "TransactionsReadMicroservice";
 package TransactionsMicroservice;
@@ -12,19 +13,17 @@ service TransactionsRead {
 }
 
 message GetTransactionsRequest {
-  string flowId = 1;
-  repeated string ids = 2;
+  repeated string ids = 1;
 }
 
 message FilterTransactionsRequest {
-  string flowId = 1;
-  repeated string recipients = 2;
-  repeated string senders = 3;
-  repeated string payments = 4;
-  repeated string cards = 5;
-  int64 timestampFrom = 6;
-  int64 timestampTo = 7;
-  int32 top = 8;
+  repeated string recipients = 1;
+  repeated string senders = 2;
+  repeated string payments = 3;
+  repeated string cards = 4;
+  google.protobuf.Timestamp timestampFrom = 5;
+  google.protobuf.Timestamp timestampTo = 6;
+  int32 top = 7;
 }
 
 message GetTransactionsResult {

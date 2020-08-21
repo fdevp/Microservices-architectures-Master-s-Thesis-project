@@ -1,14 +1,10 @@
-using System;
 using System.Net.Http;
-using AccountsMicroservice;
 using APIGateway.Middlewares;
 using APIGateway.Models;
 using APIGateway.Models.Setup;
 using AutoMapper;
-using CardsMicroservice;
 using Google.Protobuf.Collections;
 using Grpc.Net.Client;
-using LoansMicroservice;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -16,7 +12,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using PanelsBranchMicroservice;
-using PaymentsMicroservice;
 using SharedClasses;
 using UsersMicroservice;
 using static AccountsMicroservice.Accounts;
@@ -80,10 +75,8 @@ namespace APIGateway
                 cfg.ForAllPropertyMaps(
                     map => map.DestinationType.IsGenericType && map.DestinationType.GetGenericTypeDefinition() == typeof(RepeatedField<>),
                     (map, options) => options.UseDestinationValue());
-                cfg.CreateMap<DateTime, long>().ConvertUsing(new DateTimeTypeConverter());
-                cfg.CreateMap<long, DateTime>().ConvertUsing(new DateTimeTypeConverterReverse());
-                cfg.CreateMap<TimeSpan, long>().ConvertUsing(new TimeSpanTypeConverter());
-                cfg.CreateMap<long, TimeSpan>().ConvertUsing(new TimeSpanTypeConverterReverse());
+
+                cfg.AddGrpcConverters();
 
                 cfg.CreateMap<Transaction, TransactionDTO>().ReverseMap()
                     .ForMember(dest => dest.PaymentId, opt => opt.MapFrom(src => src.PaymentId == null ? "" : src.PaymentId))

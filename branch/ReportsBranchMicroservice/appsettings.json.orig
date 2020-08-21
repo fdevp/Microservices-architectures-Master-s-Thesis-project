@@ -1,0 +1,31 @@
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft": "Warning",
+      "Microsoft.Hosting.Lifetime": "Information"
+    }
+  },
+  "AllowedHosts": "*",
+  "Kestrel": {
+    "EndpointDefaults": {
+      "Protocols": "Http2"
+    },
+    "Endpoints": {
+      "HttpsDefaultCert": {
+        "Url": "https://*:5000"
+      }
+    }
+  },
+  "Addresses": {
+    "Payments": "https://localhost:5013",
+    "Transactions": "https://localhost:5001"
+<<<<<<< HEAD
+=======
+  },
+  "FailureSettings": {
+    "ComponentNumber": 7,
+    "ComponentsCount": 9
+>>>>>>> master
+  }
+}

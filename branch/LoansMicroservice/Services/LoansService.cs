@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using LoansMicroservice.Repository;
 using Microsoft.Extensions.Logging;
 using PaymentsMicroservice;
+using SharedClasses;
 using TransactionsMicroservice;
 using static PaymentsMicroservice.Payments;
 using static TransactionsMicroservice.Transactions;
@@ -55,27 +57,19 @@ namespace LoansMicroservice
         public async override Task<GetTransactionsResult> GetTransactions(GetTransactionsRequest request, ServerCallContext context)
         {
             var ids = request.Ids.Any() ? request.Ids.ToArray() : loansRepository.GetPaymentsIds();
-            var transactionsRequest = new FilterTransactionsRequest { FlowId = request.FlowId, Payments = { ids }, TimestampFrom = request.TimestampFrom, TimestampTo = request.TimestampTo };
-            var transactionsResponse = await transactionsClient.FilterAsync(transactionsRequest);
+            var transactionsRequest = new FilterTransactionsRequest { Payments = { ids }, TimestampFrom = request.TimestampFrom, TimestampTo = request.TimestampTo };
+            var transactionsResponse = await transactionsClient.FilterAsync(transactionsRequest, context.RequestHeaders.SelectCustom());
             return new GetTransactionsResult { Transactions = { transactionsResponse.Transactions } };
         }
 
         public override async Task<Empty> BatchRepayInstalments(BatchRepayInstalmentsRequest request, ServerCallContext context)
         {
-            var paymentsToFinish = new List<string>();
-            foreach (var id in request.Ids)
+            var paymentsToFinish = RepayInstalments(request);
+            if (paymentsToFinish.Any())
             {
-                var totalAmountPaid = loansRepository.RepayInstalment(id);
-                if (totalAmountPaid)
-                    paymentsToFinish.Add(loansRepository.Get(id).PaymentId);
+                var cancelPaymentsRequest = new CancelPaymentsRequest { Ids = { paymentsToFinish } };
+                await paymentsClient.CancelAsync(cancelPaymentsRequest, context.RequestHeaders.SelectCustom());
             }
-
-            var cancelPaymentsRequest = new CancelPaymentsRequest
-            {
-                FlowId = request.FlowId,
-                Ids = { paymentsToFinish }
-            };
-            await paymentsClient.CancelAsync(cancelPaymentsRequest);
             return new Empty();
         }
 
@@ -91,6 +85,16 @@ namespace LoansMicroservice
             var loans = request.Loans.Select(l => mapper.Map<Repository.Loan>(l));
             loansRepository.SetupAppend(loans);
             return Task.FromResult(new Empty());
+        }
+
+        private IEnumerable<string> RepayInstalments(BatchRepayInstalmentsRequest request)
+        {
+            foreach (var id in request.Ids)
+            {
+                var totalAmountPaid = loansRepository.RepayInstalment(id);
+                if (totalAmountPaid)
+                    yield return loansRepository.Get(id).PaymentId;
+            }
         }
     }
 }

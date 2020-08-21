@@ -1,33 +1,35 @@
 syntax = "proto3";
 import "common/report.proto";
+import "google/protobuf/timestamp.proto";
 
 option csharp_namespace = "ReportsBranchMicroservice";
 
 package ReportsBranchMicroservice;
 
 service ReportsBranch {
-  rpc GenerateUserActivityReport (GenerateUserActivityReportRequest) returns (GenerateReportResponse);
-  rpc GenerateOverallReport (GenerateOverallReportRequest) returns (GenerateReportResponse);
+  rpc AggregateUserActivity (AggregateUserActivityRequest) returns (AggregateUserActivityResponse);
+  rpc AggregateOverall (AggregateOverallRequest) returns (AggregateOverallResponse);
 }
 
-message GenerateUserActivityReportRequest {
-  string flowId = 1;
-  string userId = 2;
-  int64 timestampFrom = 3;
-  int64 timestampTo = 4;
-  Granularity granularity = 5;
+message AggregateUserActivityRequest {
+  string userId = 1;
+  google.protobuf.Timestamp timestampFrom = 2;
+  google.protobuf.Timestamp timestampTo = 3;
+  Granularity granularity = 4;
 }
 
-message GenerateOverallReportRequest {
-  string flowId = 1;
-  repeated Aggregation aggregations = 2;
-  int64 timestampFrom = 3;
-  int64 timestampTo = 4;
-  Granularity granularity = 5;
-  ReportSubject subject = 6;
+message AggregateUserActivityResponse {
+  string report = 1;
 }
 
-message GenerateReportResponse {
-  string flowId = 1;
-  string report = 2;
+message AggregateOverallRequest {
+  repeated Aggregation aggregations = 1;
+  google.protobuf.Timestamp timestampFrom = 2;
+  google.protobuf.Timestamp timestampTo = 3;
+  Granularity granularity = 4;
+  ReportSubject subject = 5;
+}
+
+message AggregateOverallResponse {
+  string report = 1;
 }

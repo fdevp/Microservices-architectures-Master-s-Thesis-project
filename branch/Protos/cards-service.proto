@@ -1,7 +1,8 @@
 syntax = "proto3";
 import "common/transaction.proto";
 import "common/card.proto";
-import "common/empty.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
 
 option csharp_namespace = "CardsMicroservice";
 
@@ -13,19 +14,18 @@ service Cards {
   rpc GetBlocks (GetBlocksRequest) returns (GetBlocksResponse);
   rpc GetTransactions (GetTransactionsRequest) returns (GetTransactionsResponse);
   rpc Transfer (TransferRequest) returns (TransferResponse);
-  rpc Setup(SetupRequest) returns (Empty);
+  rpc Setup(SetupRequest) returns (google.protobuf.Empty);
 }
 
 message Block {
   string id = 1;
   string cardId = 2;
   string transactionId = 3;
-  int64 timestamp = 4;
+  google.protobuf.Timestamp timestamp = 4;
 }
 
 message GetCardsRequest {
-  string flowId = 1;
-  repeated string ids = 2;
+  repeated string ids = 1;
 }
 
 message GetCardsResponse {
@@ -33,8 +33,7 @@ message GetCardsResponse {
 }
 
 message GetBlocksRequest {
-  string flowId = 1;
-  string cardId = 2;
+  string cardId = 1;
 }
 
 message GetBlocksResponse {
@@ -42,10 +41,9 @@ message GetBlocksResponse {
 }
 
 message GetTransactionsRequest {
-  string flowId = 1;
-  repeated string ids = 2;
-  int64 timestampFrom = 3;
-  int64 timestampTo = 4;
+  repeated string ids = 1;
+  google.protobuf.Timestamp timestampFrom = 2;
+  google.protobuf.Timestamp timestampTo = 3;
 }
 
 message GetTransactionsResponse {
@@ -53,10 +51,9 @@ message GetTransactionsResponse {
 }
 
 message TransferRequest {
-  string flowId = 1;
-  string cardId = 2;
-  string recipient = 3;
-  float amount = 4;
+  string cardId = 1;
+  string recipient = 2;
+  float amount = 3;
 }
 
 message TransferResponse {

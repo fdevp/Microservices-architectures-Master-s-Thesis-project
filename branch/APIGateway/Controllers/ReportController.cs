@@ -6,6 +6,7 @@ using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using ReportsBranchMicroservice;
+using SharedClasses;
 using static ReportsBranchMicroservice.ReportsBranch;
 
 namespace APIGateway.Controllers
@@ -29,15 +30,14 @@ namespace APIGateway.Controllers
         [Route("UserActivity")]
         public async Task<string> UserActivity(UserActivityReportRequest data)
         {
-            var request = new GenerateUserActivityReportRequest
+            var request = new AggregateUserActivityRequest
             {
                 Granularity = mapper.Map<Granularity>(data.Granularity),
-                TimestampFrom = data.TimestampFrom.HasValue ? data.TimestampFrom.Value.Ticks : 0,
-                TimestampTo = data.TimestampTo.HasValue ? data.TimestampTo.Value.Ticks : 0,
+                TimestampFrom = data.TimestampFrom.ToNullableTimestamp(),
+                TimestampTo = data.TimestampTo.ToNullableTimestamp(),
                 UserId = data.UserId,
             };
-            request.FlowId = HttpContext.Items["flowId"].ToString();
-            var response = await reportsBranchClient.GenerateUserActivityReportAsync(request);
+            var response = await reportsBranchClient.AggregateUserActivityAsync(request, HttpContext.CreateHeadersWithFlowId());
             return response.Report;
         }
 
@@ -45,17 +45,16 @@ namespace APIGateway.Controllers
         [Route("Overall")]
         public async Task<string> Overall(OverallReportRequest data)
         {
-            var request = new GenerateOverallReportRequest
+            var request = new AggregateOverallRequest
             {
                 Granularity = mapper.Map<Granularity>(data.Granularity),
-                TimestampFrom = data.TimestampFrom.HasValue ? data.TimestampFrom.Value.Ticks : 0,
-                TimestampTo = data.TimestampTo.HasValue ? data.TimestampTo.Value.Ticks : 0,
+                TimestampFrom = data.TimestampFrom.ToNullableTimestamp(),
+                TimestampTo = data.TimestampTo.ToNullableTimestamp(),
                 Aggregations = { data.Aggregations.Select(a => mapper.Map<Aggregation>(a)) },
                 Subject = mapper.Map<ReportSubject>(data.Subject),
             };
-            request.FlowId = HttpContext.Items["flowId"].ToString();
 
-            var response = await reportsBranchClient.GenerateOverallReportAsync(request);
+            var response = await reportsBranchClient.AggregateOverallAsync(request, HttpContext.CreateHeadersWithFlowId());
             return response.Report;
         }
     }

@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Grpc.Core;
@@ -49,13 +50,6 @@ namespace SharedClasses
             {
                 logger.LogInformation($"Service='{serviceName}' FlowId='{flowId}' Method='{method}' Type='End' Processing='{stopwatch.ElapsedMilliseconds}'");
             }
-        }
-
-        private string GetFlowId<TRequest>(TRequest request)
-        {
-            Type t = request.GetType();
-            PropertyInfo prop = t.GetProperty("FlowId");
-            return prop?.GetValue(request) as string;
         }
     }
 }

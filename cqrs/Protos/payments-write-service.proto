@@ -1,6 +1,8 @@
 syntax = "proto3";
 import "common/payment.proto";
-import "common/empty.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/duration.proto";
 
 option csharp_namespace = "PaymentsWriteMicroservice";
 
@@ -8,25 +10,23 @@ package PaymentsWriteMicroservice;
 
 service PaymentsWrite {
   rpc Create (CreatePaymentRequest) returns (CreatePaymentResult);
-  rpc Cancel (CancelPaymentsRequest) returns (Empty);
-  rpc UpdateRepayTimestamp (UpdateRepayTimestampRequest) returns (Empty);
-  rpc Setup(SetupRequest) returns (Empty);
-  rpc SetupAppend(SetupRequest) returns (Empty);
+  rpc Cancel (CancelPaymentsRequest) returns (google.protobuf.Empty);
+  rpc UpdateLatestProcessingTimestamp (UpdateLatestProcessingTimestampRequest) returns (google.protobuf.Empty);
+  rpc Setup(SetupRequest) returns (google.protobuf.Empty);
+  rpc SetupAppend(SetupRequest) returns (google.protobuf.Empty);
 }
 
 message CreatePaymentRequest {
-  string flowId = 1;
-  float amount = 2;
-  int64 startTimestamp = 3;
-  int64 interval = 4;
-  string accountId = 5;
-  string recipient = 6;
+  float amount = 1;
+  google.protobuf.Timestamp startTimestamp = 2;
+  google.protobuf.Duration interval = 3;
+  string accountId = 4;
+  string recipient = 5;
 }
 
-message UpdateRepayTimestampRequest {
-  string flowId = 1;
-  repeated string ids = 2;
-  int64 repayTimestamp = 3;
+message UpdateLatestProcessingTimestampRequest {
+  repeated string ids = 1;
+  google.protobuf.Timestamp latestProcessingTimestamp = 2;
 }
 
 message CreatePaymentResult {
@@ -34,8 +34,7 @@ message CreatePaymentResult {
 }
 
 message CancelPaymentsRequest {
-  string flowId = 1;
-  repeated string ids = 2;
+  repeated string ids = 1;
 }
 
 message SetupRequest {

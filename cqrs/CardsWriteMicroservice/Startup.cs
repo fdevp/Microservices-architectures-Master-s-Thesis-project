@@ -73,8 +73,9 @@ namespace CardsWriteMicroservice
         {
             var config = new MapperConfiguration(cfg =>
             {
-                cfg.CreateMap<Card, Repository.Card>().ReverseMap();
-                cfg.CreateMap<Block, Repository.Block>().ReverseMap();
+                cfg.AddGrpcConverters();
+                cfg.CreateMap<Card, Models.Card>().ReverseMap();
+                cfg.CreateMap<Block, Models.Block>().ReverseMap();
             });
             return new Mapper(config);
         }

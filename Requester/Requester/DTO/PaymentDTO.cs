@@ -16,7 +16,7 @@ namespace Requester
 
         public DateTime StartTimestamp { get; set; }
 
-        public DateTime LastRepayTimestamp { get; set; }
+        public DateTime LatestProcessingTimestamp { get; set; }
 
         public TimeSpan Interval { get; set; }
     }

@@ -1,9 +1,11 @@
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Microsoft.Extensions.Logging;
 using PaymentsWriteMicroservice.Repository;
+using SharedClasses;
 using SharedClasses.Messaging;
 using static LoansWriteMicroservice.LoansWrite;
 using static TransactionsWriteMicroservice.TransactionsWrite;
@@ -30,16 +32,16 @@ namespace PaymentsWriteMicroservice
         }
         public override Task<CreatePaymentResult> Create(CreatePaymentRequest request, ServerCallContext context)
         {
-            var payment = paymentsRepository.Create(request.Amount, request.StartTimestamp, request.Interval, request.AccountId, request.Recipient);
-            projectionChannel.Publish(request.FlowId.ToString(), new DataProjection<Repository.Payment, string> { Upsert = new[] { payment } });
+            var payment = paymentsRepository.Create(request.Amount, request.StartTimestamp.ToDateTime(), request.Interval.ToTimeSpan(), request.AccountId, request.Recipient);
+            projectionChannel.Publish(context.RequestHeaders.GetFlowId(), new DataProjection<Models.Payment, string> { Upsert = new[] { payment } });
             return Task.FromResult(new CreatePaymentResult { Payment = mapper.Map<Payment>(payment) });
         }
 
-        public override Task<Empty> UpdateRepayTimestamp(UpdateRepayTimestampRequest request, ServerCallContext context)
+        public override Task<Empty> UpdateLatestProcessingTimestamp(UpdateLatestProcessingTimestampRequest request, ServerCallContext context)
         {
-            paymentsRepository.UpdateLastRepayTimestamp(request.Ids, request.RepayTimestamp);
+            paymentsRepository.UpdateLastRepayTimestamp(request.Ids, request.LatestProcessingTimestamp.ToDateTime());
             var updatedPayments = request.Ids.Select(id => paymentsRepository.Get(id)).ToArray();
-            projectionChannel.Publish(request.FlowId.ToString(), new DataProjection<Repository.Payment, string> { Upsert = updatedPayments });
+            projectionChannel.Publish(context.RequestHeaders.GetFlowId(), new DataProjection<Models.Payment, string> { Upsert = updatedPayments });
             return Task.FromResult(new Empty());
         }
 
@@ -48,23 +50,23 @@ namespace PaymentsWriteMicroservice
             foreach (var id in request.Ids)
                 paymentsRepository.Cancel(id);
             var cancelledPayments = request.Ids.Select(id => paymentsRepository.Get(id)).ToArray();
-            projectionChannel.Publish(request.FlowId.ToString(), new DataProjection<Repository.Payment, string> { Upsert = cancelledPayments });
+            projectionChannel.Publish(context.RequestHeaders.GetFlowId(), new DataProjection<Models.Payment, string> { Upsert = cancelledPayments });
             return Task.FromResult(new Empty());
         }
 
         public override Task<Empty> Setup(SetupRequest request, Grpc.Core.ServerCallContext context)
         {
-            var payments = request.Payments.Select(p => mapper.Map<Repository.Payment>(p));
+            var payments = request.Payments.Select(p => mapper.Map<Models.Payment>(p));
             paymentsRepository.Setup(payments);
-            projectionChannel.Publish(null, new DataProjection<Repository.Payment, string> { Upsert = payments.ToArray() });
+            projectionChannel.Publish(null, new DataProjection<Models.Payment, string> { Upsert = payments.ToArray() });
             return Task.FromResult(new Empty());
         }
 
         public override Task<Empty> SetupAppend(SetupRequest request, Grpc.Core.ServerCallContext context)
         {
-            var payments = request.Payments.Select(p => mapper.Map<Repository.Payment>(p));
+            var payments = request.Payments.Select(p => mapper.Map<Models.Payment>(p));
             paymentsRepository.SetupAppend(payments);
-            projectionChannel.Publish(null, new DataProjection<Repository.Payment, string> { Upsert = payments.ToArray() });
+            projectionChannel.Publish(null, new DataProjection<Models.Payment, string> { Upsert = payments.ToArray() });
             return Task.FromResult(new Empty());
         }
     }

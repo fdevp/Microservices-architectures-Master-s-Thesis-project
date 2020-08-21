@@ -72,6 +72,7 @@ namespace PaymentsMicroservice
         {
             var config = new MapperConfiguration(cfg =>
             {
+                cfg.AddGrpcConverters();
                 cfg.CreateMap<PaymentStatus, Repository.PaymentStatus>().ReverseMap();
                 cfg.CreateMap<Payment, Repository.Payment>().ReverseMap();
             });

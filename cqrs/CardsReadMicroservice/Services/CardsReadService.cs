@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using CardsReadMicroservice.Repository;
+using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Microsoft.Extensions.Logging;
 using SharedClasses;
@@ -52,7 +53,7 @@ namespace CardsReadMicroservice
         public override async Task<AggregateOverallResponse> AggregateOverall(AggregateOverallRequest request, ServerCallContext context)
         {
             var cardsIds = cardsRepository.GetCardsIds();
-            var transactionsResponse = await transactionsReadClient.FilterAsync(new FilterTransactionsRequest { Cards = { cardsIds }, TimestampTo = request.TimestampTo, TimestampFrom = request.TimestampFrom });
+            var transactionsResponse = await transactionsReadClient.FilterAsync(new FilterTransactionsRequest { Cards = { cardsIds }, TimestampTo = request.TimestampTo, TimestampFrom = request.TimestampFrom }, context.RequestHeaders.SelectCustom());
             var aggregations = Aggregations.CreateOverallCsvReport(new OverallReportData { Aggregations = request.Aggregations.ToArray(), Granularity = request.Granularity, Transactions = transactionsResponse.Transactions.ToArray() });
             return new AggregateOverallResponse { Portions = { aggregations } };
         }
@@ -63,18 +64,18 @@ namespace CardsReadMicroservice
             var cardsIds = cards.Select(p => p.Id).ToArray();
             var transactionsResponse = await transactionsReadClient.FilterAsync(new FilterTransactionsRequest { Cards = { cardsIds }, TimestampFrom = request.TimestampFrom, TimestampTo = request.TimestampTo });
             var transactions = transactionsResponse.Transactions.ToArray();
-            var aggregated = cards.SelectMany(c => AggregateUserTransactions(c, transactions.Where(t => t.CardId == c.Id).ToArray(), request.Granularity));
+            var aggregated = cards.SelectMany(c => AggregateUserTransactions(c, transactions, request.Granularity));
             return new AggregateUserActivityResponse { Portions = { aggregated } };
         }
 
-        private IEnumerable<UserReportPortion> AggregateUserTransactions(Repository.Card card, Transaction[] transactions, Granularity granularity)
+        private IEnumerable<UserReportPortion> AggregateUserTransactions(Models.Card card, Transaction[] allTransactions, Granularity granularity)
         {
-            var withTimestamps = transactions.Select(t => new TransactionWithTimestamp { Timestamp = new DateTime(t.Timestamp), Transaction = t });
+            var transactions = allTransactions.Where(t => t.CardId == card.Id).ToArray();
+            var withTimestamps = transactions.Select(t => new TransactionWithTimestamp { Timestamp = t.Timestamp.ToDateTime(), Transaction = t });
             var portions = Aggregations.GroupByPeriods(granularity, withTimestamps);
-            var ordered = portions.OrderBy(p => p.Key);
-            foreach (var portion in ordered)
+            foreach (var portion in portions)
             {
-                var debits = portion.Where(p => p.Transaction.CardId == card.Id).Sum(p => (float?)p.Transaction.Amount) ?? 0;
+                var debits = portion.Sum(p => (float?)p.Transaction.Amount) ?? 0;
                 yield return new UserReportPortion { Period = portion.Key, Debits = debits, Element = card.Number };
             }
         }

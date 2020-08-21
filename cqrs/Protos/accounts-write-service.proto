@@ -2,7 +2,7 @@ syntax = "proto3";
 import "common/transaction.proto";
 import "common/account.proto";
 import "common/transfer.proto";
-import "common/empty.proto";
+import "google/protobuf/empty.proto";
 
 option csharp_namespace = "AccountsWriteMicroservice";
 
@@ -10,14 +10,13 @@ package AccountsMicroservice;
 
 service AccountsWrite {
   rpc Transfer (TransferRequest) returns (TransferResponse);
-  rpc BatchTransfer (BatchTransferRequest) returns (BatchTransferResponse);
-  rpc Setup(SetupRequest) returns (Empty);
-  rpc SetupAppend(SetupRequest) returns (Empty);
+  rpc BatchTransfer (BatchTransferRequest) returns (google.protobuf.Empty);
+  rpc Setup(SetupRequest) returns (google.protobuf.Empty);
+  rpc SetupAppend(SetupRequest) returns (google.protobuf.Empty);
 }
 
 message TransferRequest {
-  string flowId = 1;
-  Transfer transfer = 2;
+  Transfer transfer = 1;
 }
 
 message TransferResponse {
@@ -25,12 +24,7 @@ message TransferResponse {
 }
 
 message BatchTransferRequest {
-  string flowId = 1;
-  repeated Transfer transfers = 2;
-}
-
-message BatchTransferResponse {
-  repeated Transaction transactions = 1;
+  repeated Transfer transfers = 1;
 }
 
 message SetupRequest {

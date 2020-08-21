@@ -32,7 +32,7 @@ namespace CardsMicroservice.Repository
 
         public Block CreateBlock(string cardId, string transactionId, DateTime timestamp)
         {
-            var block = new Block(Guid.NewGuid().ToString(), cardId, transactionId, timestamp.Ticks);
+            var block = new Block { Id = Guid.NewGuid().ToString(), CardId = cardId, TransactionId = transactionId, Timestamp = timestamp.Ticks };
             blocks.TryAdd(block.Id, block);
             return block;
         }

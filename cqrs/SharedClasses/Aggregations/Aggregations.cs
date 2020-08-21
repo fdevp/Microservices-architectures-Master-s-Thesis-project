@@ -8,10 +8,9 @@ namespace SharedClasses
     {
         public static IEnumerable<OverallReportPortion> CreateOverallCsvReport(OverallReportData data)
         {
-            var withTimestamps = data.Transactions.Select(t => new TransactionWithTimestamp { Timestamp = new DateTime(t.Timestamp), Transaction = t });
+            var withTimestamps = data.Transactions.Select(t => new TransactionWithTimestamp { Timestamp = t.Timestamp.ToDateTime(), Transaction = t });
             var periods = GroupByPeriods(data.Granularity, withTimestamps);
-            var ordered = periods.OrderBy(p => p.Key);
-            foreach (var period in ordered)
+            foreach (var period in periods)
             {
                 foreach (var aggregation in data.Aggregations)
                 {
@@ -50,8 +49,8 @@ namespace SharedClasses
                     return period.Count();
                 case Aggregation.Avg:
                     return period.Average(t => t.Transaction.Amount);
-                case Aggregation.Median:
-                    return (float)Median(period.Select(p => p.Transaction.Amount));
+                case Aggregation.Sum:
+                    return period.Sum(p => p.Transaction.Amount);
                 case Aggregation.Min:
                     return period.Min(t => t.Transaction.Amount);
                 case Aggregation.Max:
@@ -59,24 +58,6 @@ namespace SharedClasses
                 default:
                     throw new InvalidOperationException("Unknown aggregation.");
             }
-        }
-
-        private static double? Median<T>(IEnumerable<T> source)
-        {
-            if (Nullable.GetUnderlyingType(typeof(T)) != null)
-                source = source.Where(x => x != null);
-
-            int count = source.Count();
-            if (count == 0)
-                return null;
-
-            source = source.OrderBy(n => n);
-
-            int midpoint = count / 2;
-            if (count % 2 == 0)
-                return (Convert.ToDouble(source.ElementAt(midpoint - 1)) + Convert.ToDouble(source.ElementAt(midpoint))) / 2.0;
-            else
-                return Convert.ToDouble(source.ElementAt(midpoint));
         }
     }
 }

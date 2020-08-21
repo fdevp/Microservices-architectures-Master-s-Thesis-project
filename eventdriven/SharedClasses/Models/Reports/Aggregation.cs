@@ -5,7 +5,7 @@ namespace SharedClasses.Models
        Avg,
        Min,
        Max,
-       Median,
+       Sum,
        Count
     }
 }
