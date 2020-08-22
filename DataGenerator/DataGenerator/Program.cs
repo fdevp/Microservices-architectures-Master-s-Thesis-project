@@ -12,19 +12,19 @@ namespace DataGenerator
     {
         static void Main(string[] args)
         {
-            var automatSetup = AutomatDataGenerator.Generate(20000, new DateTime(2020, 8, 1, 0,0,0), new DateTime(2020, 8, 1, 1, 0, 0));
-            AddSpecialUsers(automatSetup);
-            File.WriteAllText("loans.json", JsonConvert.SerializeObject(automatSetup.LoansSetup));
-            File.WriteAllText("accounts.json", JsonConvert.SerializeObject(automatSetup.AccountsSetup));
-            File.WriteAllText("payments.json", JsonConvert.SerializeObject(automatSetup.PaymentsSetup));
+            //var automatSetup = AutomatDataGenerator.Generate(20000, new DateTime(2020, 8, 1, 0,0,0), new DateTime(2020, 8, 1, 1, 0, 0));
+            //AddSpecialUsers(automatSetup);
+            //File.WriteAllText("loans.json", JsonConvert.SerializeObject(automatSetup.LoansSetup));
+            //File.WriteAllText("accounts.json", JsonConvert.SerializeObject(automatSetup.AccountsSetup));
+            //File.WriteAllText("payments.json", JsonConvert.SerializeObject(automatSetup.PaymentsSetup));
 
-            automatSetup.AccountsSetup = new AccountsSetup { Accounts = new AccountDTO[0] };
-            automatSetup.LoansSetup = new LoansSetup { Loans = new LoanDTO[0] };
-            automatSetup.PaymentsSetup = new PaymentsSetup { Payments = new PaymentDTO[0] };
-            File.WriteAllText("setup.json", JsonConvert.SerializeObject(automatSetup));
+            //automatSetup.AccountsSetup = new AccountsSetup { Accounts = new AccountDTO[0] };
+            //automatSetup.LoansSetup = new LoansSetup { Loans = new LoanDTO[0] };
+            //automatSetup.PaymentsSetup = new PaymentsSetup { Payments = new PaymentDTO[0] };
+            //File.WriteAllText("setup.json", JsonConvert.SerializeObject(automatSetup));
 
 
-            /*
+            
             var businessUsersSetup = BusinessUserDataGenerator.Generate(200, new DateTime(2015, 1, 1), new DateTime(2020, 8, 1));
             var individualUsersSetup = IndividualUserDataGenerator.Generate(1000, new DateTime(2015, 1, 1), new DateTime(2020, 8, 1));
             
@@ -34,7 +34,7 @@ namespace DataGenerator
             individualUsersSetup.TransactionsSetup = new TransactionsSetup();
 
             var setupAll = businessUsersSetup.Concat(individualUsersSetup);
-            AddSpecialUsers(setupAll)
+            AddSpecialUsers(setupAll);
 
             File.WriteAllText("setup.json", JsonConvert.SerializeObject(setupAll));
             File.WriteAllText("transactions.json", JsonConvert.SerializeObject(transactionsSetup));
@@ -49,7 +49,7 @@ namespace DataGenerator
             File.WriteAllText("userActivityReportScenario.json", userActivityReportScenario);
 
             var overallReportScenario = ScenarioGenerator.OverallReportScenario(10, 100, new DateTime(2015, 1, 1), new DateTime(2020, 8, 1));
-            File.WriteAllText("overallReportScenario.json", overallReportScenario);*/
+            File.WriteAllText("overallReportScenario.json", overallReportScenario);
         }
 
         private static SetupAll AddSpecialUsers(SetupAll setup)

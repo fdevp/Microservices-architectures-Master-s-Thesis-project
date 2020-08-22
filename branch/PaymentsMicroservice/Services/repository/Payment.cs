@@ -5,6 +5,7 @@ namespace PaymentsMicroservice.Repository
     public class Payment
     {
         public string Id { get; set; }
+        public string Name { get; set; }
         public float Amount { get; set; }
         public DateTime StartTimestamp { get; set; }
         public DateTime? LatestProcessingTimestamp { get; set; }

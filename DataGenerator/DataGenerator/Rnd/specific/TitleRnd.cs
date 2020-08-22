@@ -21,5 +21,10 @@ namespace DataGenerator.Rnd
 
             return sb.ToString();
         }
+
+        public string Next(int maxWords)
+        {
+            return Lorem.Words(1, maxWords);
+        }
     }
 }

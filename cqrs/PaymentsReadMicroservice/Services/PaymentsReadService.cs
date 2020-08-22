@@ -85,7 +85,7 @@ namespace PaymentsReadMicroservice
             foreach (var portion in portions)
             {
                 var debits = portion.Sum(p => (float?)p.Transaction.Amount) ?? 0;
-                yield return new UserReportPortion { Period = portion.Key, Debits = debits, Element = payment.Id };
+                yield return new UserReportPortion { Period = portion.Key, Debits = debits, Element = payment.Name };
             }
         }
     }
