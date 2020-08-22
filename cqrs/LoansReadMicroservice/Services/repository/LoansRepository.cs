@@ -45,5 +45,10 @@ namespace LoansReadMicroservice.Repository
                 loans.Remove(id);
             }
         }
+
+        public void Clear()
+        {
+            this.loans = new Dictionary<string, Models.Loan>();
+        }
     }
 }

@@ -42,7 +42,8 @@ namespace LoansWriteMicroservice
             }
 
             var repaidInstalments = request.Ids.Select(id => loansRepository.Get(id)).ToArray();
-            projectionChannel.Publish(context.RequestHeaders.GetFlowId(), new DataProjection<Models.Loan, string> { Upsert = repaidInstalments });
+            if (repaidInstalments.Length > 0)
+                projectionChannel.Publish(context.RequestHeaders.GetFlowId(), new DataProjection<Models.Loan, string> { Upsert = repaidInstalments });
             return new Empty();
         }
 

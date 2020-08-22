@@ -61,5 +61,11 @@ namespace CardsReadMicroservice.Repository
                 }
             }
         }
+
+        public void Clear()
+        {
+            this.cards = new Dictionary<string, Models.Card>();
+            this.blocks = new Dictionary<string, Models.Block>();
+        }
     }
 }

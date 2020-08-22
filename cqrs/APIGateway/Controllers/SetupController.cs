@@ -50,6 +50,7 @@ namespace APIGateway.Controllers
             await cardsClient.SetupAsync(new CardsWriteMicroservice.SetupRequest());
             await loansClient.SetupAsync(new LoansWriteMicroservice.SetupRequest());
             await paymentsClient.SetupAsync(new PaymentsWriteMicroservice.SetupRequest());
+			await transactionsClient.SetupAsync(new TransactionsWriteMicroservice.SetupRequest());
         }
 
         [HttpPost]

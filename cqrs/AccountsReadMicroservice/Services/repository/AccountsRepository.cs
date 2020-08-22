@@ -35,5 +35,10 @@ namespace AccountsReadMicroservice.Repository
                 accounts.Remove(id);
             }
         }
+
+        public void Clear()
+        {
+            this.accounts = new Dictionary<string, Models.Account>();
+        }
     }
 }

@@ -58,8 +58,10 @@ namespace PaymentsReadMicroservice
 
             rabbitMq.Received += (sender, projection) =>
             {
-                if (projection.Upsert != null)
+                if (projection.Upsert != null && projection.Upsert.Length > 0)
                     repository.Upsert(projection.Upsert);
+                if (projection.Upsert != null && projection.Upsert.Length == 0)
+                    repository.Clear();
                 if (projection.Remove != null)
                     repository.Remove(projection.Remove);
             };

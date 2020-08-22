@@ -46,5 +46,10 @@ namespace PaymentsReadMicroservice.Repository
                 payments.Remove(id);
             }
         }
+
+        public void Clear()
+        {
+            this.payments = new Dictionary<string, Models.Payment>();
+        }
     }
 }

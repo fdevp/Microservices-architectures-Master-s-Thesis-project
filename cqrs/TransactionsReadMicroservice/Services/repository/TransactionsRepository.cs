@@ -40,13 +40,18 @@ namespace TransactionsReadMicroservice.Repository
             }
         }
 
+        public void Clear()
+        {
+            this.transactions = new ConcurrentDictionary<string, Models.Transaction>();
+        }
+
         private bool SelectTransaction(Models.Transaction transaction, Filters filters)
         {
-			 if (filters.TimestampFrom.HasValue && transaction.Timestamp < filters.TimestampFrom)
+            if (filters.TimestampFrom.HasValue && transaction.Timestamp < filters.TimestampFrom)
                 return false;
             if (filters.TimestampTo.HasValue && transaction.Timestamp > filters.TimestampTo)
                 return false;
-			
+
             var anyPayments = filters.Payments?.Any() ?? false;
             if (anyPayments && !string.IsNullOrEmpty(transaction.PaymentId) && filters.Payments.Contains(transaction.PaymentId))
                 return true;
