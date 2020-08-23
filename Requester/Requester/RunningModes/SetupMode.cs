@@ -55,9 +55,9 @@ namespace Requester.RunningModes
             if (File.Exists("transactions.json"))
             {
                 var transactions = JsonConvert.DeserializeObject<TransactionsSetup>(File.ReadAllText("transactions.json")).Transactions;
-                for (int i = 0; i < transactions.Length; i += 1000)
+                for (int i = 0; i < transactions.Length; i += 10000)
                 {
-                    var portion = transactions.Skip(i).Take(1000);
+                    var portion = transactions.Skip(i).Take(10000);
                     var transactionsSetp = new TransactionsSetup { Transactions = portion.ToArray() };
                     var result = httpClient.PostAsync("transaction/setup", new StringContent(JsonConvert.SerializeObject(transactionsSetp), Encoding.UTF8, "application/json")).Result;
                     logger.Information("Transactions portion setup done.");
