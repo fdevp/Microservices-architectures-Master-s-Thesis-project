@@ -11,7 +11,7 @@ namespace SharedClasses
 
         public static bool IsNull(this Timestamp timestamp)
         {
-            return timestamp.Seconds == NullValue.Seconds && timestamp.Nanos == NullValue.Nanos;
+            return timestamp == null || (timestamp.Seconds == NullValue.Seconds && timestamp.Nanos == NullValue.Nanos);
         }
 
         public static Timestamp ToNullableTimestamp(this DateTime dateTime)

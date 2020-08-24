@@ -69,7 +69,9 @@ namespace Requester.RunningModes
 
         public void Balance(string accountId, string scenarioId)
         {
-            var result = httpClient.GetAsync($"account/balance/{accountId}").Result;
+            var request = new HttpRequestMessage(HttpMethod.Get, $"account/balance/{accountId}");
+            request.Headers.Add("flowId", scenarioId);
+            var result = httpClient.SendAsync(request).Result;
         }
 
         public void Transfer(IndividualUserScenarioElement element, string scenarioId)

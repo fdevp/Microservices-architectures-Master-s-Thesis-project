@@ -100,7 +100,9 @@ namespace APIGateway
                 cfg.CreateMap<PaymentsWriteMicroservice.SetupRequest, PaymentsSetup>().ReverseMap();
                 cfg.CreateMap<LoansWriteMicroservice.SetupRequest, LoansSetup>().ReverseMap();
 
-                cfg.CreateMap<Transfer, AccountTransfer>().ReverseMap();
+                cfg.CreateMap<Transfer, AccountTransfer>()
+                    .ForMember(dest => dest.PaymentId, opt => opt.MapFrom(src => src.PaymentId == null ? "" : src.PaymentId))
+                    .ReverseMap();
                 cfg.CreateMap<CardsWriteMicroservice.TransferRequest, CardTransfer>().ReverseMap();
                 cfg.CreateMap<UsersMicroservice.SignInRequest, TokenRequest>().ReverseMap();
             });
