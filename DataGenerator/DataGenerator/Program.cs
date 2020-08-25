@@ -12,7 +12,8 @@ namespace DataGenerator
     {
         static void Main(string[] args)
         {
-            GenerateReportsScenario();
+            GenerateIndividualScenario();
+            //GenerateReportsScenario();
             //GenerateAutomatScenario();
         }
 
@@ -32,14 +33,15 @@ namespace DataGenerator
 
         private static void GenerateIndividualScenario()
         {
-            var setupAll = IndividualUserDataGenerator.Generate(1000, new DateTime(2015, 1, 1), new DateTime(2020, 8, 1));
+            var setupAll = IndividualUserDataGenerator.Generate(2000, new DateTime(2015, 1, 1), new DateTime(2020, 8, 1));
             AddSpecialUsers(setupAll);
-            var individualScenario = ScenarioGenerator.IndividualUserScenario(setupAll, 16, 4000);
-            File.WriteAllText("individual.json", individualScenario);
-
             File.WriteAllText("transactions.json", JsonConvert.SerializeObject(setupAll.TransactionsSetup));
             setupAll.TransactionsSetup = new TransactionsSetup();
             File.WriteAllText("setup.json", JsonConvert.SerializeObject(setupAll));
+
+            var individualScenario = ScenarioGenerator.IndividualUserScenario(setupAll, 16, 6000, 2);
+            for (int i = 0; i < individualScenario.Length; i++)
+                File.WriteAllText(i + "individual.json", individualScenario[i]);
         }
 
         private static void GenerateBusinessAndIndividualScenario()
@@ -58,11 +60,13 @@ namespace DataGenerator
             File.WriteAllText("setup.json", JsonConvert.SerializeObject(setupAll));
             File.WriteAllText("transactions.json", JsonConvert.SerializeObject(transactionsSetup));
 
-            var individualScenario = ScenarioGenerator.IndividualUserScenario(setupAll, 16, 2000);
-            File.WriteAllText("individual.json", individualScenario);
+            var individualScenario = ScenarioGenerator.IndividualUserScenario(setupAll, 16, 2000, 2);
+            for (int i = 0; i < individualScenario.Length; i++)
+                File.WriteAllText(i + "individual.json", individualScenario[i]);
 
-            var businessScenario = ScenarioGenerator.BusinessUserScenario(setupAll, 16, 2000, 3, 7);
-            File.WriteAllText("business.json", businessScenario);
+            var businessScenario = ScenarioGenerator.BusinessUserScenario(setupAll, 16, 2000, 3, 7, 2);
+            for (int i = 0; i < businessScenario.Length; i++)
+                File.WriteAllText(i + "business.json", businessScenario[i]);
 
             /*
             var userActivityReportScenario = ScenarioGenerator.UserActivityReportsScenario(setupAll, 1, 5, new DateTime(2015, 1, 1), new DateTime(2020, 8, 1));

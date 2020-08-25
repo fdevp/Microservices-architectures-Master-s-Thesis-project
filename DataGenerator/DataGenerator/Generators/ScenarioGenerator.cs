@@ -14,7 +14,7 @@ namespace DataGenerator
         static Random rand = new Random();
         static ReportAggregation[] ReportAggregationValues = typeof(ReportAggregation).GetEnumValues().OfType<ReportAggregation>().ToArray();
 
-        public static string IndividualUserScenario(SetupAll setup, int clients, int actionsPerGroup)
+        public static string[] IndividualUserScenario(SetupAll setup, int clients, int actionsPerGroup, int requesters)
         {
             var users = setup.UsersSetup.Users.Where(u => !u.Business)
                 .Select((u, i) => new { index = i, user = u })
@@ -40,8 +40,7 @@ namespace DataGenerator
 
                 for (int i = 0; i < actionsPerGroup; i++)
                 {
-                    //var amount = (float)Math.Round(amountRnd.Next(), 2);
-                    var amount = 1;
+                    var amount = (float)Math.Round(amountRnd.Next(), 2);
                     var sender = GetSender(amount, usersAccounts);
                     var accountId = usersAccounts[sender.UserId].OrderBy(a => Guid.NewGuid()).First().Id;
                     var card = cardsAccounts[sender.Id];
@@ -54,10 +53,10 @@ namespace DataGenerator
                 }
             }
 
-            return JsonConvert.SerializeObject(actions);
+            return actions.GroupBy(a => a.Group % requesters).Select(g => JsonConvert.SerializeObject(g)).ToArray();
         }
 
-        public static string BusinessUserScenario(SetupAll setup, int clients, int actionsPerGroup, int minTransactions, int maxTransacitons)
+        public static string[] BusinessUserScenario(SetupAll setup, int clients, int actionsPerGroup, int minTransactions, int maxTransacitons, int requesters)
         {
             var users = setup.UsersSetup.Users.Where(u => u.Business)
                 .Select((u, i) => new { index = i, user = u })
@@ -76,7 +75,7 @@ namespace DataGenerator
             var titelRnd = new TitleRnd();
             var transactionsCountRnd = new RndBuilder<int>().Min(minTransactions).Max(maxTransacitons).Build();
 
-            var groupActions = new List<BusinessUserScenarioElement>();
+            var allActions = new List<BusinessUserScenarioElement>();
             var no = 0;
             foreach (var group in groups)
             {
@@ -95,8 +94,7 @@ namespace DataGenerator
                     {
                         if (userAccounts.All(a => a.Balance < minAmount))
                             continue;
-                        //var amount = GetAmount(userAccounts, amountRnd);
-                        var amount = 1;
+                        var amount = GetAmount(userAccounts, amountRnd);
                         var sender = GetSender(amount, userAccounts);
                         var recipient = groupAccounts.ElementAt(rand.Next(0, groupAccounts.Length));
 
@@ -106,11 +104,11 @@ namespace DataGenerator
                         recipient.Balance += amount;
                     }
 
-                    groupActions.Add(new BusinessUserScenarioElement { No = (no++).ToString(), Group = group.Key, UserId = user.Id, User = user.Login, Transactions = userActions.ToArray() });
+                    allActions.Add(new BusinessUserScenarioElement { No = (no++).ToString(), Group = group.Key, UserId = user.Id, User = user.Login, Transactions = userActions.ToArray() });
                 }
             }
 
-            return JsonConvert.SerializeObject(groupActions);
+            return allActions.GroupBy(a => a.Group % requesters).Select(g => JsonConvert.SerializeObject(g)).ToArray();
         }
 
         public static string UserActivityReportsScenario(SetupAll setup, int minUserReports, int maxUserReports, DateTime minDate, DateTime maxDate)
@@ -202,6 +200,11 @@ namespace DataGenerator
 
         private static AccountDTO GetSender(float amount, AccountDTO[] accounts)
         {
+            var filtered = accounts.Where(a => a.Balance > amount).ToArray();
+            if (filtered.Length == 0)
+                throw new InvalidOperationException("Sender not found");
+
+
             while (true)
             {
                 var account = accounts[rand.Next(0, accounts.Length)];
