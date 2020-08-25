@@ -66,7 +66,7 @@ namespace DataGenerator.Generators
         {
             var countRnd = new RndBuilder<int>()
               .DistributionValues(new[] { 0, 1, 2 })
-              .DistributionProbabilities(new[] { 50, 40, 10 })
+              .DistributionProbabilities(new[] { 10, 60, 30 })
               .Build();
 
             return ValuesGenerator.CreateCards(accounts, countRnd).ToArray();

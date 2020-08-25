@@ -111,7 +111,7 @@ namespace DataGenerator
             return allActions.GroupBy(a => a.Group % requesters).Select(g => JsonConvert.SerializeObject(g)).ToArray();
         }
 
-        public static string UserActivityReportsScenario(SetupAll setup, int minUserReports, int maxUserReports, DateTime minDate, DateTime maxDate)
+        public static string[] UserActivityReportsScenario(SetupAll setup, int minUserReports, int maxUserReports, DateTime minDate, DateTime maxDate, int requesters)
         {
             var timestampRnd = new RndBuilder<DateTime>(new DateTimeRnd()).Min(minDate).Max(maxDate).Build();
             var countRnd = new RndBuilder<int>().Min(minUserReports).Max(maxUserReports).Build();
@@ -136,10 +136,13 @@ namespace DataGenerator
             }
 
             var shuffled = actions.OrderBy(elem => Guid.NewGuid()).Select(a => JsonConvert.SerializeObject(a));
-            return string.Join("|", shuffled);
+            return shuffled
+               .Select((a, index) => new { Action = a, Index = index })
+               .GroupBy(g => g.Index % requesters)
+               .Select(g => string.Join("|", g.Select(ac => ac.Action))).ToArray();
         }
 
-        public static string OverallReportScenario(int min, int max, DateTime minDate, DateTime maxDate, TimeSpan maxRange)
+        public static string[] OverallReportScenario(int min, int max, DateTime minDate, DateTime maxDate, TimeSpan maxRange, int requesters)
         {
             var firstDateRnd = new RndBuilder<DateTime>(new DateTimeRnd()).Min(minDate).Max(maxDate - maxRange).Build();
             var secondDateRnd = new DateTimeRnd();
@@ -169,7 +172,10 @@ namespace DataGenerator
             }
 
             var shuffled = actions.OrderBy(elem => Guid.NewGuid()).Select(a => JsonConvert.SerializeObject(a));
-            return string.Join("|", shuffled);
+            return shuffled
+                .Select((a, index) => new { Action = a, Index = index })
+                .GroupBy(g => g.Index % requesters)
+                .Select(g => string.Join("|", g.Select(ac => ac.Action))).ToArray();
         }
 
         private static int[] GetAggregations(int aggregationsCount)
@@ -194,7 +200,7 @@ namespace DataGenerator
             do
             {
                 userAccounts = accounts.ElementAt(rand.Next(0, accounts.Count)).Value;
-            } while (userAccounts.Any(a => a.Balance < amount));
+            } while (userAccounts.All(a => a.Balance < amount));
             return GetSender(amount, userAccounts);
         }
 
@@ -204,13 +210,8 @@ namespace DataGenerator
             if (filtered.Length == 0)
                 throw new InvalidOperationException("Sender not found");
 
-
-            while (true)
-            {
-                var account = accounts[rand.Next(0, accounts.Length)];
-                if (account.Balance >= amount)
-                    return account;
-            }
+            var account = filtered[rand.Next(0, filtered.Length)];
+            return account;
         }
 
     }

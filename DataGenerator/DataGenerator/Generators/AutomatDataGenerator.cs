@@ -22,18 +22,28 @@ namespace DataGenerator.Generators
             var totalPaymentsCount = activePayments.Count() + loansAndPayments.Count();
             var interval = (maxDate - minDate) / totalPaymentsCount;
             var date = minDate;
-            foreach (var payment in activePayments)
+
+            var dates = new List<DateTime>();
+            for (int i = 0; i < totalPaymentsCount; i++)
             {
-                payment.LatestProcessingTimestamp = date - payment.Interval;
-                payment.StartTimestamp = date - 2 * payment.Interval;
+                dates.Add(date);
                 date += interval;
             }
+            var shuffledDates = dates.OrderBy(d => Guid.NewGuid()).ToArray();
 
-            foreach (var pair in loansAndPayments)
+            for (int i = 0; i < activePayments.Length; i++)
             {
-                pair.payment.LatestProcessingTimestamp = date - pair.payment.Interval;
-                pair.payment.StartTimestamp = date - ((pair.loan.PaidAmount / pair.loan.TotalAmount) * pair.loan.Instalments) * pair.payment.Interval - pair.payment.Interval;
-                date += interval;
+                var paymentDate = shuffledDates[i];
+                activePayments[i].LatestProcessingTimestamp = paymentDate - activePayments[i].Interval;
+                activePayments[i].StartTimestamp = paymentDate - 2 * activePayments[i].Interval;
+            }
+
+            for (int i = 0; i < loansAndPayments.Length; i++)
+            {
+                var pair = loansAndPayments[i];
+                var paymentDate = shuffledDates[i + activePayments.Length];
+                pair.payment.LatestProcessingTimestamp = paymentDate - pair.payment.Interval;
+                pair.payment.StartTimestamp = paymentDate - ((pair.loan.PaidAmount / pair.loan.TotalAmount) * pair.loan.Instalments) * pair.payment.Interval - pair.payment.Interval;
             }
 
             var setupall = new SetupAll
