@@ -39,15 +39,7 @@ namespace Requester.RunningModes
                 {
                     var portion = accounts.Skip(i).Take(10000);
                     var accountsSetup = new AccountsSetup { Accounts = portion.ToArray() };
-                    try
-                    {
-                        var result = httpClient.PostAsync("http://localhost:5000/account/setup", new StringContent(JsonConvert.SerializeObject(accountsSetup), Encoding.UTF8, "application/json")).Result;
-                    }
-                    catch (Exception e)
-                    {
-                        int asd = 5;
-                    }
-
+                    var result = httpClient.PostAsync("account/setup", new StringContent(JsonConvert.SerializeObject(accountsSetup), Encoding.UTF8, "application/json")).Result;
                     logger.Information("Accounts portion setup done.");
                 }
             }

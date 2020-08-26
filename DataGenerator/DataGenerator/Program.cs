@@ -16,7 +16,7 @@ namespace DataGenerator
             //GenerateBusinessScenario();
             //GenerateReportsScenario();
             //GenerateAutomatScenario();
-            GenerateReportsScenario();
+            //GenerateReportsScenario();
         }
 
         private static void GenerateAutomatScenario()
