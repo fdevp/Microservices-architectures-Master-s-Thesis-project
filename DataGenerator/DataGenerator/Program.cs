@@ -17,6 +17,88 @@ namespace DataGenerator
             //GenerateReportsScenario();
             //GenerateAutomatScenario();
             //GenerateReportsScenario();
+
+            //GenerateFirstAdditional();
+            //GenerateSecondAdditional();
+            GenerateThirdAdditional();
+        }
+
+        private static void GenerateThirdAdditional()
+        {
+            var reportSetup = ReportDataGenerator.GenerateOverallReportData(10000, 50000, 50000, 50000, 50000, new DateTime(2008, 1, 1), new DateTime(2018, 8, 1));
+            var userActivityReportScenario = ScenarioGenerator.UserActivityReportsScenario(reportSetup, 1, 1, new DateTime(2008, 1, 1), new DateTime(2018, 8, 1), 2);
+            for (int i = 0; i < userActivityReportScenario.Length; i++)
+                File.WriteAllText(i + "userActivityReportScenario.json", userActivityReportScenario[i]);
+
+            var overallReportScenario = ScenarioGenerator.OverallReportScenario(3500, 3500, new DateTime(2008, 1, 1), new DateTime(2018, 8, 1), TimeSpan.FromDays(1050), 2);
+            for (int i = 0; i < overallReportScenario.Length; i++)
+                File.WriteAllText(i + "overallReportScenario.json", overallReportScenario[i]);
+
+            var automatSetup = AutomatDataGenerator.Generate(30000, new DateTime(2020, 8, 1, 0, 0, 0), new DateTime(2020, 8, 1, 0, 15, 0));
+            var setupAll = reportSetup.Concat(automatSetup);
+            File.WriteAllText("loans.json", JsonConvert.SerializeObject(setupAll.LoansSetup));
+            File.WriteAllText("accounts.json", JsonConvert.SerializeObject(setupAll.AccountsSetup));
+            File.WriteAllText("payments.json", JsonConvert.SerializeObject(setupAll.PaymentsSetup));
+            File.WriteAllText("transactions.json", JsonConvert.SerializeObject(setupAll.TransactionsSetup));
+
+            setupAll.AccountsSetup = new AccountsSetup { Accounts = new AccountDTO[0] };
+            setupAll.LoansSetup = new LoansSetup { Loans = new LoanDTO[0] };
+            setupAll.PaymentsSetup = new PaymentsSetup { Payments = new PaymentDTO[0] };
+            setupAll.TransactionsSetup = new TransactionsSetup { Transactions = new TransactionDTO[0] };
+
+            File.WriteAllText("setup.json", JsonConvert.SerializeObject(setupAll));
+        }
+
+        private static void GenerateSecondAdditional()
+        {
+            var invidiualSetup = IndividualUserDataGenerator.Generate(2000, new DateTime(2018, 1, 1), new DateTime(2020, 7, 1));
+            AddSpecialUsers(invidiualSetup);
+
+            invidiualSetup.LoansSetup = new LoansSetup();
+            invidiualSetup.PaymentsSetup = new PaymentsSetup();
+            invidiualSetup.TransactionsSetup = new TransactionsSetup();
+            var individualScenario = ScenarioGenerator.IndividualUserScenario(invidiualSetup, 16, 29000, 2);
+            for (int i = 0; i < individualScenario.Length; i++)
+                File.WriteAllText(i + "individual.json", individualScenario[i]);
+
+            var automatSetup = AutomatDataGenerator.Generate(60000, new DateTime(2020, 8, 1, 0, 0, 0), new DateTime(2020, 8, 1, 0, 15, 0));
+            File.WriteAllText("loans.json", JsonConvert.SerializeObject(automatSetup.LoansSetup));
+            File.WriteAllText("accounts.json", JsonConvert.SerializeObject(automatSetup.AccountsSetup));
+            File.WriteAllText("payments.json", JsonConvert.SerializeObject(automatSetup.PaymentsSetup));
+
+            automatSetup.AccountsSetup = new AccountsSetup { Accounts = new AccountDTO[0] };
+            automatSetup.LoansSetup = new LoansSetup { Loans = new LoanDTO[0] };
+            automatSetup.PaymentsSetup = new PaymentsSetup { Payments = new PaymentDTO[0] };
+
+            var setupAll = invidiualSetup.Concat(automatSetup);
+            File.WriteAllText("setup.json", JsonConvert.SerializeObject(setupAll));
+        }
+
+        private static void GenerateFirstAdditional()
+        {
+            var invidiualSetup = IndividualUserDataGenerator.Generate(2000, new DateTime(2018, 1, 1), new DateTime(2020, 8, 1));
+            AddSpecialUsers(invidiualSetup);
+            invidiualSetup.LoansSetup = new LoansSetup();
+            invidiualSetup.PaymentsSetup = new PaymentsSetup();
+            invidiualSetup.TransactionsSetup = new TransactionsSetup();
+            var individualScenario = ScenarioGenerator.IndividualUserScenario(invidiualSetup, 8, 12000, 1);
+            for (int i = 0; i < individualScenario.Length; i++)
+                File.WriteAllText(i + "individual.json", individualScenario[i]);
+            
+            var reportSetup = ReportDataGenerator.GenerateOverallReportData(10000, 50000, 50000, 50000, 50000, new DateTime(2008, 1, 1), new DateTime(2018, 8, 1));
+            var userActivityReportScenario = ScenarioGenerator.UserActivityReportsScenario(reportSetup, 1, 1, new DateTime(2008, 1, 1), new DateTime(2018, 8, 1), 2);
+            for (int i = 0; i < userActivityReportScenario.Length; i++)
+                File.WriteAllText(i + "userActivityReportScenario.json", userActivityReportScenario[i]);
+
+            var overallReportScenario = ScenarioGenerator.OverallReportScenario(3500, 3500, new DateTime(2008, 1, 1), new DateTime(2018, 8, 1), TimeSpan.FromDays(1050), 2);
+            for (int i = 0; i < overallReportScenario.Length; i++)
+                File.WriteAllText(i + "overallReportScenario.json", overallReportScenario[i]);
+
+            var setupAll = invidiualSetup.Concat(reportSetup);
+            var transactionsSetup = setupAll.TransactionsSetup;
+            setupAll.TransactionsSetup = new TransactionsSetup();
+            File.WriteAllText("setup.json", JsonConvert.SerializeObject(setupAll));
+            File.WriteAllText("transactions.json", JsonConvert.SerializeObject(transactionsSetup));
         }
 
         private static void GenerateAutomatScenario()

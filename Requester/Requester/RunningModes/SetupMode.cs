@@ -32,57 +32,72 @@ namespace Requester.RunningModes
             }
             logger.Information("General setup done.");
 
-            if (File.Exists("accounts.json"))
+
+            var transactionsTask = Task.Run(async () =>
             {
-                var accounts = JsonConvert.DeserializeObject<AccountsSetup>(File.ReadAllText("accounts.json")).Accounts;
-                for (int i = 0; i < accounts.Length; i += 10000)
+                if (File.Exists("transactions.json"))
                 {
-                    var portion = accounts.Skip(i).Take(10000);
-                    var accountsSetup = new AccountsSetup { Accounts = portion.ToArray() };
-                    var result = httpClient.PostAsync("account/setup", new StringContent(JsonConvert.SerializeObject(accountsSetup), Encoding.UTF8, "application/json")).Result;
-                    logger.Information("Accounts portion setup done.");
+                    var transactions = JsonConvert.DeserializeObject<TransactionsSetup>(File.ReadAllText("transactions.json")).Transactions;
+                    for (int i = 0; i < transactions.Length; i += 10000)
+                    {
+                        var portion = transactions.Skip(i).Take(10000);
+                        var transactionsSetp = new TransactionsSetup { Transactions = portion.ToArray() };
+                        var result = httpClient.PostAsync("transaction/setup", new StringContent(JsonConvert.SerializeObject(transactionsSetp), Encoding.UTF8, "application/json")).Result;
+                        logger.Information("Transactions portion setup done.");
+                    }
                 }
-            }
+            });
+            
 
-            if (File.Exists("transactions.json"))
+            var accountsTask = Task.Run(async () =>
             {
-                var transactions = JsonConvert.DeserializeObject<TransactionsSetup>(File.ReadAllText("transactions.json")).Transactions;
-                for (int i = 0; i < transactions.Length; i += 10000)
+                if (File.Exists("accounts.json"))
                 {
-                    var portion = transactions.Skip(i).Take(10000);
-                    var transactionsSetp = new TransactionsSetup { Transactions = portion.ToArray() };
-                    var result = httpClient.PostAsync("transaction/setup", new StringContent(JsonConvert.SerializeObject(transactionsSetp), Encoding.UTF8, "application/json")).Result;
-                    logger.Information("Transactions portion setup done.");
+                    var accounts = JsonConvert.DeserializeObject<AccountsSetup>(File.ReadAllText("accounts.json")).Accounts;
+                    for (int i = 0; i < accounts.Length; i += 10000)
+                    {
+                        var portion = accounts.Skip(i).Take(10000);
+                        var accountsSetup = new AccountsSetup { Accounts = portion.ToArray() };
+                        var result = httpClient.PostAsync("account/setup", new StringContent(JsonConvert.SerializeObject(accountsSetup), Encoding.UTF8, "application/json")).Result;
+                        logger.Information("Accounts portion setup done.");
+                    }
                 }
-            }
+            });
 
-            if (File.Exists("payments.json"))
+            var paymentsTask = Task.Run(async () =>
             {
-
-                var payments = JsonConvert.DeserializeObject<PaymentsSetup>(File.ReadAllText("payments.json")).Payments;
-                for (int i = 0; i < payments.Length; i += 10000)
+                if (File.Exists("payments.json"))
                 {
-                    var portion = payments.Skip(i).Take(10000);
-                    var paymentsSetup = new PaymentsSetup { Payments = portion.ToArray() };
-                    var result = httpClient.PostAsync("payment/setup", new StringContent(JsonConvert.SerializeObject(paymentsSetup), Encoding.UTF8, "application/json")).Result;
-                    logger.Information("Payments portion setup done.");
+
+                    var payments = JsonConvert.DeserializeObject<PaymentsSetup>(File.ReadAllText("payments.json")).Payments;
+                    for (int i = 0; i < payments.Length; i += 10000)
+                    {
+                        var portion = payments.Skip(i).Take(10000);
+                        var paymentsSetup = new PaymentsSetup { Payments = portion.ToArray() };
+                        var result = httpClient.PostAsync("payment/setup", new StringContent(JsonConvert.SerializeObject(paymentsSetup), Encoding.UTF8, "application/json")).Result;
+                        logger.Information("Payments portion setup done.");
+                    }
                 }
-            }
+            });
 
-
-            if (File.Exists("loans.json"))
+            var loansTask = Task.Run(async () =>
             {
-                var loans = JsonConvert.DeserializeObject<LoansSetup>(File.ReadAllText("loans.json")).Loans;
-                for (int i = 0; i < loans.Length; i += 10000)
+                if (File.Exists("loans.json"))
                 {
-                    var portion = loans.Skip(i).Take(10000);
-                    var loansSetup = new LoansSetup { Loans = portion.ToArray() };
-                    var result = httpClient.PostAsync("loan/setup", new StringContent(JsonConvert.SerializeObject(loansSetup), Encoding.UTF8, "application/json")).Result;
-                    logger.Information("Loans portion setup done.");
+                    var loans = JsonConvert.DeserializeObject<LoansSetup>(File.ReadAllText("loans.json")).Loans;
+                    for (int i = 0; i < loans.Length; i += 10000)
+                    {
+                        var portion = loans.Skip(i).Take(10000);
+                        var loansSetup = new LoansSetup { Loans = portion.ToArray() };
+                        var result = httpClient.PostAsync("loan/setup", new StringContent(JsonConvert.SerializeObject(loansSetup), Encoding.UTF8, "application/json")).Result;
+                        logger.Information("Loans portion setup done.");
+                    }
                 }
-            }
+
+            });
 
 
+            Task.WaitAll(new Task[] { accountsTask, loansTask, transactionsTask, paymentsTask });
             logger.Information("Setup all done.");
         }
     }
