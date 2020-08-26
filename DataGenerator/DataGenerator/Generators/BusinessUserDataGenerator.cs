@@ -23,16 +23,22 @@ namespace DataGenerator
             var activePayments = ActivePayments(accounts, recipientRnd, timestampRnd);
             var loansAndPayments = ActiveLoans(accounts, recipientRnd);
 
+
+
+
             var accountsTransactions = AccountsTransactions(accounts, recipientRnd, timestampRnd);
-            var loansTransactions = LoansTransactions(loansAndPayments.Select(lp => lp.loan).ToArray(), loansAndPayments.Select(lp => lp.payment).ToArray());
+            /*
             var cardsTransactions = CardsTransactions(cards, recipientRnd, timestampRnd);
+            
+            var loansTransactions = LoansTransactions(loansAndPayments.Select(lp => lp.loan).ToArray(), loansAndPayments.Select(lp => lp.payment).ToArray());
+            
             var paymentsTransactions = PaymentsTransactions(activePayments);
 
             var allTransactions = accountsTransactions
                 .Concat(loansTransactions)
                 .Concat(cardsTransactions)
                 .Concat(paymentsTransactions)
-                .ToArray();
+                .ToArray();*/
 
             var setupall = new SetupAll
             {
@@ -41,7 +47,7 @@ namespace DataGenerator
                 LoansSetup = new LoansSetup { Loans = loansAndPayments.Select(x => x.loan).ToArray() },
                 PaymentsSetup = new PaymentsSetup { Payments = loansAndPayments.Select(x => x.payment).Concat(activePayments).ToArray() },
                 UsersSetup = new UsersSetup { Users = users },
-                TransactionsSetup = new TransactionsSetup { Transactions = allTransactions },
+                TransactionsSetup = new TransactionsSetup { Transactions = accountsTransactions },
             };
 
             return setupall;
@@ -50,7 +56,7 @@ namespace DataGenerator
         static AccountDTO[] Accounts(UserDTO[] users)
         {
             var countRnd = new RndBuilder<int>()
-              .DistributionValues(new[] { 3, 4, 5, 6, 7 })
+              .DistributionValues(new[] { 1, 2, 3, 4, 5 })
               .DistributionProbabilities(new[] { 20, 25, 20, 15, 10 })
               .Build();
 

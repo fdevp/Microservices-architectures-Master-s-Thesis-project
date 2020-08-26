@@ -68,10 +68,7 @@ namespace DataGenerator
                 .ToDictionary(k => k.Key, v => v.ToArray());
 
             var minAmount = 50;
-            var amountRnd = new RndBuilder<float>(new CurrencyRnd()).Min(minAmount).Max(10000)
-                .DistributionValues(new float[] { 300, 500, 1500, 2500, 5000, 8000 })
-                .DistributionProbabilities(new[] { 2, 15, 20, 30, 25, 5, 3 })
-                .Build();
+            var amountRnd = new RndBuilder<float>(new CurrencyRnd()).Min(minAmount).Max(1000).Build();
             var titelRnd = new TitleRnd();
             var transactionsCountRnd = new RndBuilder<int>().Min(minTransactions).Max(maxTransacitons).Build();
 
