@@ -17,12 +17,13 @@ namespace DataGenerator.Rnd
 
         public int Next(float totalAmount)
         {
-            if (totalAmount < 25000)
-                return shortLoan[rand.Next(0, shortLoan.Length)];
-            else if (totalAmount < 100000)
-                return midLoan[rand.Next(0, shortLoan.Length)];
-            else
-                return longLoan[rand.Next(0, shortLoan.Length)];
+            return rand.Next(5, 11);
+            //if (totalAmount < 25000)
+            //    return shortLoan[rand.Next(0, shortLoan.Length)];
+            //else if (totalAmount < 100000)
+            //    return midLoan[rand.Next(0, shortLoan.Length)];
+            //else
+            //    return longLoan[rand.Next(0, shortLoan.Length)];
         }
     }
 }

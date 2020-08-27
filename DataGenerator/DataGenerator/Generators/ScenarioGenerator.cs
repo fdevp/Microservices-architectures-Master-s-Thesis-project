@@ -26,9 +26,9 @@ namespace DataGenerator
                 .GroupBy(a => a.UserId)
                 .ToDictionary(k => k.Key, v => v.ToArray());
 
-            var amountRnd = new RndBuilder<float>(new CurrencyRnd()).Min(5).Max(5000)
-                .DistributionValues(new float[] { 20, 100, 300, 500, 1000, 2000, 3000 })
-                .DistributionProbabilities(new[] { 35, 30, 20, 5, 5, 2, 1, 1 })
+            var amountRnd = new RndBuilder<float>(new CurrencyRnd()).Min(5).Max(50)
+                //.DistributionValues(new float[] { 20, 100, 300, 500, 1000, 2000, 3000 })
+                //.DistributionProbabilities(new[] { 35, 30, 20, 5, 5, 2, 1, 1 })
                 .Build(); //dystrybuanta - max bardzo rzadko, min bardzo często
 
             var actions = new List<IndividualUserScenarioElement>(actionsPerGroup * clients);
@@ -68,7 +68,7 @@ namespace DataGenerator
                 .ToDictionary(k => k.Key, v => v.ToArray());
 
             var minAmount = 50;
-            var amountRnd = new RndBuilder<float>(new CurrencyRnd()).Min(minAmount).Max(1000).Build();
+            var amountRnd = new RndBuilder<float>(new CurrencyRnd()).Min(minAmount).Max(100).Build();
             var titelRnd = new TitleRnd();
             var transactionsCountRnd = new RndBuilder<int>().Min(minTransactions).Max(maxTransacitons).Build();
 

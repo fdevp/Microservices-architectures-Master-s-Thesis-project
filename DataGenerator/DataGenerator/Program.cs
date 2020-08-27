@@ -20,8 +20,8 @@ namespace DataGenerator
 
             //GenerateFirstAdditional();
             //GenerateSecondAdditional();
-            //GenerateThirdAdditional();
-            GenerateFourthAdditional();
+            GenerateThirdAdditional();
+            //GenerateFourthAdditional();
         }
 
         private static void GenerateFourthAdditional()
@@ -29,17 +29,17 @@ namespace DataGenerator
             var setupBusiness = BusinessUserDataGenerator.Generate(500, new DateTime(2010, 1, 1), new DateTime(2020, 8, 1));
             AddSpecialUsers(setupBusiness);
             
-            var businessScenario = ScenarioGenerator.BusinessUserScenario(setupBusiness, 16, 500, 5, 5, 2);
+            var businessScenario = ScenarioGenerator.BusinessUserScenario(setupBusiness, 8, 1250, 5, 5, 1);
             for (int i = 0; i < businessScenario.Length; i++)
                 File.WriteAllText(i + "business.json", businessScenario[i]);
 
-            var setupReports = ReportDataGenerator.GenerateOverallReportData(3000, 40000, 40000, 40000, 40000, new DateTime(2010, 1, 1), new DateTime(2020, 8, 1));
+            var setupReports = ReportDataGenerator.GenerateOverallReportData(5700, 40000, 40000, 40000, 40000, new DateTime(2010, 1, 1), new DateTime(2018, 8, 1));
             
-            var userActivityReportScenario = ScenarioGenerator.UserActivityReportsScenario(setupReports, 1, 1, new DateTime(2010, 1, 1), new DateTime(2020, 8, 1), 2);
+            var userActivityReportScenario = ScenarioGenerator.UserActivityReportsScenario(setupReports, 1, 1, new DateTime(2010, 1, 1), new DateTime(2018, 8, 1), 2);
             for (int i = 0; i < userActivityReportScenario.Length; i++)
                 File.WriteAllText(i + "userActivityReportScenario.json", userActivityReportScenario[i]);
 
-            var overallReportScenario = ScenarioGenerator.OverallReportScenario(1000, 1000, new DateTime(2010, 1, 1), new DateTime(2020, 8, 1), TimeSpan.FromDays(1050), 2);
+            var overallReportScenario = ScenarioGenerator.OverallReportScenario(2730, 2730, new DateTime(2010, 1, 1), new DateTime(2018, 8, 1), TimeSpan.FromDays(900), 2);
             for (int i = 0; i < overallReportScenario.Length; i++)
                 File.WriteAllText(i + "overallReportScenario.json", overallReportScenario[i]);
 
@@ -57,7 +57,7 @@ namespace DataGenerator
             for (int i = 0; i < userActivityReportScenario.Length; i++)
                 File.WriteAllText(i + "userActivityReportScenario.json", userActivityReportScenario[i]);
 
-            var overallReportScenario = ScenarioGenerator.OverallReportScenario(3500, 3500, new DateTime(2008, 1, 1), new DateTime(2018, 8, 1), TimeSpan.FromDays(1050), 2);
+            var overallReportScenario = ScenarioGenerator.OverallReportScenario(3500, 3500, new DateTime(2008, 1, 1), new DateTime(2018, 8, 1), TimeSpan.FromDays(900), 2);
             for (int i = 0; i < overallReportScenario.Length; i++)
                 File.WriteAllText(i + "overallReportScenario.json", overallReportScenario[i]);
 
@@ -84,11 +84,11 @@ namespace DataGenerator
             invidiualSetup.LoansSetup = new LoansSetup();
             invidiualSetup.PaymentsSetup = new PaymentsSetup();
             invidiualSetup.TransactionsSetup = new TransactionsSetup();
-            var individualScenario = ScenarioGenerator.IndividualUserScenario(invidiualSetup, 16, 29000, 2);
+            var individualScenario = ScenarioGenerator.IndividualUserScenario(invidiualSetup, 16, 30000, 2);
             for (int i = 0; i < individualScenario.Length; i++)
                 File.WriteAllText(i + "individual.json", individualScenario[i]);
 
-            var automatSetup = AutomatDataGenerator.Generate(40000, new DateTime(2020, 8, 1, 0, 0, 0), new DateTime(2020, 8, 1, 0, 15, 0));
+            var automatSetup = AutomatDataGenerator.Generate(32000, new DateTime(2020, 8, 1, 0, 0, 0), new DateTime(2020, 8, 1, 0, 12, 0));
             File.WriteAllText("loans.json", JsonConvert.SerializeObject(automatSetup.LoansSetup));
             File.WriteAllText("accounts.json", JsonConvert.SerializeObject(automatSetup.AccountsSetup));
             File.WriteAllText("payments.json", JsonConvert.SerializeObject(automatSetup.PaymentsSetup));
@@ -117,7 +117,7 @@ namespace DataGenerator
             for (int i = 0; i < userActivityReportScenario.Length; i++)
                 File.WriteAllText(i + "userActivityReportScenario.json", userActivityReportScenario[i]);
 
-            var overallReportScenario = ScenarioGenerator.OverallReportScenario(3500, 3500, new DateTime(2008, 1, 1), new DateTime(2018, 8, 1), TimeSpan.FromDays(1050), 2);
+            var overallReportScenario = ScenarioGenerator.OverallReportScenario(3700, 3700, new DateTime(2008, 1, 1), new DateTime(2018, 8, 1), TimeSpan.FromDays(1050), 2);
             for (int i = 0; i < overallReportScenario.Length; i++)
                 File.WriteAllText(i + "overallReportScenario.json", overallReportScenario[i]);
 

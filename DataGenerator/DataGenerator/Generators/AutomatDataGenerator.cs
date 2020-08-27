@@ -68,9 +68,9 @@ namespace DataGenerator.Generators
               .DistributionProbabilities(new[] { 10, 40, 30, 20 })
               .Build();
 
-            var amountRnd = new RndBuilder<float>(new CurrencyRnd()).Min(200).Max(3000)
-                .DistributionValues(new float[] { 500, 900, 1500, 2000 })
-                .DistributionProbabilities(new[] { 30, 30, 20, 10, 10 })
+            var amountRnd = new RndBuilder<float>(new CurrencyRnd())
+                .DistributionValues(new float[] { 30, 50, 100, 800000, 900000, 1500000 })
+                .DistributionProbabilities(new[] { 30, 20, 30, 10, 7, 3 })
                 .Build(); //dystrybuanta
             var startDateRnd = timestampRnd;
 
@@ -89,13 +89,14 @@ namespace DataGenerator.Generators
               .DistributionProbabilities(new[] { 20, 50, 30 })
               .Build();
 
-            var totalRnd = new RndBuilder<float>(new CurrencyRnd(false)).Min(100).Max(300000)
-                .DistributionValues(new float[] { 3000, 10000, 30000, 50000, 100000 })
-                .DistributionProbabilities(new[] { 5, 20, 30, 15, 15, 15 })
-                .Build(); //dystrybuanta
+            var totalRnd = new RndBuilder<float>(new CurrencyRnd(false))
+               .DistributionValues(new float[] { 300, 400, 500, 600, 5000000 })
+               .DistributionProbabilities(new[] { 20, 20, 20, 20, 20 })
+               .Build(); //dystrybuanta
 
             var instalmentsRnd = new LoanInstalmentsRnd(); //todo w zaleznosci od totalRnd
-            var paidInstalmentsRnd = new CustomPaidInstalmentsRnd(2);
+            //var paidInstalmentsRnd = new CustomPaidInstalmentsRnd(2);
+            var paidInstalmentsRnd = (Rnd<int>)new RndBuilder<int>().Min(0).Build();
 
             var intervalRnd = new RndBuilder<TimeSpan>()
               .DistributionValues(new[] { TimeSpan.FromDays(7), TimeSpan.FromDays(14), TimeSpan.FromDays(21), TimeSpan.FromDays(28), })
@@ -112,9 +113,9 @@ namespace DataGenerator.Generators
               .Build();
 
             var amountRnd = new RndBuilder<float>(new CurrencyRnd())
-                .Min(500)
-                .Max(50000)
-                .DistributionValues(new float[] { 3000, 5000, 10000, 15000, 20000, 35000 })
+                .Min(10000)
+                .Max(150000)
+                .DistributionValues(new float[] { 15000, 20000, 30000, 50000, 80000, 120000 })
                 .DistributionProbabilities(new int[] { 20, 25, 20, 15, 10, 5, 5 })
                 .Build();
 

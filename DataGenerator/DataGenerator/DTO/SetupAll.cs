@@ -9,11 +9,14 @@ namespace DataGenerator.DTO
     {
         public SetupAll Concat(SetupAll setup)
         {
+            var users = this.UsersSetup.Concat(setup.UsersSetup);
+            var distinctUsers = users.Users.GroupBy(u => u.Login).Select(g => g.First());
+
             return new SetupAll
             {
                 AccountsSetup = this.AccountsSetup.Concat(setup.AccountsSetup),
                 CardsSetup = this.CardsSetup.Concat(setup.CardsSetup),
-                UsersSetup = this.UsersSetup.Concat(setup.UsersSetup),
+                UsersSetup = new UsersSetup { Users = distinctUsers.ToArray() },
                 LoansSetup = this.LoansSetup.Concat(setup.LoansSetup),
                 PaymentsSetup = this.PaymentsSetup.Concat(setup.PaymentsSetup),
                 TransactionsSetup = this.TransactionsSetup.Concat(setup.TransactionsSetup),
