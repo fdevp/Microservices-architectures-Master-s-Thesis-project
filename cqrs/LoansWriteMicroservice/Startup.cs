@@ -36,7 +36,7 @@ namespace LoansWriteMicroservice
             services.AddGrpc(options =>
             {
                 options.Interceptors.Add<LoggingInterceptor>("LoansWrite");
-                options.Interceptors.Add<CommandsInterceptor>(commandsRepository);
+                //options.Interceptors.Add<CommandsInterceptor>(commandsRepository);
                 options.MaxReceiveMessageSize = 16 * 1024 * 1024;
             });
             services.AddSingleton(CreateMapper());

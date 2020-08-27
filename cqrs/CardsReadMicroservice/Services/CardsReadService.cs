@@ -61,6 +61,9 @@ namespace CardsReadMicroservice
         public override async Task<AggregateUserActivityResponse> AggregateUserActivity(AggregateUserActivityRequest request, ServerCallContext context)
         {
             var cards = cardsRepository.GetByAccounts(request.AccountsIds);
+            if (!cards.Any())
+                    return new AggregateUserActivityResponse();
+
             var cardsIds = cards.Select(p => p.Id).ToArray();
             var transactionsResponse = await transactionsReadClient.FilterAsync(new FilterTransactionsRequest { Cards = { cardsIds }, TimestampFrom = request.TimestampFrom, TimestampTo = request.TimestampTo });
             var transactions = transactionsResponse.Transactions.ToArray();
