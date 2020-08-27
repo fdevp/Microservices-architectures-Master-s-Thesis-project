@@ -33,7 +33,7 @@ namespace TransactionsWriteMicroservice
             {
                 options.Interceptors.Add<LoggingInterceptor>("TransactionsWrite");
                 options.Interceptors.Add<CommandsInterceptor>(commandsRepository);
-                options.MaxReceiveMessageSize = 500 * 1024 * 1024;
+                options.MaxReceiveMessageSize = 16 * 1024 * 1024;
             });
             services.AddSingleton(CreateMapper());
             services.AddSingleton(new TransactionsRepository());
