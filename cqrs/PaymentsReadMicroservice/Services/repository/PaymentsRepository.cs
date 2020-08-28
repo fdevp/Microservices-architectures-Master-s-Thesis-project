@@ -22,7 +22,7 @@ namespace PaymentsReadMicroservice.Repository
         {
             return payments.Values
                 .Where((element, index) => ((index % totalParts) + 1) == part)
-                .Where((element, index) => element.LatestProcessingTimestamp + element.Interval < dateTime)
+                .Where((element, index) => element.LatestProcessingTimestamp + element.Interval <= dateTime)
                 .ToArray();
         }
 

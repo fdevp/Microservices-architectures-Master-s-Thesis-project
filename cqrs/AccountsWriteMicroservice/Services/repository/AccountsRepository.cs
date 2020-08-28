@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -6,7 +7,7 @@ namespace AccountsWriteMicroservice.Repository
 {
     public class AccountsRepository
     {
-        private Dictionary<string, Models.Account> accounts = new Dictionary<string, Models.Account>();
+        private ConcurrentDictionary<string, Models.Account> accounts = new ConcurrentDictionary<string, Models.Account>();
 
         public Models.Account Get(string id)
         {
@@ -52,14 +53,14 @@ namespace AccountsWriteMicroservice.Repository
 
         public void Setup(IEnumerable<Models.Account> accounts)
         {
-            this.accounts = accounts.ToDictionary(a => a.Id, a => a);
+            this.accounts = new ConcurrentDictionary<string, Models.Account>(accounts.ToDictionary(a => a.Id, a => a));
         }
 
         public void SetupAppend(IEnumerable<Models.Account> accounts)
         {
             if (this.accounts == null)
             {
-                this.accounts = new Dictionary<string, Models.Account>();
+                this.accounts = new ConcurrentDictionary<string, Models.Account>();
             }
 
             foreach (var account in accounts)
