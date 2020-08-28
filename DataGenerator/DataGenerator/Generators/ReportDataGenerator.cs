@@ -5,11 +5,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace DataGenerator
+namespace DataGenerator.Generators
 {
-    public static class IndividualUserDataGenerator
+    public static class ReportDataGenerator
     {
-        public static SetupAll Generate(int usersCount, DateTime minDate, DateTime maxDate)
+        //cards loans payments transactions
+        public static SetupAll GenerateOverallReportData(int usersCount, int cardsTC, int loansTC, int paymentsTC, int accountsTC, DateTime minDate, DateTime maxDate)
         {
             var users = ValuesGenerator.CreateUsers(usersCount).ToArray();
             var accounts = Accounts(users);
@@ -20,10 +21,10 @@ namespace DataGenerator
             var activePayments = ActivePayments(accounts, recipientRnd, timestampRnd);
             var loansAndPayments = ActiveLoans(accounts, recipientRnd);
 
-            var accountsTransactions = AccountsTransactions(accounts, recipientRnd, timestampRnd);
-            var loansTransactions = LoansTransactions(loansAndPayments.Select(lp => lp.loan).ToArray(), loansAndPayments.Select(lp => lp.payment).ToArray());
-            var cardsTransactions = CardsTransactions(cards, recipientRnd, timestampRnd);
-            var paymentsTransactions = PaymentsTransactions(activePayments);
+            var accountsTransactions = AccountsTransactions(accountsTC, accounts, recipientRnd, timestampRnd);
+            var loansTransactions = LoansTransactions(loansTC, loansAndPayments.Select(lp => lp.loan).ToArray(), loansAndPayments.Select(lp => lp.payment).ToArray(), timestampRnd);
+            var cardsTransactions = CardsTransactions(cardsTC, cards, recipientRnd, timestampRnd);
+            var paymentsTransactions = PaymentsTransactions(paymentsTC, activePayments, timestampRnd);
 
             var allTransactions = accountsTransactions
                 .Concat(loansTransactions)
@@ -47,8 +48,8 @@ namespace DataGenerator
         static AccountDTO[] Accounts(UserDTO[] users)
         {
             var countRnd = new RndBuilder<int>()
-              .DistributionValues(new[] { 1, 2, 3, 4 })
-              .DistributionProbabilities(new[] { 45, 30, 15, 10 })
+              .DistributionValues(new[] { 1, 2 })
+              .DistributionProbabilities(new[] { 80, 20 })
               .Build();
 
             var amountRnd = new RndBuilder<float>(new CurrencyRnd())
@@ -60,7 +61,7 @@ namespace DataGenerator
 
             return ValuesGenerator.CreateAccounts(users, countRnd, amountRnd).ToArray();
         }
-        
+
         static CardDTO[] Cards(AccountDTO[] accounts)
         {
             var countRnd = new RndBuilder<int>()
@@ -115,8 +116,9 @@ namespace DataGenerator
             return ValuesGenerator.CreateLoans(accounts, countRnd, totalRnd, instalmentsRnd, paidInstalmentsRnd, intervalRnd, () => DateTime.UtcNow, recipientRnd).ToArray();
         }
 
-        static TransactionDTO[] AccountsTransactions(AccountDTO[] accounts, IRnd<string> recipientRnd, IRnd<DateTime> timestampRnd)
+        static IEnumerable<TransactionDTO> AccountsTransactions(int accountsTC, AccountDTO[] accounts, IRnd<string> recipientRnd, IRnd<DateTime> timestampRnd)
         {
+            var rand = new Random();
             var countRnd = new RndBuilder<int>().Min(0).Max(100).Build(); //przykladowo   init: 0-3000
             var amountRnd = new RndBuilder<float>(new CurrencyRnd()).Min(10).Max(70000)
                 .DistributionValues(new float[] { 200, 500, 1000, 3000, 5000, 10000, 30000, 50000 })
@@ -124,28 +126,89 @@ namespace DataGenerator
                 .Build();//dystrybuanta - max bardzo rzadko, min bardzo często
             var titleRnd = new RndBuilder<string>(new TitleRnd()).Build();
 
-            return ValuesGenerator.CreateTransactions(accounts, recipientRnd, countRnd, timestampRnd, amountRnd, titleRnd).ToArray();
+            for (int i = 0; i < accountsTC; i++)
+            {
+                var sender = recipientRnd.Next();
+                var recipient = recipientRnd.Next(sender);
+                yield return new TransactionDTO
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    Amount = amountRnd.Next(),
+                    Sender = sender,
+                    Timestamp = timestampRnd.Next(),
+                    Recipient = recipient,
+                    Title = titleRnd.Next()
+                };
+            }
         }
 
-        static TransactionDTO[] LoansTransactions(LoanDTO[] loans, PaymentDTO[] payments)
+        static IEnumerable<TransactionDTO> LoansTransactions(int loansTC, LoanDTO[] loans, PaymentDTO[] payments, IRnd<DateTime> timestampRnd)
         {
+            var rand = new Random();
             var paymentsDict = payments.ToDictionary(k => k.Id, k => k);
-            return ValuesGenerator.CreateTransactions(loans, paymentsDict).ToArray();
+            for (int i = 0; i < loansTC; i++)
+            {
+                var loan = loans[rand.Next(0, payments.Length)];
+                var payment = paymentsDict[loan.PaymentId];
+                var timestamp = timestampRnd.Next();
+                yield return new TransactionDTO
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    Amount = payment.Amount,
+                    PaymentId = payment.Id,
+                    Sender = payment.AccountId,
+                    Recipient = payment.Recipient,
+                    Timestamp = timestamp,
+                    Title = $"{i + 1} of {loan.Instalments} instalments. Payment {"nejm"}({payment.Id})"
+                };
+            }
         }
 
-        static TransactionDTO[] PaymentsTransactions(PaymentDTO[] payments)
+        static IEnumerable<TransactionDTO> PaymentsTransactions(int paymentsTC, PaymentDTO[] payments, IRnd<DateTime> timestampRnd)
         {
-            return ValuesGenerator.CreateTransactions(payments).ToArray();
+            var rand = new Random();
+            for (int i = 0; i < paymentsTC; i++)
+            {
+                var payment = payments[rand.Next(0, payments.Length)];
+                var timestamp = timestampRnd.Next();
+                yield return new TransactionDTO
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    Amount = payment.Amount,
+                    PaymentId = payment.Id,
+                    Sender = payment.AccountId,
+                    Recipient = payment.Recipient,
+                    Timestamp = timestamp,
+                    Title = $"Transaction of payment {"nejm"}({payment.Id})"
+                };
+            }
         }
 
-        static TransactionDTO[] CardsTransactions(CardDTO[] cards, IRnd<string> recipientRnd, IRnd<DateTime> timestampRnd)
+        static IEnumerable<TransactionDTO> CardsTransactions(int cardsTC, CardDTO[] cards, IRnd<string> recipientRnd, IRnd<DateTime> timestampRnd)
         {
+            var rand = new Random();
             var countRnd = new RndBuilder<int>().Min(50).Max(100).Build(); //przykladowo  50-20000
             var amountRnd = new RndBuilder<float>(new CurrencyRnd()).Min(5).Max(20000)
                 .DistributionValues(new float[] { 20, 100, 300, 500, 1000, 2000, 5000, 10000 })
                 .DistributionProbabilities(new[] { 35, 30, 20, 5, 5, 2, 1, 1, 1 })
                 .Build(); //dystrybuanta - max bardzo rzadko, min bardzo często
-            return ValuesGenerator.CreateTransactions(cards, recipientRnd, countRnd, timestampRnd, amountRnd).ToArray();
+
+            for (int i = 0; i < cardsTC; i++)
+            {
+                var card = cards[rand.Next(0, cards.Length)];
+                var timestamp = timestampRnd.Next();
+                var amount = amountRnd.Next();
+                yield return new TransactionDTO
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    Amount = amount,
+                    CardId = card.Id,
+                    Sender = card.AccountId,
+                    Timestamp = timestamp,
+                    Recipient = recipientRnd.Next(card.AccountId),
+                    Title = $"{timestamp} card usage for a transfer worth {amount} EUR."
+                };
+            }
         }
     }
 }

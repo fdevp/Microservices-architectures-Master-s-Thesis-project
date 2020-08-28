@@ -9,11 +9,12 @@ enum PaymentStatus {
 
 message Payment {
   string id = 1;
-  float amount = 2;
-  google.protobuf.Timestamp startTimestamp = 3;
-  google.protobuf.Timestamp latestProcessingTimestamp = 4;
-  PaymentStatus status = 5;
-  google.protobuf.Duration interval = 6;
-  string accountId = 7;
-  string recipient = 8;
+  string name = 2;
+  float amount = 3;
+  google.protobuf.Timestamp startTimestamp = 4;
+  google.protobuf.Timestamp latestProcessingTimestamp = 5;
+  PaymentStatus status = 6;
+  google.protobuf.Duration interval = 7;
+  string accountId = 8;
+  string recipient = 9;
 }

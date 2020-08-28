@@ -38,7 +38,7 @@ namespace AccountsReadMicroservice
             services.AddGrpc(options =>
             {
                 options.Interceptors.Add<LoggingInterceptor>("AccountsRead", failureSettings);
-                options.MaxReceiveMessageSize = 500 * 1024 * 1024;
+                options.MaxReceiveMessageSize = 16 * 1024 * 1024;
             });
             services.AddSingleton(CreateMapper());
             services.AddSingleton(CreateTransactionsClient());
@@ -56,8 +56,10 @@ namespace AccountsReadMicroservice
 
             rabbitMq.Received += (sender, projection) =>
             {
-                if (projection.Upsert != null)
+                if (projection.Upsert != null && projection.Upsert.Length > 0)
                     repository.Upsert(projection.Upsert);
+                if (projection.Upsert != null && projection.Upsert.Length == 0)
+                    repository.Clear();
                 if (projection.Remove != null)
                     repository.Remove(projection.Remove);
             };
@@ -103,7 +105,7 @@ namespace AccountsReadMicroservice
             httpClientHandler.ServerCertificateCustomValidationCallback =
                 HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
             var httpClient = new HttpClient(httpClientHandler);
-            var channel = GrpcChannel.ForAddress(addresses.TransactionsRead, new GrpcChannelOptions { HttpClient = httpClient, MaxReceiveMessageSize = 500 * 1024 * 1024 });
+            var channel = GrpcChannel.ForAddress(addresses.TransactionsRead, new GrpcChannelOptions { HttpClient = httpClient, MaxReceiveMessageSize = 16 * 1024 * 1024 });
             return new TransactionsReadClient(channel);
         }
     }

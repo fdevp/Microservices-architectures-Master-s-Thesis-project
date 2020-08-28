@@ -64,6 +64,8 @@ namespace LoansReadMicroservice
         public override async Task<AggregateUserActivityResponse> AggregateUserActivity(AggregateUserActivityRequest request, ServerCallContext context)
         {
             var loans = loansRepository.GetByAccounts(request.AccountsIds);
+            if (!loans.Any())
+                return new AggregateUserActivityResponse();
             var paymentsIds = loans.Select(l => l.PaymentId).ToArray();
             var transactionsResponse = await transactionsReadClient.FilterAsync(new FilterTransactionsRequest { Payments = { paymentsIds }, TimestampFrom = request.TimestampFrom, TimestampTo = request.TimestampTo }, context.RequestHeaders.SelectCustom());
             var transactions = transactionsResponse.Transactions.ToArray();

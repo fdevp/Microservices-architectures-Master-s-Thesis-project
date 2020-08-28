@@ -43,7 +43,7 @@ namespace PaymentsReadMicroservice
             services.AddGrpc(options =>
             {
                 options.Interceptors.Add<LoggingInterceptor>("PaymentsRead", failureSettings);
-                options.MaxReceiveMessageSize = 500 * 1024 * 1024;
+                options.MaxReceiveMessageSize = 16 * 1024 * 1024;
             });
             services.AddSingleton(CreateMapper());
             services.AddSingleton(repository);
@@ -61,8 +61,10 @@ namespace PaymentsReadMicroservice
 
             rabbitMq.Received += (sender, projection) =>
             {
-                if (projection.Upsert != null)
+                if (projection.Upsert != null && projection.Upsert.Length > 0)
                     repository.Upsert(projection.Upsert);
+                if (projection.Upsert != null && projection.Upsert.Length == 0)
+                    repository.Clear();
                 if (projection.Remove != null)
                     repository.Remove(projection.Remove);
             };
@@ -110,10 +112,10 @@ namespace PaymentsReadMicroservice
                 HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
             var httpClient = new HttpClient(httpClientHandler);
 
-            var transactionsChannel = GrpcChannel.ForAddress(addresses.TransactionsRead, new GrpcChannelOptions { HttpClient = httpClient, MaxReceiveMessageSize = 500 * 1024 * 1024 });
+            var transactionsChannel = GrpcChannel.ForAddress(addresses.TransactionsRead, new GrpcChannelOptions { HttpClient = httpClient, MaxReceiveMessageSize = 16 * 1024 * 1024 });
             services.AddSingleton(new TransactionsReadClient(transactionsChannel));
 
-            var loansChannel = GrpcChannel.ForAddress(addresses.LoansRead, new GrpcChannelOptions { HttpClient = httpClient, MaxReceiveMessageSize = 500 * 1024 * 1024 });
+            var loansChannel = GrpcChannel.ForAddress(addresses.LoansRead, new GrpcChannelOptions { HttpClient = httpClient, MaxReceiveMessageSize = 16 * 1024 * 1024 });
             services.AddSingleton(new LoansReadClient(loansChannel));
         }
     }

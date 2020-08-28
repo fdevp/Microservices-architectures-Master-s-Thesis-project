@@ -32,11 +32,12 @@ namespace APIGateway.Controllers
         [Route("clear")]
         public Task Clear()
         {
-            this.publishingRouter.Publish(Queues.Users, new SetupUsersEvent(), null);
-            this.publishingRouter.Publish(Queues.Accounts, new SetupAccountsEvent(), null);
-            this.publishingRouter.Publish(Queues.Cards, new SetupCardsEvent(), null);
-            this.publishingRouter.Publish(Queues.Loans, new SetupLoansEvent(), null);
-            this.publishingRouter.Publish(Queues.Payments, new SetupPaymentsEvent(), null);
+            this.publishingRouter.Publish(Queues.Users, new SetupUsersEvent { Messages = new UserMessage[0], Users = new User[0] }, null);
+            this.publishingRouter.Publish(Queues.Accounts, new SetupAccountsEvent { Accounts = new Account[0] }, null);
+            this.publishingRouter.Publish(Queues.Cards, new SetupCardsEvent { Cards = new Card[0] }, null);
+            this.publishingRouter.Publish(Queues.Loans, new SetupLoansEvent { Loans = new Loan[0] }, null);
+            this.publishingRouter.Publish(Queues.Payments, new SetupPaymentsEvent { Payments = new Payment[0] }, null);
+            this.publishingRouter.Publish(Queues.Transactions, new SetupTransactionsEvent { Transactions = new Transaction[0] }, null);
             return Task.CompletedTask;
         }
 
@@ -52,7 +53,7 @@ namespace APIGateway.Controllers
 
             var cardsEvent = mapper.Map<SetupCardsEvent>(setup.CardsSetup);
             this.publishingRouter.Publish(Queues.Cards, cardsEvent, null);
-            
+
             for (int i = 0; i < setup.LoansSetup.loans.Length; i += 10000)
             {
                 var portion = setup.LoansSetup.loans.Skip(i).Take(10000).ToArray();

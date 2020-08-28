@@ -35,8 +35,8 @@ namespace TransactionsWriteMicroservice
             services.AddGrpc(options =>
             {
                 options.Interceptors.Add<LoggingInterceptor>("TransactionsWrite", failureSettings);
-                options.Interceptors.Add<CommandsInterceptor>(commandsRepository);
-                options.MaxReceiveMessageSize = 500 * 1024 * 1024;
+                //options.Interceptors.Add<CommandsInterceptor>(commandsRepository);
+                options.MaxReceiveMessageSize = 16 * 1024 * 1024;
             });
             services.AddSingleton(CreateMapper());
             services.AddSingleton(new TransactionsRepository());

@@ -45,7 +45,8 @@ namespace AccountsWriteMicroservice
 
             accountsRepository.Transfer(request.Transfer.AccountId, request.Transfer.Recipient, request.Transfer.Amount);
             var affectedAccounts = new[] { accountsRepository.Get(request.Transfer.AccountId), accountsRepository.Get(request.Transfer.Recipient) };
-            projectionChannel.Publish(context.RequestHeaders.GetFlowId(), new DataProjection<Models.Account, string> { Upsert = affectedAccounts });
+            if (affectedAccounts.Length > 0)
+                projectionChannel.Publish(context.RequestHeaders.GetFlowId(), new DataProjection<Models.Account, string> { Upsert = affectedAccounts });
 
             return new TransferResponse { Transaction = result.Transaction };
         }
@@ -62,8 +63,9 @@ namespace AccountsWriteMicroservice
             };
             var result = await transactionsClient.BatchCreateAsync(batchAddTransactionsRequest, context.RequestHeaders.SelectCustom());
 
-            var affectedAccounts = ApplyBatchToRepository(request);
-            projectionChannel.Publish(context.RequestHeaders.GetFlowId(), new DataProjection<Models.Account, string> { Upsert = affectedAccounts.ToArray() });
+            var affectedAccounts = ApplyBatchToRepository(request).ToArray();
+            if (affectedAccounts.Length > 0)
+                projectionChannel.Publish(context.RequestHeaders.GetFlowId(), new DataProjection<Models.Account, string> { Upsert = affectedAccounts });
 
             return new Empty();
         }

@@ -70,6 +70,8 @@ namespace PaymentsReadMicroservice
         public override async Task<AggregateUserActivityResponse> AggregateUserActivity(AggregateUserActivityRequest request, ServerCallContext context)
         {
             var payments = paymentsRepository.GetByAccounts(request.AccountsIds);
+            if (!payments.Any())
+                return new AggregateUserActivityResponse();
             var paymentsIds = payments.Select(p => p.Id).ToArray();
             var transactionsResponse = await transactionsClient.FilterAsync(new FilterTransactionsRequest { Payments = { paymentsIds }, TimestampFrom = request.TimestampFrom, TimestampTo = request.TimestampTo }, context.RequestHeaders.SelectCustom());
             var transactions = transactionsResponse.Transactions.ToArray();
@@ -85,7 +87,7 @@ namespace PaymentsReadMicroservice
             foreach (var portion in portions)
             {
                 var debits = portion.Sum(p => (float?)p.Transaction.Amount) ?? 0;
-                yield return new UserReportPortion { Period = portion.Key, Debits = debits, Element = payment.Id };
+                yield return new UserReportPortion { Period = portion.Key, Debits = debits, Element = payment.Name };
             }
         }
     }

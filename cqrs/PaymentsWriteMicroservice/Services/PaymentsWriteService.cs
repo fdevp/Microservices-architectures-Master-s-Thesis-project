@@ -41,7 +41,8 @@ namespace PaymentsWriteMicroservice
         {
             paymentsRepository.UpdateLastRepayTimestamp(request.Ids, request.LatestProcessingTimestamp.ToDateTime());
             var updatedPayments = request.Ids.Select(id => paymentsRepository.Get(id)).ToArray();
-            projectionChannel.Publish(context.RequestHeaders.GetFlowId(), new DataProjection<Models.Payment, string> { Upsert = updatedPayments });
+            if (updatedPayments.Length > 0)
+                projectionChannel.Publish(context.RequestHeaders.GetFlowId(), new DataProjection<Models.Payment, string> { Upsert = updatedPayments });
             return Task.FromResult(new Empty());
         }
 
@@ -50,7 +51,8 @@ namespace PaymentsWriteMicroservice
             foreach (var id in request.Ids)
                 paymentsRepository.Cancel(id);
             var cancelledPayments = request.Ids.Select(id => paymentsRepository.Get(id)).ToArray();
-            projectionChannel.Publish(context.RequestHeaders.GetFlowId(), new DataProjection<Models.Payment, string> { Upsert = cancelledPayments });
+            if (cancelledPayments.Length > 0)
+                projectionChannel.Publish(context.RequestHeaders.GetFlowId(), new DataProjection<Models.Payment, string> { Upsert = cancelledPayments });
             return Task.FromResult(new Empty());
         }
 

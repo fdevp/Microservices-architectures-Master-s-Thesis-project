@@ -1,12 +1,13 @@
 using System;
 using System.Linq;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 
 namespace PaymentsReadMicroservice.Repository
 {
     public class PaymentsRepository
     {
-        private Dictionary<string, Models.Payment> payments = new Dictionary<string, Models.Payment>();
+        private ConcurrentDictionary<string, Models.Payment> payments = new ConcurrentDictionary<string, Models.Payment>();
 
         public Models.Payment Get(string id)
         {
@@ -21,7 +22,7 @@ namespace PaymentsReadMicroservice.Repository
         {
             return payments.Values
                 .Where((element, index) => ((index % totalParts) + 1) == part)
-                .Where((element, index) => element.LatestProcessingTimestamp + element.Interval < dateTime)
+                .Where((element, index) => element.LatestProcessingTimestamp + element.Interval <= dateTime)
                 .ToArray();
         }
 
@@ -43,8 +44,13 @@ namespace PaymentsReadMicroservice.Repository
         {
             foreach (var id in ids)
             {
-                payments.Remove(id);
+                payments.TryRemove(id, out var removed);
             }
+        }
+
+        public void Clear()
+        {
+            this.payments = new ConcurrentDictionary<string, Models.Payment>();
         }
     }
 }

@@ -34,7 +34,7 @@ namespace BatchesBranchMicroservice
             services.AddGrpc(options =>
             {
                 options.Interceptors.Add<LoggingInterceptor>("BatchesBranch", failureSettings);
-                options.MaxReceiveMessageSize = 8 * 1024 * 1024;
+                options.MaxReceiveMessageSize = 16 * 1024 * 1024;
             });
             CreateClients(services);
         }
@@ -72,16 +72,16 @@ namespace BatchesBranchMicroservice
                 HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
             var httpClient = new HttpClient(httpClientHandler);
 
-            var accountsChannel = GrpcChannel.ForAddress(addresses.Accounts, new GrpcChannelOptions { HttpClient = httpClient, MaxReceiveMessageSize = 8 * 1024 * 1024 });
+            var accountsChannel = GrpcChannel.ForAddress(addresses.Accounts, new GrpcChannelOptions { HttpClient = httpClient, MaxReceiveMessageSize = 16 * 1024 * 1024 });
             services.AddSingleton(new AccountsClient(accountsChannel));
 
-            var usersChannel = GrpcChannel.ForAddress(addresses.Users, new GrpcChannelOptions { HttpClient = httpClient, MaxReceiveMessageSize = 8 * 1024 * 1024 });
+            var usersChannel = GrpcChannel.ForAddress(addresses.Users, new GrpcChannelOptions { HttpClient = httpClient, MaxReceiveMessageSize = 16 * 1024 * 1024 });
             services.AddSingleton(new UsersClient(usersChannel));
 
-            var paymentsChannel = GrpcChannel.ForAddress(addresses.Payments, new GrpcChannelOptions { HttpClient = httpClient, MaxReceiveMessageSize = 8 * 1024 * 1024 });
+            var paymentsChannel = GrpcChannel.ForAddress(addresses.Payments, new GrpcChannelOptions { HttpClient = httpClient, MaxReceiveMessageSize = 16 * 1024 * 1024 });
             services.AddSingleton(new PaymentsClient(paymentsChannel));
 
-            var loansChannel = GrpcChannel.ForAddress(addresses.Loans, new GrpcChannelOptions { HttpClient = httpClient, MaxReceiveMessageSize = 8 * 1024 * 1024 });
+            var loansChannel = GrpcChannel.ForAddress(addresses.Loans, new GrpcChannelOptions { HttpClient = httpClient, MaxReceiveMessageSize = 16 * 1024 * 1024 });
             services.AddSingleton(new LoansClient(loansChannel));
         }
     }

@@ -57,7 +57,7 @@ namespace DataGenerator
         }
 
         public static IEnumerable<PaymentDTO> CreatePayments(AccountDTO[] accounts, PaymentStatus status, IRnd<string> recipientRnd,
-            IRnd<int> countRnd, IRnd<float> amountRnd, IRnd<DateTime> startDateRnd, Func<DateTime> datetimeNow, IRnd<TimeSpan> intervalRnd)
+            IRnd<int> countRnd, IRnd<float> amountRnd, IRnd<DateTime> startDateRnd, Func<DateTime> datetimeNow, IRnd<TimeSpan> intervalRnd, TitleRnd titleRnd)
         {
             foreach (var account in accounts)
             {
@@ -71,6 +71,7 @@ namespace DataGenerator
                     yield return new PaymentDTO
                     {
                         Id = Guid.NewGuid().ToString(),
+                        Name = titleRnd.Next(5),
                         AccountId = account.Id,
                         Amount = amountRnd.Next(),
                         StartTimestamp = startTimestamp,
@@ -113,6 +114,7 @@ namespace DataGenerator
                     var payment = new PaymentDTO
                     {
                         Id = Guid.NewGuid().ToString(),
+                        Name = $"Loan {loan.Id} payment",
                         AccountId = account.Id,
                         Amount = totalAmount / instalments,
                         Interval = interval,

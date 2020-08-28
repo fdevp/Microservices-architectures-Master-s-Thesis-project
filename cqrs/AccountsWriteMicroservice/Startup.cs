@@ -39,8 +39,8 @@ namespace AccountsWriteMicroservice
             services.AddGrpc(options =>
             {
                 options.Interceptors.Add<LoggingInterceptor>("AccountsWrite", failureSettings);
-                options.Interceptors.Add<CommandsInterceptor>(commandsRepository);
-                options.MaxReceiveMessageSize = 500 * 1024 * 1024;
+                //options.Interceptors.Add<CommandsInterceptor>(commandsRepository);
+                options.MaxReceiveMessageSize = 16 * 1024 * 1024;
             });
 
             services.AddSingleton(CreateMapper());
@@ -89,7 +89,7 @@ namespace AccountsWriteMicroservice
             httpClientHandler.ServerCertificateCustomValidationCallback =
                 HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
             var httpClient = new HttpClient(httpClientHandler);
-            var channel = GrpcChannel.ForAddress(addresses.TransactionsWrite, new GrpcChannelOptions { HttpClient = httpClient, MaxReceiveMessageSize = 500 * 1024 * 1024 });
+            var channel = GrpcChannel.ForAddress(addresses.TransactionsWrite, new GrpcChannelOptions { HttpClient = httpClient, MaxReceiveMessageSize = 16 * 1024 * 1024 });
 
             return new TransactionsWriteClient(channel);
         }

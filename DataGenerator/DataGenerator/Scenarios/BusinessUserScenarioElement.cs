@@ -6,6 +6,7 @@ namespace DataGenerator
 {
     public class BusinessUserScenarioElement
     {
+        public string No { get; set; }
         public string User { get; set; }
         public string UserId { get; set; }
         public int Group { get; set; }

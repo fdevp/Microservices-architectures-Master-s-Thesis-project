@@ -26,7 +26,7 @@ namespace SharedClasses
         public override async Task<TResponse> UnaryServerHandler<TRequest, TResponse>(TRequest request, Grpc.Core.ServerCallContext context, Grpc.Core.UnaryServerMethod<TRequest, TResponse> continuation)
         {
             var method = context.Method;
-            var flowId = GetFlowId(request);
+            var flowId = context.RequestHeaders.FirstOrDefault(h => h.Key == "flowid")?.Value;
             
             var isGuid = Guid.TryParse(flowId, out var guid);
             if (isGuid && guid.GetHashCode() % failureSettings.ComponentsCount == failureSettings.ComponentNumber)

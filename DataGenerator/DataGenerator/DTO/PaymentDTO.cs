@@ -5,6 +5,7 @@ namespace DataGenerator
     public class PaymentDTO
     {
         public string Id { get; set; }
+        public string Name { get; set; }
         public int Status { get; set; }
         public string AccountId { get; set; }
         public string Recipient { get; set; }

@@ -38,7 +38,7 @@ namespace LoansReadMicroservice
             services.AddGrpc(options =>
             {
                 options.Interceptors.Add<LoggingInterceptor>("LoansRead", failureSettings);
-                options.MaxReceiveMessageSize = 500 * 1024 * 1024;
+                options.MaxReceiveMessageSize = 16 * 1024 * 1024;
             });
             services.AddSingleton(CreateMapper());
             services.AddSingleton(repository);
@@ -56,8 +56,10 @@ namespace LoansReadMicroservice
 
             rabbitMq.Received += (sender, projection) =>
             {
-                if (projection.Upsert != null)
+                if (projection.Upsert != null && projection.Upsert.Length > 0)
                     repository.Upsert(projection.Upsert);
+                if (projection.Upsert != null && projection.Upsert.Length == 0)
+                    repository.Clear();
                 if (projection.Remove != null)
                     repository.Remove(projection.Remove);
             };
@@ -104,10 +106,10 @@ namespace LoansReadMicroservice
                 HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
             var httpClient = new HttpClient(httpClientHandler);
 
-            var paymentsChannel = GrpcChannel.ForAddress(addresses.PaymentsRead, new GrpcChannelOptions { HttpClient = httpClient, MaxReceiveMessageSize = 500 * 1024 * 1024 });
+            var paymentsChannel = GrpcChannel.ForAddress(addresses.PaymentsRead, new GrpcChannelOptions { HttpClient = httpClient, MaxReceiveMessageSize = 16 * 1024 * 1024 });
             services.AddSingleton(new PaymentsReadClient(paymentsChannel));
 
-            var transactionsChannel = GrpcChannel.ForAddress(addresses.TransactionsRead, new GrpcChannelOptions { HttpClient = httpClient, MaxReceiveMessageSize = 500 * 1024 * 1024 });
+            var transactionsChannel = GrpcChannel.ForAddress(addresses.TransactionsRead, new GrpcChannelOptions { HttpClient = httpClient, MaxReceiveMessageSize = 16 * 1024 * 1024 });
             services.AddSingleton(new TransactionsReadClient(transactionsChannel));
         }
     }

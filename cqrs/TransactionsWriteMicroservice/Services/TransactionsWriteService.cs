@@ -35,8 +35,9 @@ namespace TransactionsWriteMicroservice
 
         public override Task<Empty> BatchCreate(BatchCreateTransactionRequest request, ServerCallContext context)
         {
-            var transactions = request.Requests.Select(r => transactionsRepository.Create(r.Title, r.Amount, r.Recipient, r.Sender, r.PaymentId, r.CardId));
-            projectionChannel.Publish(context.RequestHeaders.GetFlowId(), new DataProjection<Models.Transaction, string> { Upsert = transactions.ToArray() });
+            var transactions = request.Requests.Select(r => transactionsRepository.Create(r.Title, r.Amount, r.Recipient, r.Sender, r.PaymentId, r.CardId)).ToArray();
+            if (transactions.Length > 0)
+                projectionChannel.Publish(context.RequestHeaders.GetFlowId(), new DataProjection<Models.Transaction, string> { Upsert = transactions });
             var response = transactions.Select(transaction => mapper.Map<Transaction>(transaction))
                 .ToArray();
             return Task.FromResult(new Empty());
