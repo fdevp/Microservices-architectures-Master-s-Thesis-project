@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using Models;
@@ -7,8 +8,8 @@ namespace CardsReadMicroservice.Repository
 {
     public class CardsRepository
     {
-        private Dictionary<string, Models.Card> cards = new Dictionary<string, Models.Card>();
-        private Dictionary<string, Models.Block> blocks = new Dictionary<string, Models.Block>();
+        private ConcurrentDictionary<string, Models.Card> cards = new ConcurrentDictionary<string, Models.Card>();
+        private ConcurrentDictionary<string, Models.Block> blocks = new ConcurrentDictionary<string, Models.Block>();
 
         public Models.Card GetCard(string id)
         {
@@ -52,20 +53,20 @@ namespace CardsReadMicroservice.Repository
             {
                 if (update.CardId != null)
                 {
-                    cards.Remove(update.CardId);
+                    cards.TryRemove(update.CardId, out var removed);
                 }
 
                 if (update.BlockId != null)
                 {
-                    blocks.Remove(update.BlockId);
+                    blocks.TryRemove(update.BlockId, out var removed);
                 }
             }
         }
 
         public void Clear()
         {
-            this.cards = new Dictionary<string, Models.Card>();
-            this.blocks = new Dictionary<string, Models.Block>();
+            this.cards = new ConcurrentDictionary<string, Models.Card>();
+            this.blocks = new ConcurrentDictionary<string, Models.Block>();
         }
     }
 }

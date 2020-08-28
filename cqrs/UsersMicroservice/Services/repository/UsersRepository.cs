@@ -7,9 +7,9 @@ namespace UsersMicroservice.Repository
 {
 	public class UsersRepository
     {
-        private ConcurrentDictionary<string, Session> sessions = new ConcurrentDictionary<string, Session>();
-        private ConcurrentDictionary<string, User> users = new ConcurrentDictionary<string, User>();
-        private ConcurrentDictionary<string, Inbox> inboxes = new ConcurrentDictionary<string, Inbox>();
+        private Dictionary<string, Session> sessions = new Dictionary<string, Session>();
+        private Dictionary<string, User> users = new Dictionary<string, User>();
+        private Dictionary<string, Inbox> inboxes = new Dictionary<string, Inbox>();
 
 
         public string CreateSession(string login, string password)
@@ -28,7 +28,7 @@ namespace UsersMicroservice.Repository
 
         public void RemoveSession(string token)
         {
-            sessions.TryRemove(token, out var removed);
+            sessions.Remove(token);
         }
 
         public void AddMessage(string userId, string message)
@@ -41,9 +41,9 @@ namespace UsersMicroservice.Repository
 
         public void Setup(IEnumerable<User> users, IEnumerable<Inbox> inboxes)
         {
-            sessions = new ConcurrentDictionary<string, Session>();
-            this.users = new ConcurrentDictionary<string, User>(users.ToDictionary(u => u.Login, u => u));
-            this.inboxes = new ConcurrentDictionary<string, Inbox>(inboxes.ToDictionary(i => i.UserId, i => i));
+            sessions = new Dictionary<string, Session>();
+            this.users = new Dictionary<string, User>(users.ToDictionary(u => u.Login, u => u));
+            this.inboxes = new Dictionary<string, Inbox>(inboxes.ToDictionary(i => i.UserId, i => i));
         }
     }
 }

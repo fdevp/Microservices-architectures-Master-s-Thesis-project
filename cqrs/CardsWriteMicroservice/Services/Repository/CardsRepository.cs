@@ -8,7 +8,7 @@ namespace CardsWriteMicroservice.Repository
     public class CardsRepository
     {
         private Dictionary<string, Models.Card> cards = new Dictionary<string, Models.Card>();
-        private ConcurrentDictionary<string, Models.Block> blocks = new ConcurrentDictionary<string, Models.Block>();
+        private Dictionary<string, Models.Block> blocks = new Dictionary<string, Models.Block>();
 
         public Models.Card GetCard(string id)
         {
@@ -44,7 +44,7 @@ namespace CardsWriteMicroservice.Repository
         public void Setup(IEnumerable<Models.Card> cards, IEnumerable<Models.Block> blocks)
         {
             this.cards = cards.ToDictionary(c => c.Id, c => c);
-            this.blocks = new ConcurrentDictionary<string, Models.Block>(blocks.ToDictionary(b => b.Id, b => b));
+            this.blocks = new Dictionary<string, Models.Block>(blocks.ToDictionary(b => b.Id, b => b));
         }
     }
 }

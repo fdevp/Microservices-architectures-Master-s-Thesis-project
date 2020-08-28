@@ -1,12 +1,13 @@
 using System;
 using System.Linq;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 
 namespace PaymentsReadMicroservice.Repository
 {
     public class PaymentsRepository
     {
-        private Dictionary<string, Models.Payment> payments = new Dictionary<string, Models.Payment>();
+        private ConcurrentDictionary<string, Models.Payment> payments = new ConcurrentDictionary<string, Models.Payment>();
 
         public Models.Payment Get(string id)
         {
@@ -43,13 +44,13 @@ namespace PaymentsReadMicroservice.Repository
         {
             foreach (var id in ids)
             {
-                payments.Remove(id);
+                payments.TryRemove(id, out var removed);
             }
         }
 
         public void Clear()
         {
-            this.payments = new Dictionary<string, Models.Payment>();
+            this.payments = new ConcurrentDictionary<string, Models.Payment>();
         }
     }
 }

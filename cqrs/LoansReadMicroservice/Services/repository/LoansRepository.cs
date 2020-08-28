@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -5,7 +6,7 @@ namespace LoansReadMicroservice.Repository
 {
     public class LoansRepository
     {
-        private Dictionary<string, Models.Loan> loans = new Dictionary<string, Models.Loan>();
+        private ConcurrentDictionary<string, Models.Loan> loans = new ConcurrentDictionary<string, Models.Loan>();
 
         public Models.Loan Get(string id)
         {
@@ -42,13 +43,13 @@ namespace LoansReadMicroservice.Repository
         {
             foreach (var id in ids)
             {
-                loans.Remove(id);
+                loans.TryRemove(id, out var removed);
             }
         }
 
         public void Clear()
         {
-            this.loans = new Dictionary<string, Models.Loan>();
+            this.loans = new ConcurrentDictionary<string, Models.Loan>();
         }
     }
 }
