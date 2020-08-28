@@ -66,7 +66,6 @@ namespace SharedClasses.Messaging
 
         private void Handle<T>(TaskCompletionSource<T> tcs, MqMessage message)
         {
-            var data = JSON.Deserialize<T>(message.Data, Options.ISO8601Utc);
             if (message.Type == typeof(ErrorEvent).Name)
             {
                 logger.LogInformation($"Service='{serviceName}' FlowId='{message.FlowId}' Method='{message.Type}' Type='Error'");
@@ -75,6 +74,7 @@ namespace SharedClasses.Messaging
             }
             else
             {
+				var data = JSON.Deserialize<T>(message.Data, Options.ISO8601Utc);
                 tcs.SetResult(data);
             }
         }
