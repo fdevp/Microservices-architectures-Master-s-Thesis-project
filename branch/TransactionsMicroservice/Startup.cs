@@ -19,7 +19,7 @@ namespace TransactionsMicroservice
             services.AddGrpc(options =>
             {
                 options.Interceptors.Add<LoggingInterceptor>("Transactions");
-                options.MaxReceiveMessageSize = 8 * 1024 * 1024;
+                options.MaxReceiveMessageSize = 16 * 1024 * 1024;
             });
             services.AddSingleton(CreateMapper());
             services.AddSingleton(new TransactionsRepository());

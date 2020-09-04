@@ -35,7 +35,7 @@ namespace DataGenerator.DTO
             return new AccountsSetup { Accounts = this.Accounts.Concat(setup.Accounts).ToArray() };
         }
 
-        public AccountDTO[] Accounts { get; set; }
+        public AccountDTO[] Accounts { get; set; } = new AccountDTO[0];
     }
 
     public class CardsSetup
@@ -45,7 +45,7 @@ namespace DataGenerator.DTO
             return new CardsSetup { Cards = this.Cards.Concat(setup.Cards).ToArray() };
         }
 
-        public CardDTO[] Cards { get; set; }
+        public CardDTO[] Cards { get; set; } = new CardDTO[0];
     }
 
     public class LoansSetup
@@ -55,7 +55,7 @@ namespace DataGenerator.DTO
             return new LoansSetup { Loans = this.Loans.Concat(setup.Loans).ToArray() };
         }
 
-        public LoanDTO[] Loans { get; set; }
+        public LoanDTO[] Loans { get; set; } = new LoanDTO[0];
     }
 
     public class PaymentsSetup
@@ -65,17 +65,20 @@ namespace DataGenerator.DTO
             return new PaymentsSetup { Payments = this.Payments.Concat(setup.Payments).ToArray() };
         }
 
-        public PaymentDTO[] Payments { get; set; }
+        public PaymentDTO[] Payments { get; set; } = new PaymentDTO[0];
     }
 
     public class TransactionsSetup
     {
         public TransactionsSetup Concat(TransactionsSetup setup)
         {
+            if (setup.Transactions == null)
+                return this;
+
             return new TransactionsSetup { Transactions = this.Transactions.Concat(setup.Transactions).ToArray() };
         }
 
-        public TransactionDTO[] Transactions { get; set; }
+        public TransactionDTO[] Transactions { get; set; } = new TransactionDTO[0];
     }
 
     public class UsersSetup
@@ -85,7 +88,7 @@ namespace DataGenerator.DTO
             return new UsersSetup { Users = this.Users.Concat(setup.Users).ToArray() };
         }
 
-        public UserDTO[] Users { get; set; }
+        public UserDTO[] Users { get; set; } = new UserDTO[0];
     }
 
 }

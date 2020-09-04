@@ -37,8 +37,8 @@ namespace PaymentsWriteMicroservice
             services.AddGrpc(options =>
             {
                 options.Interceptors.Add<LoggingInterceptor>("PaymentsWrite");
-                options.Interceptors.Add<CommandsInterceptor>(commandsRepository);
-                options.MaxReceiveMessageSize = 500 * 1024 * 1024;
+                //options.Interceptors.Add<CommandsInterceptor>(commandsRepository);
+                options.MaxReceiveMessageSize = 16 * 1024 * 1024;
             });
             services.AddSingleton(CreateMapper());
             services.AddSingleton(new PaymentsRepository());
@@ -88,10 +88,10 @@ namespace PaymentsWriteMicroservice
                 HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
             var httpClient = new HttpClient(httpClientHandler);
 
-            var transactionsChannel = GrpcChannel.ForAddress(addresses.TransactionsWrite, new GrpcChannelOptions { HttpClient = httpClient, MaxReceiveMessageSize = 500 * 1024 * 1024 });
+            var transactionsChannel = GrpcChannel.ForAddress(addresses.TransactionsWrite, new GrpcChannelOptions { HttpClient = httpClient, MaxReceiveMessageSize = 16 * 1024 * 1024 });
             services.AddSingleton(new TransactionsWriteClient(transactionsChannel));
 
-            var loansChannel = GrpcChannel.ForAddress(addresses.LoansWrite, new GrpcChannelOptions { HttpClient = httpClient, MaxReceiveMessageSize = 500 * 1024 * 1024 });
+            var loansChannel = GrpcChannel.ForAddress(addresses.LoansWrite, new GrpcChannelOptions { HttpClient = httpClient, MaxReceiveMessageSize = 16 * 1024 * 1024 });
             services.AddSingleton(new LoansWriteClient(loansChannel));
         }
     }

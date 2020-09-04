@@ -33,7 +33,7 @@ namespace Requester.RunningModes
 
         public void Perform()
         {
-            Parallel.For(0, settings.Threads, i => Perform(i));
+            Parallel.For(0, settings.Threads, i => Perform(automatSettings.Offset + i));
         }
 
         private void Perform(int index)

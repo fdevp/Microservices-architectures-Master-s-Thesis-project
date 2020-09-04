@@ -29,10 +29,10 @@ namespace SharedClasses.Messaging
 
         private void HandleMessage(object sender, BasicDeliverEventArgs ea)
         {
-            logger.LogInformation($"Service='{serviceName}' FlowId='{ea.BasicProperties.CorrelationId}' Method='Projection' Type='End'");
             var message = Encoding.UTF8.GetString(ea.Body.ToArray());
             var projection = JSON.Deserialize<DataProjection<TUpsert, TRemove>>(message);
             this.Received.Invoke(sender, projection);
+            logger.LogInformation($"Service='{serviceName}' FlowId='{ea.BasicProperties.CorrelationId}' Method='Projection' Type='End'");
         }
 
         public void Dispose()

@@ -36,28 +36,31 @@ namespace Requester.RunningModes
             var overallTimer = Stopwatch.StartNew();
             Parallel.ForEach(groups, options, group =>
             {
+                var index = 0;
                 foreach (var element in group)
                 {
+                    var scenarioNo = $"{group.Key}_{index}";
                     var scenarioTimer = Stopwatch.StartNew();
                     var scenarioId = Guid.NewGuid().ToString();
 
                     var scenarioPartTimer = Stopwatch.StartNew();
                     var token = sessionRequester.GetToken(element.User, scenarioId);
-                    logger.Information($"Service='Requester' ScenarioId='{scenarioId}' Method='individual token' Processing='{scenarioPartTimer.ElapsedMilliseconds}'");
+                    logger.Information($"Service='Requester' ScenarioNo='{scenarioNo}' ScenarioId='{scenarioId}' Method='individual token' Processing='{scenarioPartTimer.ElapsedMilliseconds}'");
 
                     scenarioPartTimer.Restart();
                     Balance(element.AccountId, scenarioId);
-                    logger.Information($"Service='Requester' ScenarioId='{scenarioId}' Method='individual balance' Processing='{scenarioPartTimer.ElapsedMilliseconds}'");
+                    logger.Information($"Service='Requester' ScenarioNo='{scenarioNo}' ScenarioId='{scenarioId}' Method='individual balance' Processing='{scenarioPartTimer.ElapsedMilliseconds}'");
 
                     scenarioPartTimer.Restart();
                     Transfer(element, scenarioId);
-                    logger.Information($"Service='Requester' ScenarioId='{scenarioId}' Method='individual transfer' Processing='{scenarioPartTimer.ElapsedMilliseconds}'");
+                    logger.Information($"Service='Requester' ScenarioNo='{scenarioNo}' ScenarioId='{scenarioId}' Method='individual transfer' Processing='{scenarioPartTimer.ElapsedMilliseconds}'");
 
                     scenarioPartTimer.Restart();
                     sessionRequester.Logout(token, scenarioId);
-                    logger.Information($"Service='Requester' ScenarioId='{scenarioId}' Method='individual logout' Processing='{scenarioPartTimer.ElapsedMilliseconds}'");
+                    logger.Information($"Service='Requester' ScenarioNo='{scenarioNo}' ScenarioId='{scenarioId}' Method='individual logout' Processing='{scenarioPartTimer.ElapsedMilliseconds}'");
 
-                    logger.Information($"Service='Requester' ScenarioId='{scenarioId}' Method='individual scenario' Processing='{scenarioTimer.ElapsedMilliseconds}'");
+                    logger.Information($"Service='Requester' ScenarioNo='{scenarioNo}' ScenarioId='{scenarioId}' Method='individual scenario' Processing='{scenarioTimer.ElapsedMilliseconds}'");
+                    index++;
                 }
             });
 
@@ -66,7 +69,9 @@ namespace Requester.RunningModes
 
         public void Balance(string accountId, string scenarioId)
         {
-            var result = httpClient.GetAsync($"account/balance/{accountId}").Result;
+            var request = new HttpRequestMessage(HttpMethod.Get, $"account/balance/{accountId}");
+            request.Headers.Add("flowId", scenarioId);
+            var result = httpClient.SendAsync(request).Result;
         }
 
         public void Transfer(IndividualUserScenarioElement element, string scenarioId)

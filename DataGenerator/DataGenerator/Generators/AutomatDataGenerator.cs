@@ -52,6 +52,7 @@ namespace DataGenerator.Generators
 
         static PaymentDTO[] ActivePayments(AccountDTO[] accounts, IRnd<string> recipientRnd, IRnd<DateTime> timestampRnd)
         {
+            var titleRnd = (TitleRnd)new RndBuilder<string>(new TitleRnd()).Build();
             var countRnd = new RndBuilder<int>()
               .DistributionValues(new[] { 1, 3, 5, 10 })
               .DistributionProbabilities(new[] { 10, 40, 30, 20 })
@@ -68,7 +69,7 @@ namespace DataGenerator.Generators
               .DistributionProbabilities(new[] { 75, 10, 10, 5 })
               .Build();
 
-            return ValuesGenerator.CreatePayments(accounts, PaymentStatus.ACTIVE, recipientRnd, countRnd, amountRnd, startDateRnd, () => DateTime.UtcNow, intervalRnd).ToArray();
+            return ValuesGenerator.CreatePayments(accounts, PaymentStatus.ACTIVE, recipientRnd, countRnd, amountRnd, startDateRnd, () => DateTime.UtcNow, intervalRnd, titleRnd).ToArray();
         }
 
         static (LoanDTO loan, PaymentDTO payment)[] ActiveLoans(AccountDTO[] accounts, IRnd<string> recipientRnd)

@@ -36,8 +36,8 @@ namespace CardsWriteMicroservice
             services.AddGrpc(options =>
             {
                 options.Interceptors.Add<LoggingInterceptor>("CardsWrite");
-                options.Interceptors.Add<CommandsInterceptor>(commandsRepository);
-                options.MaxReceiveMessageSize = 500 * 1024 * 1024;
+                //options.Interceptors.Add<CommandsInterceptor>(commandsRepository);
+                options.MaxReceiveMessageSize = 16 * 1024 * 1024;
             });
             services.AddSingleton(CreateMapper());
             services.AddSingleton(CreateAccountsClient());
@@ -86,7 +86,7 @@ namespace CardsWriteMicroservice
             httpClientHandler.ServerCertificateCustomValidationCallback =
                 HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
             var httpClient = new HttpClient(httpClientHandler);
-            var channel = GrpcChannel.ForAddress(addresses.AccountsWrite, new GrpcChannelOptions { HttpClient = httpClient, MaxReceiveMessageSize = 500 * 1024 * 1024 });
+            var channel = GrpcChannel.ForAddress(addresses.AccountsWrite, new GrpcChannelOptions { HttpClient = httpClient, MaxReceiveMessageSize = 16 * 1024 * 1024 });
             return new AccountsWriteClient(channel);
         }
     }

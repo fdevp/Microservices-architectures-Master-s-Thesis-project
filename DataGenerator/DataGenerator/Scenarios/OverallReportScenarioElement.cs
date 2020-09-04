@@ -4,6 +4,7 @@ namespace DataGenerator
 {
     public class OverallReportScenarioElement
     {
+        public string No { get; set; }
         public int[] Aggregations { get; set; }
         public DateTime? TimestampFrom { get; set; }
         public DateTime? TimestampTo { get; set; }

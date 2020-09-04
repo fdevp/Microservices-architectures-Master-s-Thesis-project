@@ -59,7 +59,7 @@ namespace Requester.RunningModes
                 {
                     var portion = transactions.Skip(i).Take(10000);
                     var transactionsSetp = new TransactionsSetup { Transactions = portion.ToArray() };
-                    var result = httpClient.PostAsync("http://localhost:5000/transaction/setup", new StringContent(JsonConvert.SerializeObject(transactionsSetp), Encoding.UTF8, "application/json")).Result;
+                    var result = httpClient.PostAsync("transaction/setup", new StringContent(JsonConvert.SerializeObject(transactionsSetp), Encoding.UTF8, "application/json")).Result;
                     logger.Information("Transactions portion setup done.");
                 }
             }
@@ -72,7 +72,7 @@ namespace Requester.RunningModes
                 {
                     var portion = payments.Skip(i).Take(10000);
                     var paymentsSetup = new PaymentsSetup { Payments = portion.ToArray() };
-                    var result = httpClient.PostAsync("http://localhost:5000/payment/setup", new StringContent(JsonConvert.SerializeObject(paymentsSetup), Encoding.UTF8, "application/json")).Result;
+                    var result = httpClient.PostAsync("payment/setup", new StringContent(JsonConvert.SerializeObject(paymentsSetup), Encoding.UTF8, "application/json")).Result;
                     logger.Information("Payments portion setup done.");
                 }
             }
@@ -85,7 +85,7 @@ namespace Requester.RunningModes
                 {
                     var portion = loans.Skip(i).Take(10000);
                     var loansSetup = new LoansSetup { Loans = portion.ToArray() };
-                    var result = httpClient.PostAsync("http://localhost:5000/loan/setup", new StringContent(JsonConvert.SerializeObject(loansSetup), Encoding.UTF8, "application/json")).Result;
+                    var result = httpClient.PostAsync("loan/setup", new StringContent(JsonConvert.SerializeObject(loansSetup), Encoding.UTF8, "application/json")).Result;
                     logger.Information("Loans portion setup done.");
                 }
             }

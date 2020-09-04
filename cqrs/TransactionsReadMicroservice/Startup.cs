@@ -31,7 +31,7 @@ namespace TransactionsReadMicroservice
             services.AddGrpc(options =>
             {
                 options.Interceptors.Add<LoggingInterceptor>("TransactionsRead");
-                options.MaxReceiveMessageSize = 500 * 1024 * 1024;
+                options.MaxReceiveMessageSize = 16 * 1024 * 1024;
             });
             services.AddSingleton(CreateMapper());
             services.AddSingleton(repository);
@@ -48,8 +48,10 @@ namespace TransactionsReadMicroservice
 
             rabbitMq.Received += (sender, projection) =>
             {
-                if (projection.Upsert != null)
+                if (projection.Upsert != null && projection.Upsert.Length > 0)
                     repository.Upsert(projection.Upsert);
+                if (projection.Upsert != null && projection.Upsert.Length == 0)
+                    repository.Clear();
                 if (projection.Remove != null)
                     repository.Remove(projection.Remove);
             };
