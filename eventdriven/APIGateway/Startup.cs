@@ -94,15 +94,16 @@ namespace APIGateway
             var config = new RabbitMqConfig();
             Configuration.GetSection("RabbitMq").Bind(config);
             var rabbitMqFactory = RabbitMqFactory.Create(config);
-            AddAwaiter(services, rabbitMqFactory, loggerServicesProvier);
+            services.AddSingleton(config);
+            AddAwaiter(services, rabbitMqFactory, loggerServicesProvier, config.Queue);
             AddPublishing(services, rabbitMqFactory);
         }
 
-        private void AddAwaiter(IServiceCollection services, RabbitMqFactory factory, ServiceProvider loggerServicesProvier)
+        private void AddAwaiter(IServiceCollection services, RabbitMqFactory factory, ServiceProvider loggerServicesProvier, string queue)
         {
             var awaiter = new EventsAwaiter("APIGateway", loggerServicesProvier.GetService<ILogger<EventsAwaiter>>());
 
-            var consumer = factory.CreateConsumer(Queues.APIGateway);
+            var consumer = factory.CreateConsumer(queue);
             awaiter.BindConsumer(consumer);
 
             services.AddSingleton(awaiter);

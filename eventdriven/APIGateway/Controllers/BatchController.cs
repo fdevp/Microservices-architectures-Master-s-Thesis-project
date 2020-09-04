@@ -13,6 +13,7 @@ using SharedClasses.Events.Loans;
 using SharedClasses.Events.Payments;
 using SharedClasses.Events.Users;
 using SharedClasses.Messaging;
+using SharedClasses.Messaging.RabbitMq;
 using SharedClasses.Models;
 
 namespace APIGateway.Controllers
@@ -25,15 +26,18 @@ namespace APIGateway.Controllers
         private readonly Mapper mapper;
         private readonly PublishingRouter publishingRouter;
         private readonly EventsAwaiter eventsAwaiter;
+        private readonly string queue;
 
         public BatchController(ILogger<BatchController> logger, Mapper mapper,
          PublishingRouter publishingRouter,
-         EventsAwaiter eventsAwaiter)
+         EventsAwaiter eventsAwaiter,
+         RabbitMqConfig config)
         {
             this.logger = logger;
             this.mapper = mapper;
             this.publishingRouter = publishingRouter;
             this.eventsAwaiter = eventsAwaiter;
+            this.queue = config.Queue;
         }
 
         [HttpGet]
@@ -47,7 +51,7 @@ namespace APIGateway.Controllers
 
             var paymentsFlowId = flowId + "_p";
             var paymentsEvent = new GetPartPaymentsEvent { Part = part, TotalParts = total, Timestamp = timestamp };
-            var paymentsResponse = await eventsAwaiter.AwaitResponse<SelectedPaymentsEvent>(paymentsFlowId, () => publishingRouter.Publish(Queues.Payments, paymentsEvent, paymentsFlowId, Queues.APIGateway));
+            var paymentsResponse = await eventsAwaiter.AwaitResponse<SelectedPaymentsEvent>(paymentsFlowId, () => publishingRouter.Publish(Queues.Payments, paymentsEvent, paymentsFlowId, queue));
             payments = paymentsResponse.Payments;
 
             var parallelTasks = new List<Task>();
@@ -56,7 +60,7 @@ namespace APIGateway.Controllers
                 var loansFlowId = flowId + "_l";
                 var paymentsIds = payments.Select(p => p.Id).ToArray();
                 var loansEvent = new GetLoansByPaymentsEvent { PaymentsIds = paymentsIds };
-                var loansResponse = await eventsAwaiter.AwaitResponse<SelectedLoansEvent>(loansFlowId, () => publishingRouter.Publish(Queues.Loans, loansEvent, loansFlowId, Queues.APIGateway));
+                var loansResponse = await eventsAwaiter.AwaitResponse<SelectedLoansEvent>(loansFlowId, () => publishingRouter.Publish(Queues.Loans, loansEvent, loansFlowId, queue));
                 loans = loansResponse.Loans;
             }));
             parallelTasks.Add(Task.Run(async () =>
@@ -64,7 +68,7 @@ namespace APIGateway.Controllers
                 var balancesFlowId = flowId + "_b";
                 var accountsIds = payments.Select(p => p.AccountId).Distinct().ToArray();
                 var balancesEvent = new GetBalancesEvent { Ids = accountsIds };
-                var balancesRequest = await eventsAwaiter.AwaitResponse<SelectedBalancesEvent>(balancesFlowId, () => publishingRouter.Publish(Queues.Accounts, balancesEvent, balancesFlowId, Queues.APIGateway));
+                var balancesRequest = await eventsAwaiter.AwaitResponse<SelectedBalancesEvent>(balancesFlowId, () => publishingRouter.Publish(Queues.Accounts, balancesEvent, balancesFlowId, queue));
                 balances = balancesRequest.Balances;
             }));
 

@@ -10,6 +10,7 @@ using SharedClasses.Events;
 using SharedClasses.Events.Accounts;
 using SharedClasses.Events.Transactions;
 using SharedClasses.Messaging;
+using SharedClasses.Messaging.RabbitMq;
 using SharedClasses.Models;
 
 namespace APIGateway.Controllers
@@ -22,13 +23,15 @@ namespace APIGateway.Controllers
         private readonly PublishingRouter publishingRouter;
         private readonly EventsAwaiter eventsAwaiter;
         private readonly Mapper mapper;
+        private readonly string queue;
 
-        public AccountController(ILogger<AccountController> logger, PublishingRouter publishingRouter, EventsAwaiter eventsAwaiter, Mapper mapper)
+        public AccountController(ILogger<AccountController> logger, PublishingRouter publishingRouter, EventsAwaiter eventsAwaiter, Mapper mapper, RabbitMqConfig config)
         {
             this.logger = logger;
             this.publishingRouter = publishingRouter;
             this.eventsAwaiter = eventsAwaiter;
             this.mapper = mapper;
+            this.queue = config.Queue;
         }
 
         [HttpGet]
@@ -37,7 +40,7 @@ namespace APIGateway.Controllers
         {
             var flowId = HttpContext.Items["flowId"].ToString();
             var payload = new GetUserAccountsEvent { UserId = userId };
-            var response = await eventsAwaiter.AwaitResponse<SelectedAccountsEvent>(flowId, () => publishingRouter.Publish(Queues.Accounts, payload, flowId, Queues.APIGateway));
+            var response = await eventsAwaiter.AwaitResponse<SelectedAccountsEvent>(flowId, () => publishingRouter.Publish(Queues.Accounts, payload, flowId, queue));
             var accounts = response.Accounts.Select(a => mapper.Map<AccountDTO>(a));
             return accounts;
         }
@@ -48,7 +51,7 @@ namespace APIGateway.Controllers
         {
             var flowId = HttpContext.Items["flowId"].ToString();
             var payload = new GetBalancesEvent { Ids = new[] { accountId } };
-            var response = await eventsAwaiter.AwaitResponse<SelectedBalancesEvent>(flowId, () => publishingRouter.Publish(Queues.Accounts, payload, flowId, Queues.APIGateway));
+            var response = await eventsAwaiter.AwaitResponse<SelectedBalancesEvent>(flowId, () => publishingRouter.Publish(Queues.Accounts, payload, flowId, queue));
             var balance = response.Balances.Single();
             return balance.Balance;
         }
@@ -59,7 +62,7 @@ namespace APIGateway.Controllers
         {
             var flowId = HttpContext.Items["flowId"].ToString();
             var payload = new GetBalancesEvent { Ids = ids };
-            var response = await eventsAwaiter.AwaitResponse<SelectedBalancesEvent>(flowId, () => publishingRouter.Publish(Queues.Accounts, payload, flowId, Queues.APIGateway));
+            var response = await eventsAwaiter.AwaitResponse<SelectedBalancesEvent>(flowId, () => publishingRouter.Publish(Queues.Accounts, payload, flowId, queue));
             return response.Balances.Select(b => mapper.Map<BalanceDTO>(b)).ToArray();
         }
 
