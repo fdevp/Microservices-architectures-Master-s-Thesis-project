@@ -46,6 +46,9 @@ namespace TransactionsMicroservice
             publishers.Add(Queues.Cards, factory.CreatePublisher(Queues.Cards));
             publishers.Add(Queues.Loans, factory.CreatePublisher(Queues.Loans));
             publishers.Add(Queues.Payments, factory.CreatePublisher(Queues.Payments));
+            publishers.Add("apigateway1", factory.CreatePublisher("apigateway1"));
+            publishers.Add("apigateway2", factory.CreatePublisher("apigateway2"));
+            publishers.Add("apigateway3", factory.CreatePublisher("apigateway3"));
             var publishingRouter = new PublishingRouter(publishers);
             services.AddSingleton(publishingRouter);
 

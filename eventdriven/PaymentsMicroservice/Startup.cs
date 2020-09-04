@@ -39,6 +39,9 @@ namespace PaymentsMicroservice
             var publishers = new Dictionary<string, IPublisher>();
             publishers.Add(Queues.APIGateway, factory.CreatePublisher(Queues.APIGateway));
             publishers.Add(Queues.Transactions, factory.CreatePublisher(Queues.Transactions));
+            publishers.Add("apigateway1", factory.CreatePublisher("apigateway1"));
+            publishers.Add("apigateway2", factory.CreatePublisher("apigateway2"));
+            publishers.Add("apigateway3", factory.CreatePublisher("apigateway3"));
             var publishingRouter = new PublishingRouter(publishers);
             services.AddSingleton(new PublishingRouter(publishers));
 
