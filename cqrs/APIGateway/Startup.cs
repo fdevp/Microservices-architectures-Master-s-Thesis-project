@@ -118,8 +118,8 @@ namespace APIGateway
                 HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
             var httpClient = new HttpClient(httpClientHandler);
 
-            services.AddSingleton(new TransactionsWriteClient(GrpcChannel.ForAddress(addresses.TransactionsWrite, new GrpcChannelOptions { HttpClient = httpClient, MaxReceiveMessageSize = 16 * 1024 * 1024 })));
-            services.AddSingleton(new TransactionsReadClient(GrpcChannel.ForAddress(addresses.TransactionsRead, new GrpcChannelOptions { HttpClient = httpClient, MaxReceiveMessageSize = 16 * 1024 * 1024 })));
+            services.AddSingleton(new TransactionsWriteClient(GrpcChannel.ForAddress(addresses.TransactionsBalancer, new GrpcChannelOptions { HttpClient = httpClient, MaxReceiveMessageSize = 16 * 1024 * 1024 })));
+            services.AddSingleton(new TransactionsReadClient(GrpcChannel.ForAddress(addresses.TransactionsBalancer, new GrpcChannelOptions { HttpClient = httpClient, MaxReceiveMessageSize = 16 * 1024 * 1024 })));
 
             services.AddSingleton(new AccountsWriteClient(GrpcChannel.ForAddress(addresses.AccountsWrite, new GrpcChannelOptions { HttpClient = httpClient, MaxReceiveMessageSize = 16 * 1024 * 1024 })));
             services.AddSingleton(new AccountsReadClient(GrpcChannel.ForAddress(addresses.AccountsRead, new GrpcChannelOptions { HttpClient = httpClient, MaxReceiveMessageSize = 16 * 1024 * 1024 })));

@@ -106,7 +106,7 @@ namespace LoansReadMicroservice
             var paymentsChannel = GrpcChannel.ForAddress(addresses.PaymentsRead, new GrpcChannelOptions { HttpClient = httpClient, MaxReceiveMessageSize = 16 * 1024 * 1024 });
             services.AddSingleton(new PaymentsReadClient(paymentsChannel));
 
-            var transactionsChannel = GrpcChannel.ForAddress(addresses.TransactionsRead, new GrpcChannelOptions { HttpClient = httpClient, MaxReceiveMessageSize = 16 * 1024 * 1024 });
+            var transactionsChannel = GrpcChannel.ForAddress(addresses.TransactionsBalancer, new GrpcChannelOptions { HttpClient = httpClient, MaxReceiveMessageSize = 16 * 1024 * 1024 });
             services.AddSingleton(new TransactionsReadClient(transactionsChannel));
         }
     }
