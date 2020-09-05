@@ -113,12 +113,22 @@ namespace TransactionsLoadBalancer
         [EventHandlingMethod(typeof(SetupTransactionsEvent))]
         public Task Setup(MessageContext context, SetupTransactionsEvent inputEvent)
         {
-            var groupedIds = inputEvent.Transactions.GroupBy(transaction => GetQueue(transaction.Id)).ToArray();
-            foreach (var group in groupedIds)
+            if (inputEvent.Transactions.Length == 0)
             {
-                var queue = group.Key;
-                var portionEvent = new SetupTransactionsEvent { Transactions = group.ToArray() };
-                publishingRouter.Publish(queue, portionEvent, context.FlowId);
+                foreach (var queue in balancingQueues.Queues)
+                {
+                    publishingRouter.Publish(queue, new SetupTransactionsEvent { Transactions = new SharedClasses.Models.Transaction[0] }, context.FlowId);
+                }
+            }
+            else
+            {
+                var groupedIds = inputEvent.Transactions.GroupBy(transaction => GetQueue(transaction.Id)).ToArray();
+                foreach (var group in groupedIds)
+                {
+                    var queue = group.Key;
+                    var portionEvent = new SetupTransactionsEvent { Transactions = group.ToArray() };
+                    publishingRouter.Publish(queue, portionEvent, context.FlowId);
+                }
             }
 
             return Task.CompletedTask;
