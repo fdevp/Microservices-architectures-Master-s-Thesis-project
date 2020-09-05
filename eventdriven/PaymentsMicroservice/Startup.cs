@@ -42,6 +42,7 @@ namespace PaymentsMicroservice
 
             publishers.Add("transactions1", factory.CreatePublisher("transactions1"));
             publishers.Add("transactions2", factory.CreatePublisher("transactions2"));
+            publishers.Add("transactions3", factory.CreatePublisher("transactions3"));
 
             var publishingRouter = new PublishingRouter(publishers);
             services.AddSingleton(new PublishingRouter(publishers));
