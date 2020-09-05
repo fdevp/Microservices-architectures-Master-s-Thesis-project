@@ -31,6 +31,13 @@ namespace TransactionsLoadBalancer
             return new GetTransactionsResult { Transactions = { transactions } };
         }
 
+        public override async Task<AggregateOverallResponse> AggregateOverall(AggregateOverallRequest request, ServerCallContext context)
+        {
+            var tasks = services.Select(s => s.AggregateOverallAsync(request, context.RequestHeaders.SelectCustom()).ResponseAsync);
+            var results = await Task.WhenAll(tasks);
+            return new AggregateOverallResponse { Portions = { results.SelectMany(r => r.Portions) } };
+        }
+
         public override async Task<GetTransactionsResult> Filter(FilterTransactionsRequest request, ServerCallContext context)
         {
             var tasks = services.Select(s => s.FilterAsync(request, context.RequestHeaders.SelectCustom()).ResponseAsync);
