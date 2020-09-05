@@ -39,14 +39,6 @@ namespace TransactionsLoadBalancer
 
         public override async Task<Empty> Setup(SetupRequest request, ServerCallContext context)
         {
-            var grouped = request.Transactions.GroupBy(t => GetServiceIndex(t.Id)).ToArray();
-            var tasks = grouped.Select(g => services[g.Key].SetupAsync(new SetupRequest { Transactions = { g } }).ResponseAsync);
-            await Task.WhenAll(tasks);
-            return new Empty();
-        }
-
-        public override async Task<Empty> SetupAppend(SetupRequest request, ServerCallContext context)
-        {
             if (request.Transactions.Count == 0)
             {
                 var tasks = services.Select(s => s.SetupAsync(new SetupRequest()).ResponseAsync);
@@ -55,9 +47,17 @@ namespace TransactionsLoadBalancer
             else
             {
                 var grouped = request.Transactions.GroupBy(t => GetServiceIndex(t.Id)).ToArray();
-                var tasks = grouped.Select(g => services[g.Key].SetupAppendAsync(new SetupRequest { Transactions = { g } }).ResponseAsync);
+                var tasks = grouped.Select(g => services[g.Key].SetupAsync(new SetupRequest { Transactions = { g } }).ResponseAsync);
                 await Task.WhenAll(tasks);
             }
+            return new Empty();
+        }
+
+        public override async Task<Empty> SetupAppend(SetupRequest request, ServerCallContext context)
+        {
+            var grouped = request.Transactions.GroupBy(t => GetServiceIndex(t.Id)).ToArray();
+            var tasks = grouped.Select(g => services[g.Key].SetupAppendAsync(new SetupRequest { Transactions = { g } }).ResponseAsync);
+            await Task.WhenAll(tasks);
             return new Empty();
         }
 
