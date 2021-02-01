@@ -1,4 +1,4 @@
-# Project created for a master's thesis
+# Master's thesis project
 Master's thesis: Design and architectural patterns for microservices-based applications.
 
 Three distributed systems built for analysing aspects of usage most frequent used architectural patterns:
